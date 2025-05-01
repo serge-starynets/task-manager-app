@@ -12,7 +12,7 @@ export default function Navigation() {
           href="/"
           className="text-xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
-          <span className="hidden md:inline">Mode</span>
+          <span className="hidden md:inline">Task Manager</span>
           <span className="md:hidden">M</span>
         </Link>
       </div>

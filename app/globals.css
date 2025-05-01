@@ -22,7 +22,7 @@ body {
     sans-serif;
 }
 
-/* Mode-inspired custom utilities */
+/* custom utilities */
 @layer components {
   .line-clamp-1 {
     display: -webkit-box;
@@ -46,7 +46,7 @@ body {
   }
 }
 
-/* Custom scrollbar for a more Mode-like feel */
+/* Custom scrollbar */
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
