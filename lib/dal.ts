@@ -49,3 +49,13 @@ export async function getIssues() {
     throw new Error('Failed to fetch issues');
   }
 }
+
+export async function getIssue(issueId: number) {
+  try {
+    const result = await db.select().from(issues).where(eq(issues.id, issueId));
+    return result[0] || null;
+  } catch (err) {
+    console.log('Error getting issue:', issueId);
+    return null;
+  }
+}
