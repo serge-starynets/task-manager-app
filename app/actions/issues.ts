@@ -3,7 +3,7 @@
 import { db } from '@/db';
 import { issues } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getCurrentUser } from '@/lib/dal';
+import { getCurrentUser, getIssue } from '@/lib/dal';
 import { z } from 'zod';
 import { mockDelay } from '@/lib/utils';
 
@@ -143,6 +143,14 @@ export async function deleteIssue(id: number) {
       throw new Error('Unauthorized');
     }
 
+    const isUserOwnsIssue = await userOwnsIssue(id);
+    if (!isUserOwnsIssue) {
+      return {
+        success: false,
+        message: 'An error occurred while deleting the issue.',
+        error: 'Failed to delete issue of another user',
+      };
+    }
     // Delete issue
     await db.delete(issues).where(eq(issues.id, id));
 
@@ -155,4 +163,14 @@ export async function deleteIssue(id: number) {
       error: 'Failed to delete issue',
     };
   }
+}
+
+export async function userOwnsIssue(issueId: number) {
+  const user = await getCurrentUser();
+  const issue = await getIssue(issueId);
+
+  if (user && issue) {
+    return user.id === issue.userId;
+  }
+  return false;
 }

@@ -52,8 +52,11 @@ export async function getIssues() {
 
 export async function getIssue(issueId: number) {
   try {
-    const result = await db.select().from(issues).where(eq(issues.id, issueId));
-    return result[0] || null;
+    const result = await db.query.issues.findFirst({
+      where: eq(issues.id, issueId),
+      with: { user: true },
+    });
+    return result;
   } catch (err) {
     console.log('Error getting issue:', issueId);
     return null;

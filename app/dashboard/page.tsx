@@ -28,10 +28,11 @@ export default async function DashboardPage() {
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-sm">
           {/* Header row */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border-default">
-            <div className="col-span-5">Title</div>
+            <div className="col-span-4">Title</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Priority</div>
-            <div className="col-span-3">Created</div>
+            <div className="col-span-2">Created</div>
+            <div className="col-span-2">Updated</div>
           </div>
 
           {/* Issue rows */}
@@ -43,7 +44,7 @@ export default async function DashboardPage() {
                 className="block hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
               >
                 <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
-                  <div className="col-span-5 font-medium truncate">
+                  <div className="col-span-4 font-medium truncate">
                     {issue.title}
                   </div>
                   <div className="col-span-2">
@@ -56,8 +57,11 @@ export default async function DashboardPage() {
                       {ISSUE_PRIORITY[issue.priority as Priority].label}
                     </Badge>
                   </div>
-                  <div className="col-span-3 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
                     {formatRelativeTime(new Date(issue.createdAt))}
+                  </div>
+                  <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
+                    {formatRelativeTime(new Date(issue.updatedAt))}
                   </div>
                 </div>
               </Link>
