@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Issue, ISSUE_STATUS, ISSUE_PRIORITY } from '@/db/schema';
 import Button from './ui/Button';
@@ -64,7 +65,8 @@ export default function IssueForm({
 
       // Handle successful submission
       if (result.success) {
-        router.refresh();
+        toast.success(result.message);
+        router.push(`/issues/${issue!.id}`);
         if (!isEditing) {
           router.push('/dashboard');
         }
@@ -72,6 +74,7 @@ export default function IssueForm({
 
       return result;
     } catch (err) {
+      toast.error('Failed to update Issue');
       return {
         success: false,
         message: (err as Error).message || 'An error occurred',
@@ -94,16 +97,6 @@ export default function IssueForm({
 
   return (
     <Form action={formAction}>
-      {state?.message && (
-        <FormError
-          className={`mb-4 ${
-            state.success ? 'bg-green-100 text-green-800 border-green-300' : ''
-          }`}
-        >
-          {state.message}
-        </FormError>
-      )}
-
       <FormGroup>
         <FormLabel htmlFor="title">Title</FormLabel>
         <FormInput

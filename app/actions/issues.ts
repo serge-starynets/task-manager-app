@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidateTag } from 'next/cache';
 import { db } from '@/db';
 import { issues } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -24,6 +25,8 @@ const IssueSchema = z.object({
     errorMap: () => ({ message: 'Please select a valid priority' }),
   }),
   userId: z.string().min(1, 'User ID is required'),
+  updatedAt: z.date().optional(),
+  createdAt: z.date().optional(),
 });
 
 export type IssueData = z.infer<typeof IssueSchema>;
@@ -48,8 +51,16 @@ export async function createIssue(data: IssueData): Promise<ActionResponse> {
       };
     }
 
+    const timestamp = Date.now();
+    const createdDate = new Date(timestamp);
+
+    const newIssueData = {
+      ...data,
+      createdAt: createdDate,
+    };
+
     // Validate with Zod
-    const validationResult = IssueSchema.safeParse(data);
+    const validationResult = IssueSchema.safeParse(newIssueData);
     if (!validationResult.success) {
       return {
         success: false,
@@ -66,14 +77,16 @@ export async function createIssue(data: IssueData): Promise<ActionResponse> {
       status: validatedData.status,
       priority: validatedData.priority,
       userId: validatedData.userId,
+      createdAt: validatedData.createdAt,
     });
+    revalidateTag('issues');
 
     return { success: true, message: 'Issue created successfully' };
   } catch (error) {
     console.error('Error creating issue:', error);
     return {
       success: false,
-      message: 'An error occurred while creating the issue',
+      message: 'An error occurred while creating the issues',
       error: 'Failed to create issue',
     };
   }
@@ -95,9 +108,18 @@ export async function updateIssue(
       };
     }
 
+    const timestamp = Date.now();
+    const updatedDate = new Date(timestamp);
+
+    const newData = {
+      ...data,
+      updatedAt: updatedDate,
+    };
+
+    console.log('data', newData);
     // Allow partial validation for updates
     const UpdateIssueSchema = IssueSchema.partial();
-    const validationResult = UpdateIssueSchema.safeParse(data);
+    const validationResult = UpdateIssueSchema.safeParse(newData);
 
     if (!validationResult.success) {
       return {
@@ -119,6 +141,7 @@ export async function updateIssue(
       updateData.status = validatedData.status;
     if (validatedData.priority !== undefined)
       updateData.priority = validatedData.priority;
+    updateData.updatedAt = validatedData.updatedAt;
 
     // Update issue
     await db.update(issues).set(updateData).where(eq(issues.id, id));
@@ -153,6 +176,8 @@ export async function deleteIssue(id: number) {
     }
     // Delete issue
     await db.delete(issues).where(eq(issues.id, id));
+
+    revalidateTag('issues');
 
     return { success: true, message: 'Issue deleted successfully' };
   } catch (error) {

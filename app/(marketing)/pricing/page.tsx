@@ -22,7 +22,7 @@ export default function PricingPage() {
           features={[
             { name: 'Up to 3 team members', included: true },
             { name: 'Unlimited issues', included: true },
-            { name: 'Basic issue tracking', included: true },
+            { name: 'Basic issues tracking', included: true },
             { name: 'Email support', included: true },
             { name: 'API access', included: false },
             { name: 'Custom fields', included: false },
@@ -41,7 +41,7 @@ export default function PricingPage() {
           features={[
             { name: 'Unlimited team members', included: true },
             { name: 'Unlimited issues', included: true },
-            { name: 'Advanced issue tracking', included: true },
+            { name: 'Advanced issues tracking', included: true },
             { name: 'Priority support', included: true },
             { name: 'API access', included: true },
             { name: 'Custom fields', included: true },
@@ -61,7 +61,7 @@ export default function PricingPage() {
           features={[
             { name: 'Unlimited team members', included: true },
             { name: 'Unlimited issues', included: true },
-            { name: 'Advanced issue tracking', included: true },
+            { name: 'Advanced issues tracking', included: true },
             { name: 'Dedicated support', included: true },
             { name: 'API access', included: true },
             { name: 'Custom fields', included: true },
