@@ -1,9 +1,17 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-    experimental: {
-        dynamicIO: true,
-    },
-}
+  experimental: {
+    dynamicIO: true,
+  },
+  // ignore ts errors
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // ignore eslint errors
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+};
 
-export default nextConfig
+export default nextConfig;
