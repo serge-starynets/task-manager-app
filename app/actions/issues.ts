@@ -113,7 +113,6 @@ export async function updateIssue(
       updatedAt: updatedDate,
     };
 
-    console.log('data', newData);
     // Allow partial validation for updates
     const UpdateIssueSchema = IssueSchema.partial();
     const validationResult = UpdateIssueSchema.safeParse(newData);
