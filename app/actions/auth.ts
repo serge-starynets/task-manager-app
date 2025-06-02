@@ -8,7 +8,6 @@ import {
   deleteSession,
 } from '@/lib/auth';
 import { getUserByEmail } from '@/lib/dal';
-import { mockDelay } from '@/lib/utils';
 import { redirect } from 'next/navigation';
 
 // Define Zod schema for signin validation
@@ -159,7 +158,6 @@ export async function signUp(formData: FormData): Promise<ActionResponse> {
 
 export async function signOut(): Promise<void> {
   try {
-    await mockDelay(300);
     await deleteSession();
   } catch (error) {
     console.error('Sign out error:', error);

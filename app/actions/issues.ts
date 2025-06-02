@@ -6,7 +6,6 @@ import { issues } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getCurrentUser, getIssue } from '@/lib/dal';
 import { z } from 'zod';
-import { mockDelay } from '@/lib/utils';
 
 // Define Zod schema for issue validation
 const IssueSchema = z.object({
@@ -39,7 +38,6 @@ export type ActionResponse = {
 };
 
 export async function createIssue(data: IssueData): Promise<ActionResponse> {
-  await mockDelay(1000);
   try {
     // Security check - ensure user is authenticated
     const user = await getCurrentUser();
@@ -98,7 +96,6 @@ export async function updateIssue(
 ): Promise<ActionResponse> {
   try {
     // Security check - ensure user is authenticated
-    await mockDelay(700);
     const user = await getCurrentUser();
     if (!user) {
       return {
@@ -160,7 +157,6 @@ export async function updateIssue(
 export async function deleteIssue(id: number) {
   try {
     // Security check - ensure user is authenticated
-    await mockDelay(700);
     const user = await getCurrentUser();
     if (!user) {
       throw new Error('Unauthorized');
