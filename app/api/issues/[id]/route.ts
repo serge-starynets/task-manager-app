@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: any } },
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
 
     const issue = await db.query.issues.findFirst({
       where: eq(issues.id, id),
