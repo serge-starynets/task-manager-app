@@ -37,7 +37,6 @@ export const getUserByEmail = async (email: string) => {
 export async function getIssues() {
   'use cache';
   cacheTag('issues');
-  console.log('getIssues() called');
   try {
     const result = await db.query.issues.findMany({
       with: {
@@ -45,7 +44,6 @@ export async function getIssues() {
       },
       orderBy: (issues, { desc }) => [desc(issues.createdAt)],
     });
-    console.log('result called', result);
     return result;
   } catch (error) {
     console.error('Error fetching issues:', error);

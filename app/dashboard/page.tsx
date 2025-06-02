@@ -1,4 +1,4 @@
-import { getIssues } from '@/lib/dal';
+import { getCurrentUser, getIssues } from '@/lib/dal';
 import Link from 'next/link';
 import Button from '../components/ui/Button';
 import { PlusIcon } from 'lucide-react';
@@ -8,7 +8,10 @@ import { Priority, Status } from '@/lib/types';
 import { ISSUE_STATUS, ISSUE_PRIORITY } from '@/db/schema';
 
 export default async function DashboardPage() {
+  await getCurrentUser();
   const issues = await getIssues();
+  console.log(issues);
+  console.log('issues.length', issues.length);
 
   return (
     <div>
