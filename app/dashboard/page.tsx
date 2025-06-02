@@ -10,8 +10,6 @@ import { ISSUE_STATUS, ISSUE_PRIORITY } from '@/db/schema';
 export default async function DashboardPage() {
   await getCurrentUser();
   const issues = await getIssues();
-  console.log(issues);
-  console.log('issues.length', issues.length);
 
   return (
     <div>
