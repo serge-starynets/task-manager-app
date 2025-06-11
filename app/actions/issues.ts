@@ -20,7 +20,7 @@ const IssueSchema = z.object({
     errorMap: () => ({ message: 'Please select a valid status' }),
   }),
 
-  priority: z.enum(['low', 'medium', 'high'], {
+  priority: z.enum(['low', 'medium', 'high', 'critical'], {
     errorMap: () => ({ message: 'Please select a valid priority' }),
   }),
   userId: z.string().min(1, 'User ID is required'),

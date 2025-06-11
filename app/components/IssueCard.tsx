@@ -1,44 +1,52 @@
-import { Issue } from '@/db/schema'
-import { formatRelativeTime } from '@/lib/utils'
-import { Priority, Status } from '@/lib/types'
-import Link from 'next/link'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/Card'
-import Badge from './ui/Badge'
+import { Issue } from '@/db/schema';
+import { formatRelativeTime } from '@/lib/utils';
+import { Priority, Status } from '@/lib/types';
+import Link from 'next/link';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from './ui/Card';
+import Badge from './ui/Badge';
 
 interface IssueCardProps {
-  issue: Issue
+  issue: Issue;
 }
 
 export default function IssueCard({ issue }: IssueCardProps) {
-  const { id, title, description, status, priority, createdAt } = issue
+  const { id, title, description, status, priority, createdAt } = issue;
 
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'backlog':
-        return 'Backlog'
+        return 'Backlog';
       case 'todo':
-        return 'Todo'
+        return 'Todo';
       case 'in_progress':
-        return 'In Progress'
+        return 'In Progress';
       case 'done':
-        return 'Done'
+        return 'Done';
       default:
-        return status
+        return status;
     }
-  }
+  };
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
       case 'low':
-        return 'Low'
+        return 'Low';
       case 'medium':
-        return 'Medium'
+        return 'Medium';
       case 'high':
-        return 'High'
+        return 'High';
+      case 'critical':
+        return 'Critical';
       default:
-        return priority
+        return priority;
     }
-  }
+  };
 
   return (
     <Link href={`/issues/${id}`}>
@@ -64,5 +72,5 @@ export default function IssueCard({ issue }: IssueCardProps) {
         </CardFooter>
       </Card>
     </Link>
-  )
+  );
 }

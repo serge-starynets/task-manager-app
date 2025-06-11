@@ -8,7 +8,12 @@ export const statusEnum = pgEnum('status', [
   'in_progress',
   'done',
 ]);
-export const priorityEnum = pgEnum('priority', ['low', 'medium', 'high']);
+export const priorityEnum = pgEnum('priority', [
+  'low',
+  'medium',
+  'high',
+  'critical',
+]);
 
 // Issues table
 export const issues = pgTable('issues', {
@@ -58,4 +63,5 @@ export const ISSUE_PRIORITY = {
   low: { label: 'Low', value: 'low' },
   medium: { label: 'Medium', value: 'medium' },
   high: { label: 'High', value: 'high' },
+  critical: { label: 'Critical', value: 'critical' },
 };

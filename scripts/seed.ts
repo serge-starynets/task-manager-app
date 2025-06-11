@@ -89,7 +89,7 @@ async function main() {
     await db.insert(issues).values({
       title: issue.title,
       description: issue.description,
-      priority: issue.priority as 'low' | 'medium' | 'high',
+      priority: issue.priority as 'low' | 'medium' | 'high' | 'critical',
       status: issue.status as 'backlog' | 'todo' | 'in_progress' | 'done',
       userId: issue.userId,
     });

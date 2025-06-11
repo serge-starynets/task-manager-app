@@ -52,7 +52,11 @@ export default function IssueForm({
         | 'todo'
         | 'in_progress'
         | 'done',
-      priority: formData.get('priority') as 'low' | 'medium' | 'high',
+      priority: formData.get('priority') as
+        | 'low'
+        | 'medium'
+        | 'high'
+        | 'critical',
       userId,
     };
 

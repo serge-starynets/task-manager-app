@@ -130,7 +130,7 @@ export default function SignInPage() {
                 href="/"
                 className="font-medium text-gray-400 hover:text-gray-200"
               >
-                go Home
+                Go to Home Page
               </Link>
             </p>
           </div>

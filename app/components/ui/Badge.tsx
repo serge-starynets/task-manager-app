@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
-import React from 'react'
+import { cn } from '@/lib/utils';
+import React from 'react';
 
 type BadgeVariant =
   | 'default'
@@ -7,14 +7,20 @@ type BadgeVariant =
   | 'outline'
   | 'success'
   | 'warning'
-  | 'danger'
-type StatusType = 'backlog' | 'todo' | 'in_progress' | 'done'
-type PriorityType = 'low' | 'medium' | 'high'
+  | 'danger';
+type StatusType =
+  | 'backlog'
+  | 'todo'
+  | 'in_progress'
+  | 'done'
+  | 'rejected'
+  | 'closed';
+type PriorityType = 'low' | 'medium' | 'high' | 'critical';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: BadgeVariant
-  status?: StatusType
-  priority?: PriorityType
+  variant?: BadgeVariant;
+  status?: StatusType;
+  priority?: PriorityType;
 }
 
 export default function Badge({
@@ -30,33 +36,35 @@ export default function Badge({
     if (status) {
       switch (status) {
         case 'backlog':
-          return 'secondary'
+          return 'secondary';
         case 'todo':
-          return 'default'
+          return 'default';
         case 'in_progress':
-          return 'warning'
+          return 'warning';
         case 'done':
-          return 'success'
+          return 'success';
         default:
-          return 'default'
+          return 'default';
       }
     }
 
     if (priority) {
       switch (priority) {
         case 'low':
-          return 'secondary'
+          return 'secondary';
         case 'medium':
-          return 'default'
+          return 'default';
         case 'high':
-          return 'danger'
+          return 'danger';
+        case 'critical':
+          return 'danger';
         default:
-          return 'default'
+          return 'default';
       }
     }
 
-    return variant
-  }
+    return variant;
+  };
 
   const variantStyles = {
     default:
@@ -69,20 +77,21 @@ export default function Badge({
     warning:
       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     danger: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  }
+    critical: 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-300',
+  };
 
-  const badgeVariant = getBadgeVariant()
+  const badgeVariant = getBadgeVariant();
 
   return (
     <span
       className={cn(
         'inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full',
         variantStyles[badgeVariant],
-        className
+        className,
       )}
       {...props}
     >
       {children}
     </span>
-  )
+  );
 }
