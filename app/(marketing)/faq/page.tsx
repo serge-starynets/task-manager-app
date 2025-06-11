@@ -8,8 +8,8 @@ export default function FAQPage() {
       </h2>
       <div className="space-y-6">
         <FAQItem
-          question="What is Linear Clone?"
-          answer="Linear Clone is a project management tool inspired by Linear. It helps teams organize, track, and manage their projects and issues in a simple and efficient way."
+          question="What is Task Manager App?"
+          answer="Task Manager Appis a project management tool inspired by Linear. It helps teams organize, track, and manage their projects and issues in a simple and efficient way."
         />
 
         <FAQItem
@@ -19,12 +19,12 @@ export default function FAQPage() {
 
         <FAQItem
           question="Is it free to use?"
-          answer="Yes, Linear Clone is completely free to use as it's an open-source project. You can even download the source code and host it yourself."
+          answer="Yes, Task Manager App is completely free to use as it's an open-source project. You can even download the source code and host it yourself."
         />
 
         <FAQItem
           question="Can I contribute to the project?"
-          answer={`Absolutely! Linear Clone is open-source and contributions are welcome. Check out our GitHub repository to get started.`}
+          answer={`Absolutely! Task Manager App is open-source and contributions are welcome. Check out our GitHub repository to get started.`}
         />
 
         <FAQItem
@@ -33,8 +33,8 @@ export default function FAQPage() {
         />
 
         <FAQItem
-          question="What technologies does Linear Clone use?"
-          answer="Linear Clone is built with Next.js, TypeScript, Tailwind CSS, and uses a PostgreSQL database. It leverages the latest features of Next.js App Router for optimal performance."
+          question="What technologies does Task Manager App use?"
+          answer="Task Manager App is built with Next.js, TypeScript, Tailwind CSS, and uses a PostgreSQL database. It leverages the latest features of Next.js App Router for optimal performance."
         />
       </div>
     </div>

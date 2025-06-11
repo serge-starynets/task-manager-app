@@ -12,7 +12,6 @@ import {
   FormInput,
   FormTextarea,
   FormSelect,
-  FormError,
 } from './ui/Form';
 import {
   createIssue,

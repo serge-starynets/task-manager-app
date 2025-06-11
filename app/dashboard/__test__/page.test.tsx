@@ -32,6 +32,13 @@ vi.mock('@/lib/utils', () => ({
   cn: vi.fn((...args) => args.join(' ')),
 }));
 
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 describe('DashboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -108,5 +115,22 @@ describe('DashboardPage', () => {
       screen.getByText('Get started by creating your first issue.'),
     ).toBeInTheDocument();
     expect(screen.getByText('Create Issue')).toBeInTheDocument();
+  });
+
+  it('navigates to new issue page when clicking New Issue button', async () => {
+    // Setup the mock to return an empty array to show the empty state
+    vi.mocked(getIssues).mockResolvedValue([]);
+
+    // Render the component
+    const Component = await DashboardPage();
+    render(Component);
+
+    // Find the New Issue button by test ID
+    const newIssueButton = screen.getByTestId('new-issue-button');
+    expect(newIssueButton).toBeInTheDocument();
+
+    // Get the parent link element
+    const linkElement = newIssueButton.closest('[data-testid="next-link"]');
+    expect(linkElement).toHaveAttribute('href', '/issues/new');
   });
 });

@@ -1,4 +1,4 @@
-# Linear Clone
+# Task Manager App
 
 A project management application built with Next.js, inspired by Linear.
 
@@ -30,8 +30,8 @@ A project management application built with Next.js, inspired by Linear.
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/yourusername/linear-clone.git
-   cd linear-clone
+   git clone https://github.com/serge-starynets/task-manager-app.git
+   cd task-manager-app
    ```
 
 2. Install dependencies

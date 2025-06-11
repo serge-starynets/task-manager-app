@@ -16,7 +16,7 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">Issues</h1>
         <Link href="/issues/new">
-          <Button>
+          <Button data-testid="new-issue-button">
             <span className="flex items-center">
               <PlusIcon size={18} className="mr-2" />
               New Issue

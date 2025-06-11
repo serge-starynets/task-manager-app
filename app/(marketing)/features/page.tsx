@@ -1,5 +1,5 @@
 import React from 'react';
-import { FeatureCard, PlanCard } from './Cards';
+import { FeatureCard } from './Cards';
 
 export default function FeaturesPage() {
   return (
@@ -7,7 +7,7 @@ export default function FeaturesPage() {
       <div className="max-w-3xl mx-auto text-center mb-16">
         <h1 className="text-4xl font-bold mb-4 text-white">Features</h1>
         <p className="text-xl text-gray-400">
-          Discover how Linear Clone can help you manage your projects more
+          Discover how Task Manager App can help you manage your projects more
           efficiently.
         </p>
       </div>
