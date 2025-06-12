@@ -90,7 +90,13 @@ async function main() {
       title: issue.title,
       description: issue.description,
       priority: issue.priority as 'low' | 'medium' | 'high' | 'critical',
-      status: issue.status as 'backlog' | 'todo' | 'in_progress' | 'done',
+      status: issue.status as
+        | 'backlog'
+        | 'todo'
+        | 'in_progress'
+        | 'done'
+        | 'rejected'
+        | 'closed',
       userId: issue.userId,
     });
   }

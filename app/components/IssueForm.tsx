@@ -51,7 +51,9 @@ export default function IssueForm({
         | 'backlog'
         | 'todo'
         | 'in_progress'
-        | 'done',
+        | 'done'
+        | 'rejected'
+        | 'closed',
       priority: formData.get('priority') as
         | 'low'
         | 'medium'

@@ -16,9 +16,12 @@ const IssueSchema = z.object({
 
   description: z.string().optional().nullable(),
 
-  status: z.enum(['backlog', 'todo', 'in_progress', 'done'], {
-    errorMap: () => ({ message: 'Please select a valid status' }),
-  }),
+  status: z.enum(
+    ['backlog', 'todo', 'in_progress', 'done', 'rejected', 'closed'],
+    {
+      errorMap: () => ({ message: 'Please select a valid status' }),
+    },
+  ),
 
   priority: z.enum(['low', 'medium', 'high', 'critical'], {
     errorMap: () => ({ message: 'Please select a valid priority' }),

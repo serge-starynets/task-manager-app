@@ -12,10 +12,10 @@ const DashboardButton = async () => {
         </Link>
       ) : (
         <div className="flex items-center space-x-4">
-          <Link href="/app/(auth)/signin/signin">
+          <Link href="/app/(auth)/signin">
             <Button variant="outline">Sign in</Button>
           </Link>
-          <Link href="/app/(auth)/signup/signup">
+          <Link href="/app/(auth)/signup">
             <Button>Sign up</Button>
           </Link>
         </div>

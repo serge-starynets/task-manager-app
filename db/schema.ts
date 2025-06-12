@@ -7,6 +7,8 @@ export const statusEnum = pgEnum('status', [
   'todo',
   'in_progress',
   'done',
+  'rejected',
+  'closed',
 ]);
 export const priorityEnum = pgEnum('priority', [
   'low',
@@ -57,6 +59,8 @@ export const ISSUE_STATUS = {
   todo: { label: 'Todo', value: 'todo' },
   in_progress: { label: 'In Progress', value: 'in_progress' },
   done: { label: 'Done', value: 'done' },
+  rejected: { label: 'Rejected', value: 'rejected' },
+  closed: { label: 'Closed', value: 'closed' },
 };
 
 export const ISSUE_PRIORITY = {

@@ -28,6 +28,10 @@ export default function IssueCard({ issue }: IssueCardProps) {
         return 'In Progress';
       case 'done':
         return 'Done';
+      case 'rejected':
+        return 'Rejected';
+      case 'closed':
+        return 'Closed';
       default:
         return status;
     }
