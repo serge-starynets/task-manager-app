@@ -12,7 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "seed": "tsx scripts/seed.ts",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

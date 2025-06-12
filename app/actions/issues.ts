@@ -144,6 +144,7 @@ export async function updateIssue(
 
     // Update issue
     await db.update(issues).set(updateData).where(eq(issues.id, id));
+    revalidateTag('issues');
 
     return { success: true, message: 'Issue updated successfully' };
   } catch (error) {
