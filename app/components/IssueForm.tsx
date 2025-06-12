@@ -69,9 +69,10 @@ export default function IssueForm({
       // Handle successful submission
       if (result.success) {
         toast.success(result.message);
-        router.push(`/issues/${issue!.id}`);
         if (!isEditing) {
           router.push('/dashboard');
+        } else {
+          router.push(`/issues/${issue!.id}`);
         }
       }
 
