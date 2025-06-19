@@ -52,7 +52,7 @@ export default async function IssuePage({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-8">
+    <div className="bg-white dark:bg-dark-elevated max-w-4xl mx-auto p-4 md:p-8">
       <div className="mb-8">
         <Link
           href="/dashboard"

@@ -5,7 +5,9 @@ export default function FeaturesPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-3xl mx-auto text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4 text-white">Features</h1>
+        <h1 className="text-4xl font-bold mb-4 text-gray-500 dark:text-white">
+          Features
+        </h1>
         <p className="text-xl text-gray-400">
           Discover how Task Manager App can help you manage your projects more
           efficiently.

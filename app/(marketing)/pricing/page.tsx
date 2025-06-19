@@ -5,7 +5,7 @@ export default function PricingPage() {
   return (
     <div className="container mx-auto px-4 py-12 text-white">
       <div className="max-w-2xl mx-auto text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4 text-white">
+        <h1 className="text-4xl font-bold mb-4 text-gray-500 dark:text-white">
           Simple, Transparent Pricing
         </h1>
         <p className="text-xl text-gray-400 dark:text-gray-300">

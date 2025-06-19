@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Timestamp } from '../components/Timestamp';
 import Button from '../components/ui/Button';
+import ThemeToggle from '../components/ThemeToggler';
 
 export default async function MarketingLayout({
   children,
@@ -37,6 +38,7 @@ export default async function MarketingLayout({
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <div className="flex items-center space-x-4">
               <Link href="/signin">
                 <Button variant="outline">Sign in</Button>

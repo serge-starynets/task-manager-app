@@ -3,10 +3,14 @@ import { HomeIcon, PlusIcon, LogInIcon } from 'lucide-react';
 import UserEmail from './UserEmail';
 import { Suspense } from 'react';
 import NavLink from './NavLink';
+import ThemeToggle from '@/app/components/ThemeToggler';
 
 export default function Navigation() {
   return (
-    <aside className="fixed inset-y-0 left-0 w-16 md:w-64 bg-gray-50 dark:bg-[#1A1A1A] border-r border-gray-200 dark:border-dark-border-subtle flex flex-col py-4 px-2 md:px-4">
+    <aside className="fixed inset-y-0 left-0 w-16 md:w-64 bg-gray-50 dark:bg-dark-elevated border-r border-gray-200 dark:border-dark-border-subtle flex flex-col py-4 px-2 md:px-4">
+      <div className="flex items-center justify-center md:justify-start mb-6">
+        <ThemeToggle />
+      </div>
       <div className="flex items-center justify-center md:justify-start mb-8 px-2">
         <Link
           href="/"
