@@ -1,4 +1,4 @@
-import { getIssue } from '@/lib/dal';
+import { getAccessibleIssue } from '@/lib/dal';
 import IssueForm from '@/app/components/IssueForm';
 import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ export default async function EditIssuePage({
 }) {
   const { id } = await params;
 
-  const issue = await getIssue(parseInt(id));
+  const issue = await getAccessibleIssue(parseInt(id));
 
   if (!issue) {
     notFound();

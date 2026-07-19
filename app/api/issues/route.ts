@@ -1,10 +1,21 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { issues } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { getCurrentUser, isAdmin } from '@/lib/dal';
 
 export async function GET() {
   try {
-    const allIssues = await db.query.issues.findMany();
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const allIssues = await db.query.issues.findMany({
+      where: isAdmin(user) ? undefined : eq(issues.userId, user.id),
+      with: { user: true },
+      orderBy: (issuesTable, { desc }) => [desc(issuesTable.createdAt)],
+    });
 
     return NextResponse.json({ data: allIssues });
   } catch (error) {
@@ -18,17 +29,19 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const data = await request.json();
 
     // Validate required fields
-    if (!data.title || !data.userId) {
-      return NextResponse.json(
-        { error: 'Title and userId are required' },
-        { status: 400 },
-      );
+    if (!data.title) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // Create the issues
+    // Create the issue for the authenticated user
     const newIssue = await db
       .insert(issues)
       .values({
@@ -36,7 +49,7 @@ export async function POST(request: Request) {
         description: data.description || null,
         status: data.status || 'backlog',
         priority: data.priority || 'medium',
-        userId: data.userId,
+        userId: user.id,
       })
       .returning();
 

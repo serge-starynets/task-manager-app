@@ -4,7 +4,7 @@ import { revalidateTag } from 'next/cache';
 import { db } from '@/db';
 import { issues } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getCurrentUser, getIssue } from '@/lib/dal';
+import { canManageIssue, getCurrentUser, isAdmin } from '@/lib/dal';
 import { z } from 'zod';
 
 // Define Zod schema for issue validation
@@ -55,8 +55,10 @@ export async function createIssue(data: IssueData): Promise<ActionResponse> {
     const timestamp = Date.now();
     const createdDate = new Date(timestamp);
 
+    // Always assign to the authenticated user (ignore client-supplied userId)
     const newIssueData = {
       ...data,
+      userId: user.id,
       createdAt: createdDate,
     };
 
@@ -108,6 +110,15 @@ export async function updateIssue(
       };
     }
 
+    const canManage = await canManageIssue(id);
+    if (!canManage) {
+      return {
+        success: false,
+        message: 'You do not have permission to update this issue',
+        error: 'Forbidden',
+      };
+    }
+
     const timestamp = Date.now();
     const updatedDate = new Date(timestamp);
 
@@ -140,6 +151,10 @@ export async function updateIssue(
       updateData.status = validatedData.status;
     if (validatedData.priority !== undefined)
       updateData.priority = validatedData.priority;
+    // Only admins may reassign ownership
+    if (validatedData.userId !== undefined && isAdmin(user)) {
+      updateData.userId = validatedData.userId;
+    }
     updateData.updatedAt = validatedData.updatedAt;
 
     // Update issue
@@ -165,8 +180,8 @@ export async function deleteIssue(id: number) {
       throw new Error('Unauthorized');
     }
 
-    const isUserOwnsIssue = await userOwnsIssue(id);
-    if (!isUserOwnsIssue) {
+    const canManage = await canManageIssue(id);
+    if (!canManage) {
       return {
         success: false,
         message: 'An error occurred while deleting the issue.',
@@ -189,12 +204,7 @@ export async function deleteIssue(id: number) {
   }
 }
 
+/** @deprecated Prefer canManageIssue — kept for any existing imports */
 export async function userOwnsIssue(issueId: number) {
-  const user = await getCurrentUser();
-  const issue = await getIssue(issueId);
-
-  if (user && issue) {
-    return user.id === issue.userId;
-  }
-  return false;
+  return canManageIssue(issueId);
 }

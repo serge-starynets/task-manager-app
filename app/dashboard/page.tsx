@@ -1,4 +1,4 @@
-import { getCurrentUser, getIssues } from '@/lib/dal';
+import { getIssues, isAdmin, requireUser } from '@/lib/dal';
 import Link from 'next/link';
 import Button from '../components/ui/Button';
 import { PlusIcon } from 'lucide-react';
@@ -8,13 +8,22 @@ import { Priority, Status } from '@/lib/types';
 import { ISSUE_STATUS, ISSUE_PRIORITY } from '@/db/schema';
 
 export default async function DashboardPage() {
-  await getCurrentUser();
-  const issues = await getIssues();
+  const user = await requireUser();
+  const issues = await getIssues({ id: user.id, role: user.role });
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">Issues</h1>
+        <div>
+          <h1 className="text-2xl font-bold">
+            {isAdmin(user) ? 'All Issues' : 'My Issues'}
+          </h1>
+          {isAdmin(user) && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Viewing issues from all users
+            </p>
+          )}
+        </div>
         <Link href="/issues/new">
           <Button data-testid="new-issue-button">
             <span className="flex items-center">
@@ -29,11 +38,14 @@ export default async function DashboardPage() {
         <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-sm">
           {/* Header row */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border-default">
-            <div className="col-span-4">Title</div>
+            <div className={isAdmin(user) ? 'col-span-3' : 'col-span-5'}>
+              Title
+            </div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Priority</div>
+            {isAdmin(user) && <div className="col-span-2">Owner</div>}
             <div className="col-span-2">Created</div>
-            <div className="col-span-2">Updated</div>
+            <div className="col-span-1">Updated</div>
           </div>
 
           {/* Issue rows */}
@@ -45,7 +57,9 @@ export default async function DashboardPage() {
                 className="block hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
               >
                 <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
-                  <div className="col-span-4 font-medium truncate">
+                  <div
+                    className={`font-medium truncate ${isAdmin(user) ? 'col-span-3' : 'col-span-5'}`}
+                  >
                     {issue.title}
                   </div>
                   <div className="col-span-2">
@@ -58,10 +72,15 @@ export default async function DashboardPage() {
                       {ISSUE_PRIORITY[issue.priority as Priority].label}
                     </Badge>
                   </div>
+                  {isAdmin(user) && (
+                    <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {issue.user?.email}
+                    </div>
+                  )}
                   <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
                     {formatRelativeTime(new Date(issue.createdAt))}
                   </div>
-                  <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="col-span-1 text-sm text-gray-500 dark:text-gray-400">
                     {formatRelativeTime(new Date(issue.updatedAt))}
                   </div>
                 </div>

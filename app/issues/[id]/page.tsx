@@ -1,4 +1,4 @@
-import { getIssue } from '@/lib/dal';
+import { getAccessibleIssue } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ export default async function IssuePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const issue = await getIssue(parseInt(id));
+  const issue = await getAccessibleIssue(parseInt(id));
 
   if (!issue) {
     notFound();

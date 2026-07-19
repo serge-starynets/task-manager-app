@@ -1,14 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import DashboardPage from '../page';
-import { getIssues } from '@/lib/dal';
+import { getIssues, requireUser } from '@/lib/dal';
 import { ISSUE_STATUS, ISSUE_PRIORITY } from '@/db/schema';
 import { Status, Priority } from '@/lib/types';
+
+const mockUser = {
+  id: 'user1',
+  email: 'user1@example.com',
+  password: 'hashed-password',
+  role: 'user' as const,
+  createdAt: new Date(),
+};
 
 // Mock the dependencies
 vi.mock('@/lib/dal', () => ({
   getIssues: vi.fn(),
   getCurrentUser: vi.fn(),
+  requireUser: vi.fn(),
+  isAdmin: (user: { role: string }) => user.role === 'admin',
 }));
 
 // Mock Next.js components
@@ -37,11 +47,13 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
+  redirect: vi.fn(),
 }));
 
 describe('DashboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(requireUser).mockResolvedValue(mockUser);
   });
 
   it('renders the issues list when issues are available', async () => {
@@ -60,6 +72,7 @@ describe('DashboardPage', () => {
           id: 'user1',
           email: 'user1@example.com',
           password: 'hashed-password',
+          role: 'user' as const,
           createdAt: new Date(),
         },
       },
@@ -71,11 +84,12 @@ describe('DashboardPage', () => {
         priority: 'high' as Priority,
         createdAt: new Date(),
         updatedAt: new Date(),
-        userId: 'user2',
+        userId: 'user1',
         user: {
-          id: 'user2',
-          email: 'user2@example.com',
+          id: 'user1',
+          email: 'user1@example.com',
           password: 'hashed-password',
+          role: 'user' as const,
           createdAt: new Date(),
         },
       },
@@ -89,7 +103,7 @@ describe('DashboardPage', () => {
     render(Component);
 
     // Assertions
-    expect(screen.getByText('Issues')).toBeInTheDocument();
+    expect(screen.getByText('My Issues')).toBeInTheDocument();
     expect(screen.getByText('Test Issue 1')).toBeInTheDocument();
     expect(screen.getByText('Test Issue 2')).toBeInTheDocument();
     expect(screen.getByText(ISSUE_STATUS.todo.label)).toBeInTheDocument();

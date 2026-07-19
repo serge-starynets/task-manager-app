@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from './ui/Button';
 import { Trash2Icon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { deleteIssue, userOwnsIssue } from '@/app/actions/issues';
+import { deleteIssue } from '@/app/actions/issues';
 
 interface DeleteIssueButtonProps {
   id: number;

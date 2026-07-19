@@ -22,6 +22,7 @@ async function main() {
       id: adminUserId,
       email: 'admin@example.com',
       password: demoPassword,
+      role: 'admin',
     })
     .returning()
     .then((rows) => rows[0]);
@@ -32,13 +33,18 @@ async function main() {
       id: memberUserId,
       email: 'user@example.com',
       password: demoPassword,
+      role: 'user',
     })
     .returning()
     .then((rows) => rows[0]);
 
   console.log('Created demo users:');
-  console.log(`- Admin: ${adminUser.email} (password: password123)`);
-  console.log(`- User: ${memberUser.email} (password: password123)`);
+  console.log(
+    `- Admin: ${adminUser.email} (role: ${adminUser.role}, password: password123)`,
+  );
+  console.log(
+    `- User: ${memberUser.email} (role: ${memberUser.role}, password: password123)`,
+  );
 
   // Create demo issues
   const demoIssues = [

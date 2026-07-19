@@ -1,7 +1,7 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
 import { pgTable, serial, text, timestamp, pgEnum } from 'drizzle-orm/pg-core';
 
-// Enums for issue status and priority
+// Enums for issue status, priority, and user role
 export const statusEnum = pgEnum('status', [
   'backlog',
   'todo',
@@ -16,6 +16,7 @@ export const priorityEnum = pgEnum('priority', [
   'high',
   'critical',
 ]);
+export const roleEnum = pgEnum('role', ['admin', 'user']);
 
 // Issues table
 export const issues = pgTable('issues', {
@@ -34,6 +35,7 @@ export const users = pgTable('users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   password: text('password').notNull(),
+  role: roleEnum('role').default('user').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

@@ -6,6 +6,11 @@ export default {
   schema: './db/schema.ts',
   out: './drizzle',
   dbCredentials: {
-    url: process.env.LOCAL_DATABASE_URL || '',
+    // Prefer DRIZZLE_DB_URL override (e.g. Neon), then local, then DATABASE_URL
+    url:
+      process.env.DRIZZLE_DB_URL ||
+      process.env.LOCAL_DATABASE_URL ||
+      process.env.DATABASE_URL ||
+      '',
   },
 } satisfies Config;

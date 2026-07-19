@@ -13,5 +13,6 @@ export type IssueWithUser = Issue & {
   user: {
     id: string;
     email: string;
+    role?: 'admin' | 'user';
   };
 };

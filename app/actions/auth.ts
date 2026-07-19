@@ -38,7 +38,6 @@ export type ActionResponse = {
   error?: string;
 };
 
-//....
 export async function signIn(formData: FormData): Promise<ActionResponse> {
   try {
     // Extract data from form

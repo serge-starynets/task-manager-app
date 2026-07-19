@@ -3,7 +3,12 @@ import { getSession } from './auth';
 import { eq } from 'drizzle-orm';
 import { unstable_cacheTag as cacheTag } from 'next/cache';
 import { cache } from 'react';
-import { issues, users } from '@/db/schema';
+import { redirect } from 'next/navigation';
+import { issues, users, User } from '@/db/schema';
+
+export function isAdmin(user: Pick<User, 'role'>) {
+  return user.role === 'admin';
+}
 
 // Current user
 export const getCurrentUser = cache(async () => {
@@ -23,6 +28,14 @@ export const getCurrentUser = cache(async () => {
   }
 });
 
+export async function requireUser() {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect('/signin');
+  }
+  return user;
+}
+
 // Get user by email
 export const getUserByEmail = async (email: string) => {
   try {
@@ -34,11 +47,12 @@ export const getUserByEmail = async (email: string) => {
   }
 };
 
-export async function getIssues() {
+export async function getIssues(user: Pick<User, 'id' | 'role'>) {
   'use cache';
   cacheTag('issues');
   try {
     const result = await db.query.issues.findMany({
+      where: isAdmin(user) ? undefined : eq(issues.userId, user.id),
       with: {
         user: true,
       },
@@ -62,4 +76,27 @@ export async function getIssue(issueId: number) {
     console.log('Error getting issues:', issueId);
     return null;
   }
+}
+
+/** Returns the issue if the current user owns it or is an admin; otherwise null. */
+export async function getAccessibleIssue(issueId: number) {
+  const user = await requireUser();
+  const issue = await getIssue(issueId);
+
+  if (!issue) return null;
+  if (isAdmin(user) || issue.userId === user.id) {
+    return issue;
+  }
+
+  return null;
+}
+
+export async function canManageIssue(issueId: number) {
+  const user = await getCurrentUser();
+  if (!user) return false;
+
+  const issue = await getIssue(issueId);
+  if (!issue) return false;
+
+  return isAdmin(user) || issue.userId === user.id;
 }
