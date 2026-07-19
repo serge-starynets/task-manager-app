@@ -1,7 +1,7 @@
 import { db } from '@/db';
 import { getSession } from './auth';
 import { eq } from 'drizzle-orm';
-import { unstable_cacheTag as cacheTag } from 'next/cache';
+import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { issues, users, User } from '@/db/schema';
@@ -47,22 +47,28 @@ export const getUserByEmail = async (email: string) => {
   }
 };
 
-export async function getIssues(user: Pick<User, 'id' | 'role'>) {
-  'use cache';
-  cacheTag('issues');
+async function fetchIssues(userId: string, role: User['role']) {
   try {
     const result = await db.query.issues.findMany({
-      where: isAdmin(user) ? undefined : eq(issues.userId, user.id),
+      where: role === 'admin' ? undefined : eq(issues.userId, userId),
       with: {
         user: true,
       },
-      orderBy: (issues, { desc }) => [desc(issues.createdAt)],
+      orderBy: (issuesTable, { desc }) => [desc(issuesTable.createdAt)],
     });
     return result;
   } catch (error) {
     console.error('Error fetching issues:', error);
     throw new Error('Failed to fetch issues');
   }
+}
+
+export async function getIssues(user: Pick<User, 'id' | 'role'>) {
+  return unstable_cache(
+    () => fetchIssues(user.id, user.role),
+    ['issues', user.id, user.role],
+    { tags: ['issues'] },
+  )();
 }
 
 export async function getIssue(issueId: number) {
