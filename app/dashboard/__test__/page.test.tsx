@@ -99,7 +99,9 @@ describe('DashboardPage', () => {
     vi.mocked(getIssues).mockResolvedValue(mockIssues);
 
     // Render the component (await it since it's an RSC)
-    const Component = await DashboardPage();
+    const Component = await DashboardPage({
+      searchParams: Promise.resolve({}),
+    });
     render(Component);
 
     // Assertions
@@ -120,7 +122,9 @@ describe('DashboardPage', () => {
     vi.mocked(getIssues).mockResolvedValue([]);
 
     // Render the component (await it since it's an RSC)
-    const Component = await DashboardPage();
+    const Component = await DashboardPage({
+      searchParams: Promise.resolve({}),
+    });
     render(Component);
 
     // Assertions
@@ -136,7 +140,9 @@ describe('DashboardPage', () => {
     vi.mocked(getIssues).mockResolvedValue([]);
 
     // Render the component
-    const Component = await DashboardPage();
+    const Component = await DashboardPage({
+      searchParams: Promise.resolve({}),
+    });
     render(Component);
 
     // Find the New Issue button by test ID
