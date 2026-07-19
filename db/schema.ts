@@ -1,7 +1,14 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, serial, text, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import {
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  pgEnum,
+} from 'drizzle-orm/pg-core';
 
-// Enums for issue status, priority, and user role
+// Enums for task status, priority, project status, and user role
 export const statusEnum = pgEnum('status', [
   'backlog',
   'todo',
@@ -16,10 +23,26 @@ export const priorityEnum = pgEnum('priority', [
   'high',
   'critical',
 ]);
+export const projectStatusEnum = pgEnum('project_status', [
+  'not_started',
+  'ongoing',
+  'completed',
+]);
 export const roleEnum = pgEnum('role', ['admin', 'user']);
 
-// Issues table
-export const issues = pgTable('issues', {
+// Projects table
+export const projects = pgTable('projects', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  status: projectStatusEnum('status').default('not_started').notNull(),
+  userId: text('user_id').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Tasks table
+export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   title: text('title').notNull(),
   description: text('description'),
@@ -28,6 +51,7 @@ export const issues = pgTable('issues', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   userId: text('user_id').notNull(),
+  projectId: integer('project_id').references(() => projects.id),
 });
 
 // Users table
@@ -40,23 +64,37 @@ export const users = pgTable('users', {
 });
 
 // Relations between tables
-export const issuesRelations = relations(issues, ({ one }) => ({
+export const projectsRelations = relations(projects, ({ one, many }) => ({
   user: one(users, {
-    fields: [issues.userId],
+    fields: [projects.userId],
     references: [users.id],
+  }),
+  tasks: many(tasks),
+}));
+
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  user: one(users, {
+    fields: [tasks.userId],
+    references: [users.id],
+  }),
+  project: one(projects, {
+    fields: [tasks.projectId],
+    references: [projects.id],
   }),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
-  issues: many(issues),
+  tasks: many(tasks),
+  projects: many(projects),
 }));
 
 // Types
-export type Issue = InferSelectModel<typeof issues>;
+export type Task = InferSelectModel<typeof tasks>;
+export type Project = InferSelectModel<typeof projects>;
 export type User = InferSelectModel<typeof users>;
 
 // Status and priority labels for display
-export const ISSUE_STATUS = {
+export const TASK_STATUS = {
   backlog: { label: 'Backlog', value: 'backlog' },
   todo: { label: 'Todo', value: 'todo' },
   in_progress: { label: 'In Progress', value: 'in_progress' },
@@ -65,9 +103,15 @@ export const ISSUE_STATUS = {
   closed: { label: 'Closed', value: 'closed' },
 };
 
-export const ISSUE_PRIORITY = {
+export const TASK_PRIORITY = {
   low: { label: 'Low', value: 'low' },
   medium: { label: 'Medium', value: 'medium' },
   high: { label: 'High', value: 'high' },
   critical: { label: 'Critical', value: 'critical' },
+};
+
+export const PROJECT_STATUS = {
+  not_started: { label: 'Not started', value: 'not_started' },
+  ongoing: { label: 'Ongoing', value: 'ongoing' },
+  completed: { label: 'Completed', value: 'completed' },
 };

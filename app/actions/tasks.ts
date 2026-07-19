@@ -2,13 +2,12 @@
 
 import { revalidateTag } from 'next/cache';
 import { db } from '@/db';
-import { issues } from '@/db/schema';
+import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { canManageIssue, getCurrentUser, isAdmin } from '@/lib/dal';
+import { canManageTask, getCurrentUser, getProject, isAdmin } from '@/lib/dal';
 import { z } from 'zod';
 
-// Define Zod schema for issue validation
-const IssueSchema = z.object({
+const TaskSchema = z.object({
   title: z
     .string()
     .min(3, 'Title must be at least 3 characters')
@@ -27,22 +26,23 @@ const IssueSchema = z.object({
     errorMap: () => ({ message: 'Please select a valid priority' }),
   }),
   userId: z.string().min(1, 'User ID is required'),
+  projectId: z.number().int().positive().optional().nullable(),
   updatedAt: z.date().optional(),
   createdAt: z.date().optional(),
 });
 
-export type IssueData = z.infer<typeof IssueSchema>;
+export type TaskData = z.infer<typeof TaskSchema>;
 
 export type ActionResponse = {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
   error?: string;
+  projectId?: number | null;
 };
 
-export async function createIssue(data: IssueData): Promise<ActionResponse> {
+export async function createTask(data: TaskData): Promise<ActionResponse> {
   try {
-    // Security check - ensure user is authenticated
     const user = await getCurrentUser();
     if (!user) {
       return {
@@ -55,15 +55,14 @@ export async function createIssue(data: IssueData): Promise<ActionResponse> {
     const timestamp = Date.now();
     const createdDate = new Date(timestamp);
 
-    // Always assign to the authenticated user (ignore client-supplied userId)
-    const newIssueData = {
+    const newTaskData = {
       ...data,
       userId: user.id,
       createdAt: createdDate,
+      projectId: data.projectId ?? null,
     };
 
-    // Validate with Zod
-    const validationResult = IssueSchema.safeParse(newIssueData);
+    const validationResult = TaskSchema.safeParse(newTaskData);
     if (!validationResult.success) {
       return {
         success: false,
@@ -72,35 +71,52 @@ export async function createIssue(data: IssueData): Promise<ActionResponse> {
       };
     }
 
-    // Create issue with validated data
     const validatedData = validationResult.data;
-    await db.insert(issues).values({
+    const projectId: number | null = validatedData.projectId ?? null;
+
+    if (projectId !== null) {
+      const project = await getProject(projectId);
+      if (!project || project.userId !== user.id) {
+        return {
+          success: false,
+          message: 'Invalid project',
+          error: 'Forbidden',
+          errors: { projectId: ['Please select a valid project'] },
+        };
+      }
+    }
+
+    await db.insert(tasks).values({
       title: validatedData.title,
       description: validatedData.description || null,
       status: validatedData.status,
       priority: validatedData.priority,
       userId: validatedData.userId,
+      projectId,
       createdAt: validatedData.createdAt,
     });
-    revalidateTag('issues');
+    revalidateTag('tasks');
 
-    return { success: true, message: 'Issue created successfully' };
+    return {
+      success: true,
+      message: 'Task created successfully',
+      projectId,
+    };
   } catch (error) {
-    console.error('Error creating issue:', error);
+    console.error('Error creating task:', error);
     return {
       success: false,
-      message: 'An error occurred while creating the issues',
-      error: 'Failed to create issue',
+      message: 'An error occurred while creating the task',
+      error: 'Failed to create task',
     };
   }
 }
 
-export async function updateIssue(
+export async function updateTask(
   id: number,
-  data: Partial<IssueData>,
+  data: Partial<TaskData>,
 ): Promise<ActionResponse> {
   try {
-    // Security check - ensure user is authenticated
     const user = await getCurrentUser();
     if (!user) {
       return {
@@ -110,11 +126,11 @@ export async function updateIssue(
       };
     }
 
-    const canManage = await canManageIssue(id);
+    const canManage = await canManageTask(id);
     if (!canManage) {
       return {
         success: false,
-        message: 'You do not have permission to update this issue',
+        message: 'You do not have permission to update this task',
         error: 'Forbidden',
       };
     }
@@ -127,9 +143,8 @@ export async function updateIssue(
       updatedAt: updatedDate,
     };
 
-    // Allow partial validation for updates
-    const UpdateIssueSchema = IssueSchema.partial();
-    const validationResult = UpdateIssueSchema.safeParse(newData);
+    const UpdateTaskSchema = TaskSchema.partial();
+    const validationResult = UpdateTaskSchema.safeParse(newData);
 
     if (!validationResult.success) {
       return {
@@ -139,7 +154,6 @@ export async function updateIssue(
       };
     }
 
-    // Type safe update object with validated data
     const validatedData = validationResult.data;
     const updateData: Record<string, unknown> = {};
 
@@ -151,60 +165,52 @@ export async function updateIssue(
       updateData.status = validatedData.status;
     if (validatedData.priority !== undefined)
       updateData.priority = validatedData.priority;
-    // Only admins may reassign ownership
     if (validatedData.userId !== undefined && isAdmin(user)) {
       updateData.userId = validatedData.userId;
     }
     updateData.updatedAt = validatedData.updatedAt;
 
-    // Update issue
-    await db.update(issues).set(updateData).where(eq(issues.id, id));
-    revalidateTag('issues');
+    await db.update(tasks).set(updateData).where(eq(tasks.id, id));
+    revalidateTag('tasks');
 
-    return { success: true, message: 'Issue updated successfully' };
+    return { success: true, message: 'Task updated successfully' };
   } catch (error) {
-    console.error('Error updating issue:', error);
+    console.error('Error updating task:', error);
     return {
       success: false,
-      message: 'An error occurred while updating the issue',
-      error: 'Failed to update issue',
+      message: 'An error occurred while updating the task',
+      error: 'Failed to update task',
     };
   }
 }
 
-export async function deleteIssue(id: number) {
+export async function deleteTask(id: number) {
   try {
-    // Security check - ensure user is authenticated
     const user = await getCurrentUser();
     if (!user) {
       throw new Error('Unauthorized');
     }
 
-    const canManage = await canManageIssue(id);
+    const canManage = await canManageTask(id);
     if (!canManage) {
       return {
         success: false,
-        message: 'An error occurred while deleting the issue.',
-        error: 'Failed to delete issue of another user',
+        message: 'An error occurred while deleting the task.',
+        error: 'Failed to delete task of another user',
       };
     }
-    // Delete issue
-    await db.delete(issues).where(eq(issues.id, id));
 
-    revalidateTag('issues');
+    await db.delete(tasks).where(eq(tasks.id, id));
 
-    return { success: true, message: 'Issue deleted successfully' };
+    revalidateTag('tasks');
+
+    return { success: true, message: 'Task deleted successfully' };
   } catch (error) {
-    console.error('Error deleting issue:', error);
+    console.error('Error deleting task:', error);
     return {
       success: false,
-      message: 'An error occurred while deleting the issue',
-      error: 'Failed to delete issue',
+      message: 'An error occurred while deleting the task',
+      error: 'Failed to delete task',
     };
   }
-}
-
-/** @deprecated Prefer canManageIssue — kept for any existing imports */
-export async function userOwnsIssue(issueId: number) {
-  return canManageIssue(issueId);
 }

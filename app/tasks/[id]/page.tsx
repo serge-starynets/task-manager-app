@@ -1,4 +1,4 @@
-import { getAccessibleIssue } from '@/lib/dal';
+import { getAccessibleTask } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
@@ -6,22 +6,22 @@ import { notFound } from 'next/navigation';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
 import { ArrowLeftIcon, Edit2Icon } from 'lucide-react';
-import DeleteIssueButton from '../../components/DeleteIssueButton';
+import DeleteTaskButton from '../../components/DeleteTaskButton';
 
-export default async function IssuePage({
+export default async function TaskPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const issue = await getAccessibleIssue(parseInt(id));
+  const task = await getAccessibleTask(parseInt(id));
 
-  if (!issue) {
+  if (!task) {
     notFound();
   }
 
   const { title, description, status, priority, createdAt, updatedAt, user } =
-    issue;
+    task;
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -51,20 +51,24 @@ export default async function IssuePage({
     }
   };
 
+  const backHref = task.projectId
+    ? `/dashboard?project=${task.projectId}`
+    : '/dashboard';
+
   return (
     <div className="bg-white dark:bg-dark-elevated max-w-4xl mx-auto p-4 md:p-8">
       <div className="mb-8">
         <Link
-          href="/dashboard"
+          href={backHref}
           className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mb-4"
         >
           <ArrowLeftIcon size={16} className="mr-1" />
-          Back to Issues
+          Back to Tasks
         </Link>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 className="text-3xl font-bold">{title}</h1>
           <div className="flex items-center space-x-2">
-            <Link href={`/issues/${id}/edit`}>
+            <Link href={`/tasks/${id}/edit`}>
               <Button variant="outline" size="sm">
                 <span className="flex items-center">
                   <Edit2Icon size={16} className="mr-1" />
@@ -72,7 +76,7 @@ export default async function IssuePage({
                 </span>
               </Button>
             </Link>
-            <DeleteIssueButton id={parseInt(id)} />
+            <DeleteTaskButton id={parseInt(id)} projectId={task.projectId} />
           </div>
         </div>
       </div>

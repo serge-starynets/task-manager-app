@@ -1,4 +1,4 @@
-import { Issue } from '@/db/schema';
+import { Task, Project } from '@/db/schema';
 
 export type Status =
   | 'backlog'
@@ -8,11 +8,19 @@ export type Status =
   | 'rejected'
   | 'closed';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type ProjectStatus = 'not_started' | 'ongoing' | 'completed';
 
-export type IssueWithUser = Issue & {
+export type TaskWithUser = Task & {
   user: {
     id: string;
     email: string;
     role?: 'admin' | 'user';
+  };
+};
+
+export type ProjectWithUser = Project & {
+  user: {
+    id: string;
+    email: string;
   };
 };

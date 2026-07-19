@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { issues } from '@/db/schema';
+import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getCurrentUser, isAdmin } from '@/lib/dal';
+import { getCurrentUser, getProject, isAdmin } from '@/lib/dal';
 
 export async function GET() {
   try {
@@ -11,17 +11,17 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const allIssues = await db.query.issues.findMany({
-      where: isAdmin(user) ? undefined : eq(issues.userId, user.id),
+    const allTasks = await db.query.tasks.findMany({
+      where: isAdmin(user) ? undefined : eq(tasks.userId, user.id),
       with: { user: true },
-      orderBy: (issuesTable, { desc }) => [desc(issuesTable.createdAt)],
+      orderBy: (tasksTable, { desc }) => [desc(tasksTable.createdAt)],
     });
 
-    return NextResponse.json({ data: allIssues });
+    return NextResponse.json({ data: allTasks });
   } catch (error) {
-    console.error('Error fetching issues:', error);
+    console.error('Error fetching tasks:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch issues' },
+      { error: 'Failed to fetch tasks' },
       { status: 500 },
     );
   }
@@ -36,31 +36,39 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    // Validate required fields
     if (!data.title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // Create the issue for the authenticated user
-    const newIssue = await db
-      .insert(issues)
+    let projectId: number | null = null;
+    if (data.projectId != null && data.projectId !== '') {
+      projectId = Number(data.projectId);
+      const project = await getProject(projectId);
+      if (!project || project.userId !== user.id) {
+        return NextResponse.json({ error: 'Invalid project' }, { status: 403 });
+      }
+    }
+
+    const newTask = await db
+      .insert(tasks)
       .values({
         title: data.title,
         description: data.description || null,
         status: data.status || 'backlog',
         priority: data.priority || 'medium',
         userId: user.id,
+        projectId,
       })
       .returning();
 
     return NextResponse.json(
-      { message: 'Issue created successfully', issue: newIssue[0] },
+      { message: 'Task created successfully', task: newTask[0] },
       { status: 201 },
     );
   } catch (error) {
-    console.error('Error creating issues:', error);
+    console.error('Error creating tasks:', error);
     return NextResponse.json(
-      { error: 'Failed to create issues' },
+      { error: 'Failed to create tasks' },
       { status: 500 },
     );
   }

@@ -1,13 +1,14 @@
 import { hash } from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
-import { issues, users } from '../db/schema';
+import { tasks, projects, users } from '../db/schema';
 
 async function main() {
   console.log('Starting database seeding...');
 
-  // Clean up existing data
-  await db.delete(issues);
+  // Clean up existing data (order matters for FKs)
+  await db.delete(tasks);
+  await db.delete(projects);
   await db.delete(users);
 
   // Create demo users
@@ -46,8 +47,32 @@ async function main() {
     `- User: ${memberUser.email} (role: ${memberUser.role}, password: password123)`,
   );
 
-  // Create demo issues
-  const demoIssues = [
+  const [adminProject] = await db
+    .insert(projects)
+    .values({
+      title: 'Platform Launch',
+      description: 'Core work for the task manager launch',
+      status: 'ongoing',
+      userId: adminUserId,
+    })
+    .returning();
+
+  const [memberProject] = await db
+    .insert(projects)
+    .values({
+      title: 'Personal Tasks',
+      description: 'Day-to-day work items',
+      status: 'not_started',
+      userId: memberUserId,
+    })
+    .returning();
+
+  console.log('Created demo projects:');
+  console.log(`- ${adminProject.title} (admin)`);
+  console.log(`- ${memberProject.title} (user)`);
+
+  // Create demo tasks (one left orphaned intentionally)
+  const demoTasks = [
     {
       title: 'Implement user authentication',
       description:
@@ -55,6 +80,7 @@ async function main() {
       priority: 'high',
       status: 'done',
       userId: adminUserId,
+      projectId: adminProject.id,
     },
     {
       title: 'Design landing page',
@@ -63,6 +89,7 @@ async function main() {
       priority: 'medium',
       status: 'in_progress',
       userId: adminUserId,
+      projectId: adminProject.id,
     },
     {
       title: 'Add dark mode support',
@@ -71,43 +98,46 @@ async function main() {
       priority: 'low',
       status: 'todo',
       userId: memberUserId,
+      projectId: memberProject.id,
     },
     {
-      title: 'Create issue management API',
+      title: 'Create task management API',
       description:
-        'Build RESTful API endpoints for creating, updating and deleting issues.',
+        'Build RESTful API endpoints for creating, updating and deleting tasks.',
       priority: 'high',
       status: 'done',
       userId: memberUserId,
+      projectId: memberProject.id,
     },
     {
-      title: 'Implement drag and drop for issues',
+      title: 'Implement drag and drop for tasks',
       description:
-        'Add drag and drop functionality to move issues between status columns.',
+        'Add drag and drop functionality to move tasks between status columns.',
       priority: 'medium',
       status: 'todo',
       userId: adminUserId,
+      projectId: null,
     },
   ];
 
-  for (const issue of demoIssues) {
-    // Explicitly cast string values to enum types to fix type issues
-    await db.insert(issues).values({
-      title: issue.title,
-      description: issue.description,
-      priority: issue.priority as 'low' | 'medium' | 'high' | 'critical',
-      status: issue.status as
+  for (const task of demoTasks) {
+    await db.insert(tasks).values({
+      title: task.title,
+      description: task.description,
+      priority: task.priority as 'low' | 'medium' | 'high' | 'critical',
+      status: task.status as
         | 'backlog'
         | 'todo'
         | 'in_progress'
         | 'done'
         | 'rejected'
         | 'closed',
-      userId: issue.userId,
+      userId: task.userId,
+      projectId: task.projectId,
     });
   }
 
-  console.log(`Created ${demoIssues.length} demo issues`);
+  console.log(`Created ${demoTasks.length} demo tasks`);
   console.log('Database seeding completed!');
 }
 

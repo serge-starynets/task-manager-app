@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Task Manager',
-  description: 'A modern issue tracking application built with Next.js 15',
+  description: 'A modern task tracking application built with Next.js 15',
 };
 
 export default function RootLayout({

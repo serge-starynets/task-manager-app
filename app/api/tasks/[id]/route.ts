@@ -1,6 +1,6 @@
 import { db } from '@/db';
-import { issues } from '@/db/schema';
-import { canManageIssue, getCurrentUser, getIssue, isAdmin } from '@/lib/dal';
+import { tasks } from '@/db/schema';
+import { canManageTask, getCurrentUser, getTask, isAdmin } from '@/lib/dal';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -15,13 +15,13 @@ export const GET = async (
     }
 
     const { id } = await params;
-    const issue = await getIssue(parseInt(id));
+    const task = await getTask(parseInt(id));
 
-    if (!issue || (!isAdmin(user) && issue.userId !== user.id)) {
+    if (!task || (!isAdmin(user) && task.userId !== user.id)) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ data: issue });
+    return NextResponse.json({ data: task });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: 'not here' }, { status: 404 });
@@ -39,16 +39,16 @@ export const DELETE = async (
     }
 
     const { id } = await params;
-    const issueId = parseInt(id);
-    const canManage = await canManageIssue(issueId);
+    const taskId = parseInt(id);
+    const canManage = await canManageTask(taskId);
 
     if (!canManage) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    await db.delete(issues).where(eq(issues.id, issueId));
+    await db.delete(tasks).where(eq(tasks.id, taskId));
 
-    return NextResponse.json({ message: 'Issue deleted successfully' });
+    return NextResponse.json({ message: 'Task deleted successfully' });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });

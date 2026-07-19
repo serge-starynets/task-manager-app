@@ -1,129 +1,126 @@
-import { getIssues, isAdmin, requireUser } from '@/lib/dal';
+import {
+  getTasksForProject,
+  getOrphanedTasks,
+  getProjects,
+  requireUser,
+} from '@/lib/dal';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import Button from '../components/ui/Button';
 import { PlusIcon } from 'lucide-react';
-import Badge from '../components/ui/Badge';
-import { formatRelativeTime } from '@/lib/utils';
-import { Priority, Status } from '@/lib/types';
-import { ISSUE_STATUS, ISSUE_PRIORITY } from '@/db/schema';
+import TaskTable from '../components/TaskTable';
+import { PROJECT_STATUS } from '@/db/schema';
+
+function OrphanedTasksSection({
+  tasks,
+}: {
+  tasks: Awaited<ReturnType<typeof getOrphanedTasks>>;
+}) {
+  if (tasks.length === 0) return null;
+
+  return (
+    <section className="mt-12 pt-10 border-t border-gray-200 dark:border-dark-border-default">
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+          Tasks without a project
+        </h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          These tasks are not assigned to any project.
+        </p>
+      </div>
+      <TaskTable tasks={tasks} />
+    </section>
+  );
+}
 
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ project?: string }>;
 }) {
   const user = await requireUser();
-  const { view } = await searchParams;
-  const viewingMine = isAdmin(user) && view === 'mine';
-  const showingAllUsers = isAdmin(user) && !viewingMine;
+  const { project: projectParam } = await searchParams;
+  const projects = await getProjects(user.id);
+  const orphanedTasks = await getOrphanedTasks(user.id);
 
-  const issues = await getIssues({
-    id: user.id,
-    role: showingAllUsers ? 'admin' : 'user',
-  });
+  if (projects.length === 0) {
+    return (
+      <div>
+        <div className="flex flex-col items-center justify-center py-12 text-center border border-gray-200 dark:border-dark-border-default rounded-lg bg-white dark:bg-dark-high p-8">
+          <h3 className="text-lg font-medium mb-2">No projects yet</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            Create a project to organize tasks, or add a task without a project
+            from the sidebar.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link href="/projects/new">
+              <Button>
+                <span className="flex items-center">
+                  <PlusIcon size={18} className="mr-2" />
+                  Create Project
+                </span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        <OrphanedTasksSection tasks={orphanedTasks} />
+      </div>
+    );
+  }
+
+  const selectedProjectId = projectParam ? parseInt(projectParam, 10) : NaN;
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+
+  if (!selectedProject) {
+    redirect(`/dashboard?project=${projects[0].id}`);
+  }
+
+  const projectTasks = await getTasksForProject(user.id, selectedProject.id);
+
+  const statusLabel =
+    PROJECT_STATUS[selectedProject.status as keyof typeof PROJECT_STATUS]
+      ?.label ?? selectedProject.status;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold">
-              {showingAllUsers ? 'All Issues' : 'My Issues'}
-            </h1>
-            {isAdmin(user) && (
-              <Link href={viewingMine ? '/dashboard' : '/dashboard?view=mine'}>
-                <Button variant="outline" size="sm">
-                  {viewingMine ? 'View All Issues' : 'View my Issues'}
-                </Button>
-              </Link>
-            )}
-          </div>
-          {showingAllUsers && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Viewing issues from all users
-            </p>
-          )}
+          <h1 className="text-2xl font-bold">{selectedProject.title}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {statusLabel}
+            {selectedProject.description
+              ? ` · ${selectedProject.description}`
+              : ''}
+          </p>
         </div>
-        <Link href="/issues/new">
-          <Button data-testid="new-issue-button">
-            <span className="flex items-center">
-              <PlusIcon size={18} className="mr-2" />
-              New Issue
-            </span>
-          </Button>
-        </Link>
       </div>
 
-      {issues.length > 0 ? (
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-sm">
-          {/* Header row */}
-          <div className="grid grid-cols-12 gap-4 px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border-default">
-            <div className={showingAllUsers ? 'col-span-3' : 'col-span-5'}>
-              Title
-            </div>
-            <div className="col-span-2">Status</div>
-            <div className="col-span-2">Priority</div>
-            {showingAllUsers && <div className="col-span-2">Owner</div>}
-            <div className="col-span-2">Created</div>
-            <div className="col-span-1">Updated</div>
-          </div>
-
-          {/* Issue rows */}
-          <div className="divide-y divide-gray-200 dark:divide-dark-border-default">
-            {issues.map((issue) => (
-              <Link
-                key={issue.id}
-                href={`/issues/${issue.id}`}
-                className="block hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
-              >
-                <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
-                  <div
-                    className={`font-medium truncate ${showingAllUsers ? 'col-span-3' : 'col-span-5'}`}
-                  >
-                    {issue.title}
-                  </div>
-                  <div className="col-span-2">
-                    <Badge status={issue.status as Status}>
-                      {ISSUE_STATUS[issue.status as Status].label}
-                    </Badge>
-                  </div>
-                  <div className="col-span-2">
-                    <Badge priority={issue.priority as Priority}>
-                      {ISSUE_PRIORITY[issue.priority as Priority].label}
-                    </Badge>
-                  </div>
-                  {showingAllUsers && (
-                    <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400 truncate">
-                      {issue.user?.email}
-                    </div>
-                  )}
-                  <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
-                    {formatRelativeTime(new Date(issue.createdAt))}
-                  </div>
-                  <div className="col-span-1 text-sm text-gray-500 dark:text-gray-400">
-                    {formatRelativeTime(new Date(issue.updatedAt))}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center border border-gray-200 dark:border-dark-border-default rounded-lg bg-white dark:bg-dark-high p-8">
-          <h3 className="text-lg font-medium mb-2">No issues found</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Get started by creating your first issue.
-          </p>
-          <Link href="/issues/new">
-            <Button>
+      <section className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Project tasks</h2>
+          <Link href={`/tasks/new?project=${selectedProject.id}`}>
+            <Button data-testid="new-task-button" size="sm">
               <span className="flex items-center">
-                <PlusIcon size={18} className="mr-2" />
-                Create Issue
+                <PlusIcon size={16} className="mr-2" />
+                New Task
               </span>
             </Button>
           </Link>
         </div>
-      )}
+        {projectTasks.length > 0 ? (
+          <TaskTable tasks={projectTasks} />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center border border-gray-200 dark:border-dark-border-default rounded-lg bg-white dark:bg-dark-high p-8">
+            <h3 className="text-lg font-medium mb-2">No tasks found</h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              Get started by creating your first task in this project.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <OrphanedTasksSection tasks={orphanedTasks} />
     </div>
   );
 }

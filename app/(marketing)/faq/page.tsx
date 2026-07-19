@@ -9,7 +9,7 @@ export default function FAQPage() {
       <div className="space-y-6">
         <FAQItem
           question="What is Task Manager App?"
-          answer="Task Manager Appis a project management tool inspired by Linear. It helps teams organize, track, and manage their projects and issues in a simple and efficient way."
+          answer="Task Manager App is a project management tool inspired by Linear. It helps teams organize, track, and manage their projects and tasks in a simple and efficient way."
         />
 
         <FAQItem

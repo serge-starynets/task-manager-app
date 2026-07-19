@@ -16,8 +16,8 @@ export default function FeaturesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         <FeatureCard
-          title="Issue Tracking"
-          description="Create, assign, and track issues with ease. Set priorities, due dates, and statuses to keep your team on track."
+          title="Task Tracking"
+          description="Create, assign, and track tasks with ease. Set priorities, due dates, and statuses to keep your team on track."
         />
         <FeatureCard
           title="Intuitive UI"
@@ -25,7 +25,7 @@ export default function FeaturesPage() {
         />
         <FeatureCard
           title="Collaboration"
-          description="Work together seamlessly. Comment on issues, mention team members, and keep everyone in the loop."
+          description="Work together seamlessly. Comment on tasks, mention team members, and keep everyone in the loop."
         />
         <FeatureCard
           title="Custom Workflows"

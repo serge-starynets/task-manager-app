@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Issue, ISSUE_STATUS, ISSUE_PRIORITY } from '@/db/schema';
+import { Task, TASK_STATUS, TASK_PRIORITY } from '@/db/schema';
 import Button from './ui/Button';
 import {
   Form,
@@ -14,14 +14,15 @@ import {
   FormSelect,
 } from './ui/Form';
 import {
-  createIssue,
-  updateIssue,
+  createTask,
+  updateTask,
   type ActionResponse,
-} from '@/app/actions/issues';
+} from '@/app/actions/tasks';
 
-interface IssueFormProps {
-  issue?: Issue;
+interface TaskFormProps {
+  task?: Task;
   userId: string;
+  projectId?: number;
   isEditing?: boolean;
 }
 
@@ -31,19 +32,18 @@ const initialState: ActionResponse = {
   errors: undefined,
 };
 
-export default function IssueForm({
-  issue,
+export default function TaskForm({
+  task,
   userId,
+  projectId,
   isEditing = false,
-}: IssueFormProps) {
+}: TaskFormProps) {
   const router = useRouter();
 
-  // Use useActionState hook for the form submission action
   const [state, formAction, isPending] = useActionState<
     ActionResponse,
     FormData
-  >(async (prevState: ActionResponse, formData: FormData) => {
-    // Extract data from form
+  >(async (_prevState: ActionResponse, formData: FormData) => {
     const data = {
       title: formData.get('title') as string,
       description: formData.get('description') as string,
@@ -60,27 +60,31 @@ export default function IssueForm({
         | 'high'
         | 'critical',
       userId,
+      projectId: projectId ?? null,
     };
 
     try {
-      // Call the appropriate action based on whether we're editing or creating
       const result = isEditing
-        ? await updateIssue(Number(issue!.id), data)
-        : await createIssue(data);
+        ? await updateTask(Number(task!.id), data)
+        : await createTask(data);
 
-      // Handle successful submission
       if (result.success) {
         toast.success(result.message);
         if (!isEditing) {
-          router.push('/dashboard');
+          const redirectProjectId = result.projectId ?? projectId;
+          router.push(
+            redirectProjectId
+              ? `/dashboard?project=${redirectProjectId}`
+              : '/dashboard',
+          );
         } else {
-          router.push(`/issues/${issue!.id}`);
+          router.push(`/tasks/${task!.id}`);
         }
       }
 
       return result;
     } catch (err) {
-      toast.error('Failed to update Issue');
+      toast.error('Failed to update Task');
       return {
         success: false,
         message: (err as Error).message || 'An error occurred',
@@ -89,12 +93,12 @@ export default function IssueForm({
     }
   }, initialState);
 
-  const statusOptions = Object.values(ISSUE_STATUS).map(({ label, value }) => ({
+  const statusOptions = Object.values(TASK_STATUS).map(({ label, value }) => ({
     label,
     value,
   }));
 
-  const priorityOptions = Object.values(ISSUE_PRIORITY).map(
+  const priorityOptions = Object.values(TASK_PRIORITY).map(
     ({ label, value }) => ({
       label,
       value,
@@ -108,8 +112,8 @@ export default function IssueForm({
         <FormInput
           id="title"
           name="title"
-          placeholder="Issue title"
-          defaultValue={issue?.title || ''}
+          placeholder="Task title"
+          defaultValue={task?.title || ''}
           required
           minLength={3}
           maxLength={100}
@@ -129,9 +133,9 @@ export default function IssueForm({
         <FormTextarea
           id="description"
           name="description"
-          placeholder="Describe the issue..."
+          placeholder="Describe the task..."
           rows={4}
-          defaultValue={issue?.description || ''}
+          defaultValue={task?.description || ''}
           disabled={isPending}
           aria-describedby="description-error"
           className={state?.errors?.description ? 'border-red-500' : ''}
@@ -149,7 +153,7 @@ export default function IssueForm({
           <FormSelect
             id="status"
             name="status"
-            defaultValue={issue?.status || 'backlog'}
+            defaultValue={task?.status || 'backlog'}
             options={statusOptions}
             disabled={isPending}
             required
@@ -168,7 +172,7 @@ export default function IssueForm({
           <FormSelect
             id="priority"
             name="priority"
-            defaultValue={issue?.priority || 'medium'}
+            defaultValue={task?.priority || 'medium'}
             options={priorityOptions}
             disabled={isPending}
             required
@@ -183,6 +187,10 @@ export default function IssueForm({
         </FormGroup>
       </div>
 
+      {state?.errors?.projectId && (
+        <p className="text-sm text-red-500 mt-2">{state.errors.projectId[0]}</p>
+      )}
+
       <div className="flex justify-end gap-2 mt-6">
         <Button
           type="button"
@@ -193,7 +201,7 @@ export default function IssueForm({
           Cancel
         </Button>
         <Button type="submit" isLoading={isPending}>
-          {isEditing ? 'Update Issue' : 'Create Issue'}
+          {isEditing ? 'Update Task' : 'Create Task'}
         </Button>
       </div>
     </Form>

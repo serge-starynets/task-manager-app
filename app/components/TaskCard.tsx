@@ -1,4 +1,4 @@
-import { Issue } from '@/db/schema';
+import { Task } from '@/db/schema';
 import { formatRelativeTime } from '@/lib/utils';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
@@ -11,12 +11,12 @@ import {
 } from './ui/Card';
 import Badge from './ui/Badge';
 
-interface IssueCardProps {
-  issue: Issue;
+interface TaskCardProps {
+  task: Task;
 }
 
-export default function IssueCard({ issue }: IssueCardProps) {
-  const { id, title, description, status, priority, createdAt } = issue;
+export default function TaskCard({ task }: TaskCardProps) {
+  const { id, title, description, status, priority, createdAt } = task;
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -53,7 +53,7 @@ export default function IssueCard({ issue }: IssueCardProps) {
   };
 
   return (
-    <Link href={`/issues/${id}`}>
+    <Link href={`/tasks/${id}`}>
       <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
         <CardHeader className="pb-2">
           <CardTitle className="line-clamp-1 text-base">{title}</CardTitle>

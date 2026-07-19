@@ -23,6 +23,18 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   priority?: PriorityType;
 }
 
+const statusStyles: Record<StatusType, string> = {
+  backlog:
+    'bg-gray-100 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400',
+  todo: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200',
+  in_progress:
+    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  done: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+  closed:
+    'bg-gray-700 text-gray-100 dark:bg-gray-900 dark:text-gray-300',
+};
+
 export default function Badge({
   className,
   variant = 'default',
@@ -31,23 +43,7 @@ export default function Badge({
   priority,
   ...props
 }: BadgeProps) {
-  // Get variant based on status or priority if provided
-  const getBadgeVariant = (): BadgeVariant => {
-    if (status) {
-      switch (status) {
-        case 'backlog':
-          return 'secondary';
-        case 'todo':
-          return 'default';
-        case 'in_progress':
-          return 'warning';
-        case 'done':
-          return 'success';
-        default:
-          return 'default';
-      }
-    }
-
+  const getPriorityVariant = (): BadgeVariant => {
     if (priority) {
       switch (priority) {
         case 'low':
@@ -77,16 +73,17 @@ export default function Badge({
     warning:
       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     danger: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-    critical: 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-300',
   };
 
-  const badgeVariant = getBadgeVariant();
+  const colorClass = status
+    ? statusStyles[status]
+    : variantStyles[getPriorityVariant()];
 
   return (
     <span
       className={cn(
         'inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full',
-        variantStyles[badgeVariant],
+        colorClass,
         className,
       )}
       {...props}

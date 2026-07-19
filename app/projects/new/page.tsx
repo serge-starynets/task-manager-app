@@ -1,9 +1,17 @@
 import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
-import { Suspense } from 'react';
-import NewIssue from '@/app/components/NewIssue';
+import { redirect } from 'next/navigation';
+import ProjectForm from '@/app/components/ProjectForm';
+import { countUserProjects, requireUser } from '@/lib/dal';
 
-export default async function NewIssuePage() {
+export default async function NewProjectPage() {
+  const user = await requireUser();
+  const projectCount = await countUserProjects(user.id);
+
+  if (projectCount >= 10) {
+    redirect('/dashboard');
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8">
       <Link
@@ -14,12 +22,10 @@ export default async function NewIssuePage() {
         Back to Dashboard
       </Link>
 
-      <h1 className="text-2xl font-bold mb-6">Create New Issue</h1>
+      <h1 className="text-2xl font-bold mb-6">Create Project</h1>
 
       <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6">
-        <Suspense fallback={<div>Loading...</div>}>
-          <NewIssue />
-        </Suspense>
+        <ProjectForm />
       </div>
     </div>
   );
