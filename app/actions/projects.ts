@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { db } from '@/db';
 import { projects } from '@/db/schema';
 import {
@@ -78,6 +78,7 @@ export async function createProject(
       .returning();
 
     revalidateTag('projects');
+    revalidatePath('/dashboard');
 
     return {
       success: true,

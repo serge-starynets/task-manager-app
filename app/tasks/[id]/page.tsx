@@ -125,9 +125,19 @@ export default async function TaskPage({
               {getPriorityLabel(priority)}
             </Badge>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Created</p>
-            <p>{formatRelativeTime(new Date(createdAt))}</p>
+          <div className="flex gap-8">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">Created</p>
+              <p className="text-xs text-gray-400">
+                {formatRelativeTime(new Date(createdAt))}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">Updated</p>
+              <p className="text-xs text-gray-400">
+                {formatRelativeTime(new Date(updatedAt))}
+              </p>
+            </div>
           </div>
         </div>
       </div>

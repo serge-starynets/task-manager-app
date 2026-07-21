@@ -6,6 +6,8 @@ import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { tasks, projects, users, User } from '@/db/schema';
 
+const CACHE_REVALIDATE_SECONDS = 30;
+
 export function isAdmin(user: Pick<User, 'role'>) {
   return user.role === 'admin';
 }
@@ -49,11 +51,10 @@ export const getUserByEmail = async (email: string) => {
 
 async function fetchProjects(userId: string) {
   try {
-    const result = await db.query.projects.findMany({
+    return await db.query.projects.findMany({
       where: eq(projects.userId, userId),
       orderBy: (projectsTable, { asc }) => [asc(projectsTable.createdAt)],
     });
-    return result;
   } catch (error) {
     console.error('Error fetching projects:', error);
     throw new Error('Failed to fetch projects');
@@ -64,7 +65,7 @@ export async function getProjects(userId: string) {
   return unstable_cache(
     () => fetchProjects(userId),
     ['projects', userId],
-    { tags: ['projects'] },
+    { tags: ['projects'], revalidate: CACHE_REVALIDATE_SECONDS },
   )();
 }
 
@@ -108,14 +109,13 @@ export async function countUserProjects(userId: string) {
 
 async function fetchTasks(userId: string, role: User['role']) {
   try {
-    const result = await db.query.tasks.findMany({
+    return await db.query.tasks.findMany({
       where: role === 'admin' ? undefined : eq(tasks.userId, userId),
       with: {
         user: true,
       },
       orderBy: (tasksTable, { desc }) => [desc(tasksTable.createdAt)],
     });
-    return result;
   } catch (error) {
     console.error('Error fetching tasks:', error);
     throw new Error('Failed to fetch tasks');
@@ -126,20 +126,19 @@ export async function getTasks(user: Pick<User, 'id' | 'role'>) {
   return unstable_cache(
     () => fetchTasks(user.id, user.role),
     ['tasks', user.id, user.role],
-    { tags: ['tasks'] },
+    { tags: ['tasks'], revalidate: CACHE_REVALIDATE_SECONDS },
   )();
 }
 
 async function fetchTasksForProject(userId: string, projectId: number) {
   try {
-    const result = await db.query.tasks.findMany({
+    return await db.query.tasks.findMany({
       where: and(eq(tasks.userId, userId), eq(tasks.projectId, projectId)),
       with: {
         user: true,
       },
       orderBy: (tasksTable, { desc }) => [desc(tasksTable.createdAt)],
     });
-    return result;
   } catch (error) {
     console.error('Error fetching tasks for project:', error);
     throw new Error('Failed to fetch tasks for project');
@@ -150,20 +149,19 @@ export async function getTasksForProject(userId: string, projectId: number) {
   return unstable_cache(
     () => fetchTasksForProject(userId, projectId),
     ['tasks', 'project', userId, String(projectId)],
-    { tags: ['tasks'] },
+    { tags: ['tasks'], revalidate: CACHE_REVALIDATE_SECONDS },
   )();
 }
 
 async function fetchOrphanedTasks(userId: string) {
   try {
-    const result = await db.query.tasks.findMany({
+    return await db.query.tasks.findMany({
       where: and(eq(tasks.userId, userId), isNull(tasks.projectId)),
       with: {
         user: true,
       },
       orderBy: (tasksTable, { desc }) => [desc(tasksTable.createdAt)],
     });
-    return result;
   } catch (error) {
     console.error('Error fetching orphaned tasks:', error);
     throw new Error('Failed to fetch orphaned tasks');
@@ -174,7 +172,7 @@ export async function getOrphanedTasks(userId: string) {
   return unstable_cache(
     () => fetchOrphanedTasks(userId),
     ['tasks', 'orphaned', userId],
-    { tags: ['tasks'] },
+    { tags: ['tasks'], revalidate: CACHE_REVALIDATE_SECONDS },
   )();
 }
 

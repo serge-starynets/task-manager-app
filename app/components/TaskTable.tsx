@@ -25,11 +25,11 @@ export default function TaskTable({
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-sm">
       <div className="grid grid-cols-12 gap-4 px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border-default">
-        <div className="col-span-5">Title</div>
+        <div className="col-span-4">Title</div>
         <div className="col-span-2">Status</div>
         <div className="col-span-2">Priority</div>
         <div className="col-span-2">Created</div>
-        <div className="col-span-1">Updated</div>
+        <div className="col-span-2">Updated</div>
       </div>
 
       <div className="divide-y divide-gray-200 dark:divide-dark-border-default">
@@ -40,7 +40,9 @@ export default function TaskTable({
             className="block hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
           >
             <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
-              <div className="font-medium truncate col-span-5">{task.title}</div>
+              <div className="font-medium truncate col-span-4">
+                {task.title}
+              </div>
               <div className="col-span-2">
                 <Badge status={task.status as Status}>
                   {TASK_STATUS[task.status as Status].label}
@@ -51,10 +53,10 @@ export default function TaskTable({
                   {TASK_PRIORITY[task.priority as Priority].label}
                 </Badge>
               </div>
-              <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className="col-span-2 text-xs text-gray-400 dark:text-gray-400">
                 {formatRelativeTime(new Date(task.createdAt))}
               </div>
-              <div className="col-span-1 text-sm text-gray-500 dark:text-gray-400">
+              <div className="col-span-2 text-xs text-gray-400 dark:text-gray-400">
                 {formatRelativeTime(new Date(task.updatedAt))}
               </div>
             </div>

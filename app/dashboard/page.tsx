@@ -87,8 +87,10 @@ export default async function DashboardPage({
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">{selectedProject.title}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <h4 className="text-m font-bold italic text-gray-500 dark:text-gray-400">
             {statusLabel}
+          </h4>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {selectedProject.description
               ? ` · ${selectedProject.description}`
               : ''}

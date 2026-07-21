@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -96,6 +96,8 @@ export async function createTask(data: TaskData): Promise<ActionResponse> {
       createdAt: validatedData.createdAt,
     });
     revalidateTag('tasks');
+    revalidatePath('/dashboard');
+    revalidatePath('/tasks', 'layout');
 
     return {
       success: true,
@@ -172,6 +174,8 @@ export async function updateTask(
 
     await db.update(tasks).set(updateData).where(eq(tasks.id, id));
     revalidateTag('tasks');
+    revalidatePath('/dashboard');
+    revalidatePath('/tasks', 'layout');
 
     return { success: true, message: 'Task updated successfully' };
   } catch (error) {
@@ -203,6 +207,8 @@ export async function deleteTask(id: number) {
     await db.delete(tasks).where(eq(tasks.id, id));
 
     revalidateTag('tasks');
+    revalidatePath('/dashboard');
+    revalidatePath('/tasks', 'layout');
 
     return { success: true, message: 'Task deleted successfully' };
   } catch (error) {

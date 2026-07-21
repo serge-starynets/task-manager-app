@@ -1,16 +1,23 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { formatDistanceToNow } from 'date-fns';
+import { differenceInMinutes, format, formatDistanceToNow } from 'date-fns';
 
 // Utility function for combining Tailwind classes
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Format date to relative time (e.g., "2 days ago")
+// Relative time for the last 5 minutes (e.g. "2 minutes ago"); otherwise dd.mm.yyyy:hh:mm
 export function formatRelativeTime(date: Date | string) {
   const parsedDate = typeof date === 'string' ? new Date(date) : date;
-  return formatDistanceToNow(parsedDate, { addSuffix: true });
+  const minutesAgo = differenceInMinutes(new Date(), parsedDate);
+
+  // Only the recent past — future dates (negative minutesAgo) use the absolute format
+  if (minutesAgo >= 0 && minutesAgo < 5) {
+    return formatDistanceToNow(parsedDate, { addSuffix: true });
+  }
+
+  return format(parsedDate, 'dd.MM.yyyy:HH:mm');
 }
 
 // Simple validation check for email
