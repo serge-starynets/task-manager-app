@@ -62,11 +62,10 @@ async function fetchProjects(userId: string) {
 }
 
 export async function getProjects(userId: string) {
-  return unstable_cache(
-    () => fetchProjects(userId),
-    ['projects', userId],
-    { tags: ['projects'], revalidate: CACHE_REVALIDATE_SECONDS },
-  )();
+  return unstable_cache(() => fetchProjects(userId), ['projects', userId], {
+    tags: ['projects'],
+    revalidate: CACHE_REVALIDATE_SECONDS,
+  })();
 }
 
 export async function getProject(projectId: number) {
@@ -137,7 +136,7 @@ async function fetchTasksForProject(userId: string, projectId: number) {
       with: {
         user: true,
       },
-      orderBy: (tasksTable, { desc }) => [desc(tasksTable.createdAt)],
+      orderBy: (tasksTable, { desc }) => [desc(tasksTable.updatedAt)],
     });
   } catch (error) {
     console.error('Error fetching tasks for project:', error);

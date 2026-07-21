@@ -25,9 +25,10 @@ export default function TaskTable({
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-sm">
       <div className="grid grid-cols-12 gap-4 px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border-default">
-        <div className="col-span-4">Title</div>
+        <div className="col-span-2">ID</div>
+        <div className="col-span-3">Title</div>
         <div className="col-span-2">Status</div>
-        <div className="col-span-2">Priority</div>
+        <div className="col-span-1">Priority</div>
         <div className="col-span-2">Created</div>
         <div className="col-span-2">Updated</div>
       </div>
@@ -40,7 +41,10 @@ export default function TaskTable({
             className="block hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
           >
             <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
-              <div className="font-medium truncate col-span-4">
+              <div className="col-span-2 text-sm font-mono text-gray-600 dark:text-gray-300 truncate">
+                {task.taskId}
+              </div>
+              <div className="font-medium truncate col-span-3">
                 {task.title}
               </div>
               <div className="col-span-2">
@@ -48,7 +52,7 @@ export default function TaskTable({
                   {TASK_STATUS[task.status as Status].label}
                 </Badge>
               </div>
-              <div className="col-span-2">
+              <div className="col-span-1">
                 <Badge priority={task.priority as Priority}>
                   {TASK_PRIORITY[task.priority as Priority].label}
                 </Badge>

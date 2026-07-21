@@ -10,13 +10,11 @@ import {
   FormGroup,
   FormLabel,
   FormInput,
-  FormTextarea,
   FormSelect,
+  FormDescription,
 } from './ui/Form';
-import {
-  createProject,
-  type ActionResponse,
-} from '@/app/actions/projects';
+import RichTextEditor from './RichTextEditor';
+import { createProject, type ActionResponse } from '@/app/actions/projects';
 
 const initialState: ActionResponse = {
   success: false,
@@ -33,11 +31,9 @@ export default function ProjectForm() {
   >(async (_prevState: ActionResponse, formData: FormData) => {
     const data = {
       title: formData.get('title') as string,
+      abbreviation: formData.get('abbreviation') as string,
       description: formData.get('description') as string,
-      status: formData.get('status') as
-        | 'not_started'
-        | 'ongoing'
-        | 'completed',
+      status: formData.get('status') as 'not_started' | 'ongoing' | 'completed',
     };
 
     try {
@@ -91,12 +87,42 @@ export default function ProjectForm() {
       </FormGroup>
 
       <FormGroup>
+        <FormLabel htmlFor="abbreviation">Abbreviation</FormLabel>
+        <FormInput
+          id="abbreviation"
+          name="abbreviation"
+          placeholder="e.g. WEB"
+          required
+          minLength={1}
+          maxLength={8}
+          pattern="[A-Za-z]{1,8}"
+          title="1–8 latin letters only"
+          disabled={isPending}
+          autoCapitalize="characters"
+          spellCheck={false}
+          aria-describedby="abbreviation-help abbreviation-error"
+          className={
+            state?.errors?.abbreviation
+              ? 'border-red-500 uppercase'
+              : 'uppercase'
+          }
+        />
+        <FormDescription id="abbreviation-help">
+          1–8 latin letters. Must be unique among your projects.
+        </FormDescription>
+        {state?.errors?.abbreviation && (
+          <p id="abbreviation-error" className="text-sm text-red-500">
+            {state.errors.abbreviation[0]}
+          </p>
+        )}
+      </FormGroup>
+
+      <FormGroup>
         <FormLabel htmlFor="description">Description</FormLabel>
-        <FormTextarea
+        <RichTextEditor
           id="description"
           name="description"
           placeholder="Describe the project..."
-          rows={4}
           disabled={isPending}
           aria-describedby="description-error"
           className={state?.errors?.description ? 'border-red-500' : ''}

@@ -1,5 +1,6 @@
 import { Task } from '@/db/schema';
 import { formatRelativeTime } from '@/lib/utils';
+import { stripHtml } from '@/lib/rich-text';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
 import {
@@ -16,7 +17,8 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task }: TaskCardProps) {
-  const { id, title, description, status, priority, createdAt } = task;
+  const { id, taskId, title, description, status, priority, createdAt } = task;
+  const descriptionPreview = stripHtml(description);
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -56,12 +58,15 @@ export default function TaskCard({ task }: TaskCardProps) {
     <Link href={`/tasks/${id}`}>
       <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
         <CardHeader className="pb-2">
+          <p className="text-xs font-mono text-gray-500 dark:text-gray-400 mb-1">
+            {taskId}
+          </p>
           <CardTitle className="line-clamp-1 text-base">{title}</CardTitle>
         </CardHeader>
         <CardContent className="pb-2">
-          {description && (
+          {descriptionPreview && (
             <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-3">
-              {description}
+              {descriptionPreview}
             </p>
           )}
           <div className="flex flex-wrap gap-2">

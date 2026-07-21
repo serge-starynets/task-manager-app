@@ -5,6 +5,8 @@ import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { canManageTask, getCurrentUser, getProject, isAdmin } from '@/lib/dal';
+import { sanitizeRichText } from '@/lib/rich-text';
+import { allocateTaskId } from '@/lib/task-id';
 import { z } from 'zod';
 
 const TaskSchema = z.object({
@@ -86,9 +88,12 @@ export async function createTask(data: TaskData): Promise<ActionResponse> {
       }
     }
 
+    const taskId = await allocateTaskId(projectId, user.id);
+
     await db.insert(tasks).values({
+      taskId,
       title: validatedData.title,
-      description: validatedData.description || null,
+      description: sanitizeRichText(validatedData.description),
       status: validatedData.status,
       priority: validatedData.priority,
       userId: validatedData.userId,
@@ -162,7 +167,7 @@ export async function updateTask(
     if (validatedData.title !== undefined)
       updateData.title = validatedData.title;
     if (validatedData.description !== undefined)
-      updateData.description = validatedData.description;
+      updateData.description = sanitizeRichText(validatedData.description);
     if (validatedData.status !== undefined)
       updateData.status = validatedData.status;
     if (validatedData.priority !== undefined)

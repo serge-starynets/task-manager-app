@@ -3,10 +3,13 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { db } from '@/db';
 import { projects } from '@/db/schema';
+import { countUserProjects, getCurrentUser } from '@/lib/dal';
 import {
-  countUserProjects,
-  getCurrentUser,
-} from '@/lib/dal';
+  isAbbreviationTaken,
+  isUniqueViolation,
+  normalizeAbbreviation,
+} from '@/lib/project-abbreviation';
+import { sanitizeRichText } from '@/lib/rich-text';
 import { z } from 'zod';
 
 const MAX_PROJECTS_PER_USER = 10;
@@ -16,6 +19,12 @@ const ProjectSchema = z.object({
     .string()
     .min(3, 'Title must be at least 3 characters')
     .max(100, 'Title must be less than 100 characters'),
+  abbreviation: z
+    .string()
+    .trim()
+    .min(1, 'Abbreviation is required')
+    .max(8, 'Abbreviation must be at most 8 characters')
+    .regex(/^[A-Za-z]+$/, 'Abbreviation may only contain latin letters'),
   description: z.string().optional().nullable(),
   status: z.enum(['not_started', 'ongoing', 'completed'], {
     errorMap: () => ({ message: 'Please select a valid status' }),
@@ -64,12 +73,35 @@ export async function createProject(
     }
 
     const validatedData = validationResult.data;
+    const abbreviation = normalizeAbbreviation(validatedData.abbreviation);
+
+    if (!abbreviation) {
+      return {
+        success: false,
+        message: 'Validation failed',
+        errors: {
+          abbreviation: ['Abbreviation may only contain latin letters (A–Z)'],
+        },
+      };
+    }
+
+    if (await isAbbreviationTaken(user.id, abbreviation)) {
+      return {
+        success: false,
+        message: 'Validation failed',
+        errors: {
+          abbreviation: ['This abbreviation is already used by another project'],
+        },
+      };
+    }
+
     const now = new Date();
     const [created] = await db
       .insert(projects)
       .values({
         title: validatedData.title,
-        description: validatedData.description || null,
+        abbreviation,
+        description: sanitizeRichText(validatedData.description),
         status: validatedData.status,
         userId: user.id,
         createdAt: now,
@@ -87,6 +119,17 @@ export async function createProject(
     };
   } catch (error) {
     console.error('Error creating project:', error);
+
+    if (isUniqueViolation(error)) {
+      return {
+        success: false,
+        message: 'Validation failed',
+        errors: {
+          abbreviation: ['This abbreviation is already used by another project'],
+        },
+      };
+    }
+
     return {
       success: false,
       message: 'An error occurred while creating the project',

@@ -1,10 +1,12 @@
 import { getAccessibleTask } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
+import { isEmptyHtml } from '@/lib/rich-text';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
+import RichText from '@/app/components/RichText';
 import { ArrowLeftIcon, Edit2Icon } from 'lucide-react';
 import DeleteTaskButton from '../../components/DeleteTaskButton';
 
@@ -20,7 +22,7 @@ export default async function TaskPage({
     notFound();
   }
 
-  const { title, description, status, priority, createdAt, updatedAt, user } =
+  const { title, description, status, priority, createdAt, updatedAt, user, taskId } =
     task;
 
   const getStatusLabel = (status: string) => {
@@ -56,7 +58,7 @@ export default async function TaskPage({
     : '/dashboard';
 
   return (
-    <div className="bg-white dark:bg-dark-elevated max-w-4xl mx-auto p-4 md:p-8">
+    <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
       <div className="mb-8">
         <Link
           href={backHref}
@@ -66,8 +68,13 @@ export default async function TaskPage({
           Back to Tasks
         </Link>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h1 className="text-3xl font-bold">{title}</h1>
-          <div className="flex items-center space-x-2">
+          <div className="min-w-0">
+            <p className="text-sm font-mono text-gray-500 dark:text-gray-400 mb-1">
+              {taskId}
+            </p>
+            <h1 className="text-3xl font-bold break-words">{title}</h1>
+          </div>
+          <div className="flex items-center space-x-2 shrink-0">
             <Link href={`/tasks/${id}/edit`}>
               <Button variant="outline" size="sm">
                 <span className="flex items-center">
@@ -81,39 +88,37 @@ export default async function TaskPage({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 mb-8">
+      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 mb-8 overflow-hidden">
         <div className="flex flex-wrap gap-3 mb-6">
           <Badge status={status as Status}>{getStatusLabel(status)}</Badge>
           <Badge priority={priority as Priority}>
             {getPriorityLabel(priority)}
           </Badge>
-          <div className="text-sm text-gray-500">
+          {/* <div className="text-sm text-gray-500">
             Created {formatRelativeTime(new Date(createdAt))}
           </div>
           {updatedAt !== createdAt && (
             <div className="text-sm text-gray-500">
               Updated {formatRelativeTime(new Date(updatedAt))}
             </div>
-          )}
+          )} */}
         </div>
 
-        {description ? (
-          <div className="prose dark:prose-invert max-w-none">
-            <p className="whitespace-pre-line">{description}</p>
-          </div>
+        {!isEmptyHtml(description) ? (
+          <RichText html={description} />
         ) : (
           <p className="text-gray-500 italic">No description provided.</p>
         )}
       </div>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6">
+      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 overflow-hidden">
         <h2 className="text-lg font-medium mb-2">Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium text-gray-500 mb-1">
               Assigned to
             </p>
-            <p>{user?.email}</p>
+            <p className="break-words">{user?.email}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500 mb-1">Status</p>

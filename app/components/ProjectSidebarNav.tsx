@@ -29,7 +29,7 @@ export default function ProjectSidebarNav({
           key={project.id}
           href={`/dashboard?project=${project.id}`}
           icon={<FolderIcon size={20} />}
-          label={project.title}
+          label={`${project.abbreviation} · ${project.title}`}
           isActive={selectedProjectId === String(project.id)}
         />
       ))}

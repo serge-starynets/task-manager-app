@@ -2,6 +2,7 @@ import { hash } from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
 import { tasks, projects, users } from '../db/schema';
+import { allocateTaskId } from '../lib/task-id';
 
 async function main() {
   console.log('Starting database seeding...');
@@ -51,6 +52,7 @@ async function main() {
     .insert(projects)
     .values({
       title: 'Platform Launch',
+      abbreviation: 'PLAT',
       description: 'Core work for the task manager launch',
       status: 'ongoing',
       userId: adminUserId,
@@ -61,6 +63,7 @@ async function main() {
     .insert(projects)
     .values({
       title: 'Personal Tasks',
+      abbreviation: 'PERS',
       description: 'Day-to-day work items',
       status: 'not_started',
       userId: memberUserId,
@@ -68,8 +71,10 @@ async function main() {
     .returning();
 
   console.log('Created demo projects:');
-  console.log(`- ${adminProject.title} (admin)`);
-  console.log(`- ${memberProject.title} (user)`);
+  console.log(`- ${adminProject.title} [${adminProject.abbreviation}] (admin)`);
+  console.log(
+    `- ${memberProject.title} [${memberProject.abbreviation}] (user)`,
+  );
 
   // Create demo tasks (one left orphaned intentionally)
   const demoTasks = [
@@ -121,7 +126,9 @@ async function main() {
   ];
 
   for (const task of demoTasks) {
+    const taskId = await allocateTaskId(task.projectId, task.userId);
     await db.insert(tasks).values({
+      taskId,
       title: task.title,
       description: task.description,
       priority: task.priority as 'low' | 'medium' | 'high' | 'critical',
@@ -135,6 +142,7 @@ async function main() {
       userId: task.userId,
       projectId: task.projectId,
     });
+    console.log(`  - ${taskId}: ${task.title}`);
   }
 
   console.log(`Created ${demoTasks.length} demo tasks`);

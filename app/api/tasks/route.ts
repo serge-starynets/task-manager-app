@@ -3,6 +3,8 @@ import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getCurrentUser, getProject, isAdmin } from '@/lib/dal';
+import { sanitizeRichText } from '@/lib/rich-text';
+import { allocateTaskId } from '@/lib/task-id';
 
 export async function GET() {
   try {
@@ -49,11 +51,14 @@ export async function POST(request: Request) {
       }
     }
 
+    const taskId = await allocateTaskId(projectId, user.id);
+
     const newTask = await db
       .insert(tasks)
       .values({
+        taskId,
         title: data.title,
-        description: data.description || null,
+        description: sanitizeRichText(data.description),
         status: data.status || 'backlog',
         priority: data.priority || 'medium',
         userId: user.id,

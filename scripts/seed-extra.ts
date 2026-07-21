@@ -2,6 +2,11 @@ import 'dotenv/config';
 import { eq } from 'drizzle-orm';
 import { db } from '../db';
 import { tasks, projects, users } from '../db/schema';
+import {
+  formatTaskId,
+  getNextTaskSequence,
+  ORPHAN_TASK_PREFIX,
+} from '../lib/task-id';
 
 const STATUSES = [
   'backlog',
@@ -125,14 +130,15 @@ function buildTask(
   index: number,
   userId: string,
   projectId: number | null,
-  prefix: string,
+  titlePrefix: string,
+  taskId: string,
 ) {
   const template = TASK_TEMPLATES[index % TASK_TEMPLATES.length];
-
   const now = new Date();
 
   return {
-    title: `${prefix}: ${template.title} #${index + 1}`,
+    taskId,
+    title: `${titlePrefix}: ${template.title} #${index + 1}`,
     description: template.description,
     status: pick(STATUSES),
     priority: pick(PRIORITIES),
@@ -164,6 +170,7 @@ async function main() {
   const projectDefs = [
     {
       title: 'Website Redesign',
+      abbreviation: 'WEB',
       description:
         'Refresh marketing pages, improve navigation, and modernize the visual system.',
       status: 'ongoing' as const,
@@ -171,6 +178,7 @@ async function main() {
     },
     {
       title: 'Mobile App MVP',
+      abbreviation: 'MOBILE',
       description:
         'Ship a first version of the mobile experience with core task workflows.',
       status: 'not_started' as const,
@@ -179,7 +187,6 @@ async function main() {
   ];
 
   const createdProjects = [];
-
   const now = new Date();
 
   for (const projectDef of projectDefs) {
@@ -187,6 +194,7 @@ async function main() {
       .insert(projects)
       .values({
         title: projectDef.title,
+        abbreviation: projectDef.abbreviation,
         description: projectDef.description,
         status: projectDef.status,
         userId: user.id,
@@ -196,21 +204,39 @@ async function main() {
       .returning();
 
     createdProjects.push({ ...project, taskPrefix: projectDef.taskPrefix });
-    console.log(`Created project: ${project.title} (id: ${project.id})`);
+    console.log(
+      `Created project: ${project.title} [${project.abbreviation}] (id: ${project.id})`,
+    );
   }
 
   const projectTasks = createdProjects.flatMap((project) =>
     Array.from({ length: 20 }, (_, index) =>
-      buildTask(index, user.id, project.id, project.taskPrefix),
+      buildTask(
+        index,
+        user.id,
+        project.id,
+        project.taskPrefix,
+        formatTaskId(project.abbreviation, index + 1),
+      ),
     ),
   );
 
+  const orphanSeq = await getNextTaskSequence(
+    null,
+    user.id,
+    ORPHAN_TASK_PREFIX,
+  );
   const orphanedTasks = Array.from({ length: 10 }, (_, index) =>
-    buildTask(index, user.id, null, 'Standalone'),
+    buildTask(
+      index,
+      user.id,
+      null,
+      'Standalone',
+      formatTaskId(ORPHAN_TASK_PREFIX, orphanSeq + index),
+    ),
   );
 
   const allTasks = [...projectTasks, ...orphanedTasks];
-
   await db.insert(tasks).values(allTasks);
 
   console.log(

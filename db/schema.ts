@@ -6,6 +6,8 @@ import {
   text,
   timestamp,
   pgEnum,
+  varchar,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 // Enums for task status, priority, project status, and user role
@@ -31,28 +33,47 @@ export const projectStatusEnum = pgEnum('project_status', [
 export const roleEnum = pgEnum('role', ['admin', 'user']);
 
 // Projects table
-export const projects = pgTable('projects', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  description: text('description'),
-  status: projectStatusEnum('status').default('not_started').notNull(),
-  userId: text('user_id').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const projects = pgTable(
+  'projects',
+  {
+    id: serial('id').primaryKey(),
+    title: text('title').notNull(),
+    /** Short unique key per user (A–Z only, max 8). Stored uppercase. */
+    abbreviation: varchar('abbreviation', { length: 8 }).notNull(),
+    /** Quill HTML (sanitized on write). Plain text still works for older rows. */
+    description: text('description'),
+    status: projectStatusEnum('status').default('not_started').notNull(),
+    userId: text('user_id').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('projects_user_id_abbreviation_uidx').on(
+      table.userId,
+      table.abbreviation,
+    ),
+  ],
+);
 
 // Tasks table
-export const tasks = pgTable('tasks', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  description: text('description'),
-  status: statusEnum('status').default('backlog').notNull(),
-  priority: priorityEnum('priority').default('medium').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  userId: text('user_id').notNull(),
-  projectId: integer('project_id').references(() => projects.id),
-});
+export const tasks = pgTable(
+  'tasks',
+  {
+    id: serial('id').primaryKey(),
+    /** Human-readable ID: {PROJECT_ABBR}-{n}, e.g. WEB-1. Unique globally. */
+    taskId: varchar('task_id', { length: 32 }).notNull(),
+    title: text('title').notNull(),
+    /** Quill HTML (sanitized on write). Plain text still works for older rows. */
+    description: text('description'),
+    status: statusEnum('status').default('backlog').notNull(),
+    priority: priorityEnum('priority').default('medium').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    userId: text('user_id').notNull(),
+    projectId: integer('project_id').references(() => projects.id),
+  },
+  (table) => [uniqueIndex('tasks_task_id_uidx').on(table.taskId)],
+);
 
 // Users table
 export const users = pgTable('users', {

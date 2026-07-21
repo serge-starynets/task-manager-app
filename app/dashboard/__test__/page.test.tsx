@@ -22,6 +22,7 @@ const mockUser = {
 const mockProject = {
   id: 1,
   title: 'Test Project',
+  abbreviation: 'TEST',
   description: 'A test project',
   status: 'ongoing' as const,
   userId: 'user1',
@@ -78,6 +79,7 @@ describe('DashboardPage', () => {
     const mockTasks = [
       {
         id: 1,
+        taskId: 'TEST-1',
         title: 'Test Task 1',
         description: 'Test description',
         status: 'todo' as Status,
@@ -96,6 +98,7 @@ describe('DashboardPage', () => {
       },
       {
         id: 2,
+        taskId: 'TEST-2',
         title: 'Test Task 2',
         description: null,
         status: 'in_progress' as Status,
@@ -201,6 +204,7 @@ describe('DashboardPage', () => {
     const orphaned = [
       {
         id: 99,
+        taskId: 'TASK-1',
         title: 'Orphaned Task',
         description: null,
         status: 'todo' as Status,

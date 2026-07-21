@@ -10,9 +10,9 @@ import {
   FormGroup,
   FormLabel,
   FormInput,
-  FormTextarea,
   FormSelect,
 } from './ui/Form';
+import RichTextEditor from './RichTextEditor';
 import {
   createTask,
   updateTask,
@@ -130,11 +130,10 @@ export default function TaskForm({
 
       <FormGroup>
         <FormLabel htmlFor="description">Description</FormLabel>
-        <FormTextarea
+        <RichTextEditor
           id="description"
           name="description"
           placeholder="Describe the task..."
-          rows={4}
           defaultValue={task?.description || ''}
           disabled={isPending}
           aria-describedby="description-error"

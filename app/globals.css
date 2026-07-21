@@ -68,3 +68,53 @@ body {
     background: rgba(255, 255, 255, 0.15);
   }
 }
+
+/* Quill (react-quill-new) */
+.rich-text-editor .ql-toolbar.ql-snow {
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  background: #f9fafb;
+}
+
+.dark .rich-text-editor .ql-toolbar.ql-snow {
+  border-bottom-color: #333;
+  background: #1a1a1a;
+}
+
+.rich-text-editor .ql-container.ql-snow {
+  border: none;
+  font-size: 0.875rem;
+  min-height: 160px;
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 160px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.rich-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.dark .rich-text-editor .ql-editor {
+  color: #f3f4f6;
+}
+
+.dark .rich-text-editor .ql-editor.ql-blank::before {
+  color: #6b7280;
+}
+
+.dark .rich-text-editor .ql-stroke {
+  stroke: #9ca3af;
+}
+
+.dark .rich-text-editor .ql-fill {
+  fill: #9ca3af;
+}
+
+.dark .rich-text-editor .ql-picker {
+  color: #d1d5db;
+}
