@@ -13,6 +13,7 @@
     "seed": "tsx scripts/seed.ts",
     "seed:extra": "tsx scripts/seed-extra.ts",
     "db:push": "drizzle-kit push",
+    "db:push:neon": "drizzle-kit push --config=drizzle.neon.config.ts",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
