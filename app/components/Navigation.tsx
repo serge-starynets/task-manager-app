@@ -18,11 +18,11 @@ export default async function Navigation() {
       </div>
       <div className="flex items-center justify-center md:justify-start mb-8 px-2">
         <Link
-          href="/"
+          href="/dashboard"
           className="text-xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
           <span className="hidden md:inline">Task Manager</span>
-          <span className="md:hidden">M</span>
+          <span className="md:hidden">TM</span>
         </Link>
       </div>
 

@@ -9,7 +9,6 @@ import {
 } from '@/lib/dal';
 import { TASK_STATUS, TASK_PRIORITY } from '@/db/schema';
 import { Status, Priority } from '@/lib/types';
-import { redirect } from 'next/navigation';
 
 const mockUser = {
   id: 'user1',
@@ -63,9 +62,17 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
-  redirect: vi.fn(() => {
-    throw new Error('NEXT_REDIRECT');
+  notFound: vi.fn(() => {
+    throw new Error('NEXT_NOT_FOUND');
   }),
+}));
+
+vi.mock('@/app/components/ThemeToggler', () => ({
+  default: () => <button type="button">Theme</button>,
+}));
+
+vi.mock('@/app/components/SignOutButton', () => ({
+  default: () => <button type="button">Sign Out</button>,
 }));
 
 describe('DashboardPage', () => {
@@ -137,7 +144,7 @@ describe('DashboardPage', () => {
     expect(screen.getAllByText('2 days ago')).toHaveLength(4);
   });
 
-  it('renders empty project state when user has no projects', async () => {
+  it('renders empty project state on home when user has no projects', async () => {
     vi.mocked(getProjects).mockResolvedValue([]);
 
     const Component = await DashboardPage({
@@ -145,13 +152,42 @@ describe('DashboardPage', () => {
     });
     render(Component);
 
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('No projects yet')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Create a project to organize tasks, or add a task without a project from the sidebar.',
-      ),
+      screen.getByText('Create a project to organize your tasks.'),
     ).toBeInTheDocument();
     expect(screen.getByText('Create Project')).toBeInTheDocument();
+    expect(screen.getByText('user1@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Sign Out')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
+  });
+
+  it('renders project list on home without redirecting', async () => {
+    const secondProject = {
+      ...mockProject,
+      id: 2,
+      title: 'Second Project',
+      abbreviation: 'SEC',
+    };
+    vi.mocked(getProjects).mockResolvedValue([mockProject, secondProject]);
+
+    const Component = await DashboardPage({
+      searchParams: Promise.resolve({}),
+    });
+    render(Component);
+
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Test Project')).toBeInTheDocument();
+    expect(screen.getByText('Second Project')).toBeInTheDocument();
+    expect(screen.getByText('TEST')).toBeInTheDocument();
+    expect(screen.getByText('SEC')).toBeInTheDocument();
+
+    const links = screen.getAllByTestId('next-link');
+    const projectHrefs = links.map((el) => el.getAttribute('href'));
+    expect(projectHrefs).toContain('/dashboard?project=1');
+    expect(projectHrefs).toContain('/dashboard?project=2');
+    expect(getTasksForProject).not.toHaveBeenCalled();
   });
 
   it('renders the empty tasks state when project has no tasks', async () => {
@@ -188,19 +224,17 @@ describe('DashboardPage', () => {
     expect(linkElement).toHaveAttribute('href', '/tasks/new?project=1');
   });
 
-  it('redirects to first project when project param is missing', async () => {
+  it('calls notFound when project param is invalid', async () => {
     vi.mocked(getProjects).mockResolvedValue([mockProject]);
 
     await expect(
       DashboardPage({
-        searchParams: Promise.resolve({}),
+        searchParams: Promise.resolve({ project: '999' }),
       }),
-    ).rejects.toThrow('NEXT_REDIRECT');
-
-    expect(redirect).toHaveBeenCalledWith('/dashboard?project=1');
+    ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 
-  it('renders orphaned tasks section when present', async () => {
+  it('renders orphaned tasks section when present on project view', async () => {
     const orphaned = [
       {
         id: 99,

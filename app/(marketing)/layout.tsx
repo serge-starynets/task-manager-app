@@ -23,12 +23,12 @@ export default async function MarketingLayout({
               >
                 Features
               </Link>
-              <Link
+              {/* <Link
                 href="/pricing"
                 className="text-sm font-medium hover:text-purple-600"
               >
                 Pricing
-              </Link>
+              </Link> */}
               <Link
                 href="/faq"
                 className="text-sm font-medium hover:text-purple-600"
