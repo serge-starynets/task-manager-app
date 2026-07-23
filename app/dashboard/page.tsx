@@ -8,7 +8,7 @@ import { stripHtml } from '@/lib/rich-text';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import Button from '../components/ui/Button';
-import { PlusIcon } from 'lucide-react';
+import { Edit2Icon, PlusIcon } from 'lucide-react';
 import TaskTable from '../components/TaskTable';
 import { PROJECT_STATUS } from '@/db/schema';
 
@@ -85,8 +85,8 @@ export default async function DashboardPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
+      <div className="flex items-start justify-between gap-4 mb-8">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold">
             <span className="text-gray-500 dark:text-gray-400 font-semibold mr-2">
               {selectedProject.abbreviation}
@@ -102,6 +102,17 @@ export default async function DashboardPage({
               : ''}
           </p>
         </div>
+        <Link
+          href={`/projects/${selectedProject.id}/edit`}
+          className="shrink-0"
+        >
+          <Button variant="outline" size="sm">
+            <span className="flex items-center">
+              <Edit2Icon size={16} className="mr-1" />
+              Edit
+            </span>
+          </Button>
+        </Link>
       </div>
 
       <section className="mb-10">

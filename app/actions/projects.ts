@@ -1,9 +1,14 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { projects } from '@/db/schema';
-import { countUserProjects, getCurrentUser } from '@/lib/dal';
+import {
+  countUserProjects,
+  getAccessibleProject,
+  getCurrentUser,
+} from '@/lib/dal';
 import {
   isAbbreviationTaken,
   isUniqueViolation,
@@ -17,7 +22,7 @@ const MAX_PROJECTS_PER_USER = 10;
 const ProjectSchema = z.object({
   title: z
     .string()
-    .min(3, 'Title must be at least 3 characters')
+    .min(2, 'Title must be at least 2 characters')
     .max(100, 'Title must be less than 100 characters'),
   abbreviation: z
     .string()
@@ -90,7 +95,9 @@ export async function createProject(
         success: false,
         message: 'Validation failed',
         errors: {
-          abbreviation: ['This abbreviation is already used by another project'],
+          abbreviation: [
+            'This abbreviation is already used by another project',
+          ],
         },
       };
     }
@@ -125,7 +132,9 @@ export async function createProject(
         success: false,
         message: 'Validation failed',
         errors: {
-          abbreviation: ['This abbreviation is already used by another project'],
+          abbreviation: [
+            'This abbreviation is already used by another project',
+          ],
         },
       };
     }
@@ -134,6 +143,80 @@ export async function createProject(
       success: false,
       message: 'An error occurred while creating the project',
       error: 'Failed to create project',
+    };
+  }
+}
+
+export async function updateProject(
+  id: number,
+  data: Partial<ProjectData>,
+): Promise<ActionResponse> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return {
+        success: false,
+        message: 'Unauthorized access',
+        error: 'Unauthorized',
+      };
+    }
+
+    const project = await getAccessibleProject(id);
+    if (!project) {
+      return {
+        success: false,
+        message: 'You do not have permission to update this project',
+        error: 'Forbidden',
+      };
+    }
+
+    const UpdateProjectSchema = ProjectSchema.omit({
+      abbreviation: true,
+    }).partial();
+    const validationResult = UpdateProjectSchema.safeParse(data);
+
+    if (!validationResult.success) {
+      return {
+        success: false,
+        message: 'Validation failed',
+        errors: validationResult.error.flatten().fieldErrors,
+      };
+    }
+
+    const validatedData = validationResult.data;
+    const updateData: Record<string, unknown> = {
+      updatedAt: new Date(),
+    };
+
+    if (validatedData.title !== undefined) {
+      updateData.title = validatedData.title;
+    }
+
+    if (validatedData.description !== undefined) {
+      updateData.description = sanitizeRichText(validatedData.description);
+    }
+
+    if (validatedData.status !== undefined) {
+      updateData.status = validatedData.status;
+    }
+
+    await db.update(projects).set(updateData).where(eq(projects.id, id));
+
+    revalidateTag('projects');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      message: 'Project updated successfully',
+      projectId: id,
+    };
+  } catch (error) {
+    console.error('Error updating project:', error);
+
+    return {
+      success: false,
+      message: 'An error occurred while updating the project',
+      error: 'Failed to update project',
     };
   }
 }

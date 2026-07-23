@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { PROJECT_STATUS } from '@/db/schema';
+import { Project, PROJECT_STATUS } from '@/db/schema';
 import Button from './ui/Button';
 import {
   Form,
@@ -14,7 +14,16 @@ import {
   FormDescription,
 } from './ui/Form';
 import RichTextEditor from './RichTextEditor';
-import { createProject, type ActionResponse } from '@/app/actions/projects';
+import {
+  createProject,
+  updateProject,
+  type ActionResponse,
+} from '@/app/actions/projects';
+
+interface ProjectFormProps {
+  project?: Project;
+  isEditing?: boolean;
+}
 
 const initialState: ActionResponse = {
   success: false,
@@ -22,33 +31,51 @@ const initialState: ActionResponse = {
   errors: undefined,
 };
 
-export default function ProjectForm() {
+export default function ProjectForm({
+  project,
+  isEditing = false,
+}: ProjectFormProps) {
   const router = useRouter();
 
   const [state, formAction, isPending] = useActionState<
     ActionResponse,
     FormData
   >(async (_prevState: ActionResponse, formData: FormData) => {
-    const data = {
-      title: formData.get('title') as string,
-      abbreviation: formData.get('abbreviation') as string,
-      description: formData.get('description') as string,
-      status: formData.get('status') as 'not_started' | 'ongoing' | 'completed',
-    };
-
     try {
-      const result = await createProject(data);
+      const result = isEditing
+        ? await updateProject(Number(project!.id), {
+            title: formData.get('title') as string,
+            description: formData.get('description') as string,
+            status: formData.get('status') as
+              | 'not_started'
+              | 'ongoing'
+              | 'completed',
+          })
+        : await createProject({
+            title: formData.get('title') as string,
+            abbreviation: formData.get('abbreviation') as string,
+            description: formData.get('description') as string,
+            status: formData.get('status') as
+              | 'not_started'
+              | 'ongoing'
+              | 'completed',
+          });
 
-      if (result.success && result.projectId) {
+      if (result.success) {
         toast.success(result.message);
-        router.push(`/dashboard?project=${result.projectId}`);
+        const projectId = result.projectId ?? project?.id;
+        router.push(
+          projectId ? `/dashboard?project=${projectId}` : '/dashboard',
+        );
       } else if (!result.success) {
         toast.error(result.message);
       }
 
       return result;
     } catch (err) {
-      toast.error('Failed to create project');
+      toast.error(
+        isEditing ? 'Failed to update project' : 'Failed to create project',
+      );
       return {
         success: false,
         message: (err as Error).message || 'An error occurred',
@@ -72,6 +99,7 @@ export default function ProjectForm() {
           id="title"
           name="title"
           placeholder="Project title"
+          defaultValue={project?.title || ''}
           required
           minLength={3}
           maxLength={100}
@@ -90,14 +118,16 @@ export default function ProjectForm() {
         <FormLabel htmlFor="abbreviation">Abbreviation</FormLabel>
         <FormInput
           id="abbreviation"
-          name="abbreviation"
+          name={isEditing ? undefined : 'abbreviation'}
           placeholder="e.g. WEB"
-          required
+          defaultValue={project?.abbreviation || ''}
+          required={!isEditing}
           minLength={1}
           maxLength={8}
           pattern="[A-Za-z]{1,8}"
           title="1–8 latin letters only"
-          disabled={isPending}
+          disabled={isPending || isEditing}
+          readOnly={isEditing}
           autoCapitalize="characters"
           spellCheck={false}
           aria-describedby="abbreviation-help abbreviation-error"
@@ -108,7 +138,9 @@ export default function ProjectForm() {
           }
         />
         <FormDescription id="abbreviation-help">
-          1–8 latin letters. Must be unique among your projects.
+          {isEditing
+            ? 'Abbreviation cannot be changed after the project is created.'
+            : '1–8 latin letters. Must be unique among your projects.'}
         </FormDescription>
         {state?.errors?.abbreviation && (
           <p id="abbreviation-error" className="text-sm text-red-500">
@@ -123,6 +155,7 @@ export default function ProjectForm() {
           id="description"
           name="description"
           placeholder="Describe the project..."
+          defaultValue={project?.description || ''}
           disabled={isPending}
           aria-describedby="description-error"
           className={state?.errors?.description ? 'border-red-500' : ''}
@@ -139,7 +172,7 @@ export default function ProjectForm() {
         <FormSelect
           id="status"
           name="status"
-          defaultValue="not_started"
+          defaultValue={project?.status || 'not_started'}
           options={statusOptions}
           disabled={isPending}
           required
@@ -163,7 +196,7 @@ export default function ProjectForm() {
           Cancel
         </Button>
         <Button type="submit" isLoading={isPending}>
-          Create Project
+          {isEditing ? 'Update Project' : 'Create Project'}
         </Button>
       </div>
     </Form>

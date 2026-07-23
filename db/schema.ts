@@ -75,6 +75,24 @@ export const tasks = pgTable(
   (table) => [uniqueIndex('tasks_task_id_uidx').on(table.taskId)],
 );
 
+/** Undirected many-to-many links between tasks. Always stored with taskIdA < taskIdB. */
+export const taskRelations = pgTable(
+  'task_relations',
+  {
+    id: serial('id').primaryKey(),
+    taskIdA: integer('task_id_a')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    taskIdB: integer('task_id_b')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('task_relations_pair_uidx').on(table.taskIdA, table.taskIdB),
+  ],
+);
+
 // Users table
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -93,7 +111,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   tasks: many(tasks),
 }));
 
-export const tasksRelations = relations(tasks, ({ one }) => ({
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
   user: one(users, {
     fields: [tasks.userId],
     references: [users.id],
@@ -101,6 +119,21 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
   project: one(projects, {
     fields: [tasks.projectId],
     references: [projects.id],
+  }),
+  relationsAsA: many(taskRelations, { relationName: 'taskA' }),
+  relationsAsB: many(taskRelations, { relationName: 'taskB' }),
+}));
+
+export const taskRelationsRelations = relations(taskRelations, ({ one }) => ({
+  taskA: one(tasks, {
+    fields: [taskRelations.taskIdA],
+    references: [tasks.id],
+    relationName: 'taskA',
+  }),
+  taskB: one(tasks, {
+    fields: [taskRelations.taskIdB],
+    references: [tasks.id],
+    relationName: 'taskB',
   }),
 }));
 
@@ -113,6 +146,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 export type Task = InferSelectModel<typeof tasks>;
 export type Project = InferSelectModel<typeof projects>;
 export type User = InferSelectModel<typeof users>;
+export type TaskRelation = InferSelectModel<typeof taskRelations>;
+export type RelatedTaskSummary = Pick<Task, 'id' | 'taskId' | 'title'>;
 
 // Status and priority labels for display
 export const TASK_STATUS = {

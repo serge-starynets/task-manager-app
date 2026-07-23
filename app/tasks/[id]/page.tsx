@@ -1,4 +1,4 @@
-import { getAccessibleTask } from '@/lib/dal';
+import { getAccessibleTask, getRelatedTasks } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 import { Priority, Status } from '@/lib/types';
@@ -16,11 +16,14 @@ export default async function TaskPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const task = await getAccessibleTask(parseInt(id));
+  const taskIdNum = parseInt(id);
+  const task = await getAccessibleTask(taskIdNum);
 
   if (!task) {
     notFound();
   }
+
+  const relatedTasks = await getRelatedTasks(taskIdNum);
 
   const { title, description, status, priority, createdAt, updatedAt, user, taskId } =
     task;
@@ -83,7 +86,7 @@ export default async function TaskPage({
                 </span>
               </Button>
             </Link>
-            <DeleteTaskButton id={parseInt(id)} projectId={task.projectId} />
+            <DeleteTaskButton id={taskIdNum} projectId={task.projectId} />
           </div>
         </div>
       </div>
@@ -94,14 +97,6 @@ export default async function TaskPage({
           <Badge priority={priority as Priority}>
             {getPriorityLabel(priority)}
           </Badge>
-          {/* <div className="text-sm text-gray-500">
-            Created {formatRelativeTime(new Date(createdAt))}
-          </div>
-          {updatedAt !== createdAt && (
-            <div className="text-sm text-gray-500">
-              Updated {formatRelativeTime(new Date(updatedAt))}
-            </div>
-          )} */}
         </div>
 
         {!isEmptyHtml(description) ? (
@@ -111,7 +106,7 @@ export default async function TaskPage({
         )}
       </div>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 overflow-hidden">
+      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 mb-8 overflow-hidden">
         <h2 className="text-lg font-medium mb-2">Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="min-w-0">
@@ -145,6 +140,32 @@ export default async function TaskPage({
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 overflow-hidden">
+        <h2 className="text-lg font-medium mb-2">Related tasks</h2>
+        {relatedTasks.length > 0 ? (
+          <ul className="space-y-2">
+            {relatedTasks.map((related) => (
+              <li key={related.id}>
+                <Link
+                  href={`/tasks/${related.id}`}
+                  className="text-sm text-gray-800 hover:underline dark:text-gray-200"
+                >
+                  <span className="font-mono text-gray-500 dark:text-gray-400">
+                    {related.taskId}
+                  </span>
+                  <span className="mx-2 text-gray-300 dark:text-gray-600">
+                    ·
+                  </span>
+                  <span className="break-words">{related.title}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500 italic">No related tasks.</p>
+        )}
       </div>
     </div>
   );

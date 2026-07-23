@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Task, TASK_STATUS, TASK_PRIORITY } from '@/db/schema';
+import { Task, TASK_STATUS, TASK_PRIORITY, type RelatedTaskSummary } from '@/db/schema';
 import Button from './ui/Button';
 import {
   Form,
@@ -13,6 +13,7 @@ import {
   FormSelect,
 } from './ui/Form';
 import RichTextEditor from './RichTextEditor';
+import RelatedTasksPicker from './RelatedTasksPicker';
 import {
   createTask,
   updateTask,
@@ -24,6 +25,7 @@ interface TaskFormProps {
   userId: string;
   projectId?: number;
   isEditing?: boolean;
+  relatedTasks?: RelatedTaskSummary[];
 }
 
 const initialState: ActionResponse = {
@@ -37,6 +39,7 @@ export default function TaskForm({
   userId,
   projectId,
   isEditing = false,
+  relatedTasks = [],
 }: TaskFormProps) {
   const router = useRouter();
 
@@ -185,6 +188,10 @@ export default function TaskForm({
           )}
         </FormGroup>
       </div>
+
+      {isEditing && task && (
+        <RelatedTasksPicker taskId={task.id} initialRelated={relatedTasks} />
+      )}
 
       {state?.errors?.projectId && (
         <p className="text-sm text-red-500 mt-2">{state.errors.projectId[0]}</p>
