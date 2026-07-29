@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { getSession } from './auth';
-import { and, eq, ilike, inArray, isNull, notInArray, or } from 'drizzle-orm';
+import { and, asc, eq, ilike, inArray, isNull, notInArray, or } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
@@ -9,8 +9,10 @@ import {
   projects,
   users,
   taskRelations,
+  taskAttachments,
   User,
   Task,
+  TaskAttachment,
   RelatedTaskSummary,
 } from '@/db/schema';
 
@@ -217,6 +219,21 @@ export async function canManageTask(taskId: number) {
   if (!task) return false;
 
   return isAdmin(user) || task.userId === user.id;
+}
+
+export async function getTaskAttachments(
+  taskId: number,
+): Promise<TaskAttachment[]> {
+  try {
+    return await db
+      .select()
+      .from(taskAttachments)
+      .where(eq(taskAttachments.taskId, taskId))
+      .orderBy(asc(taskAttachments.createdAt));
+  } catch (error) {
+    console.error('Error fetching task attachments:', taskId, error);
+    return [];
+  }
 }
 
 /** Ordered pair for undirected relations: always taskIdA < taskIdB. */

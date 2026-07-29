@@ -1,4 +1,8 @@
-import { getAccessibleTask, getRelatedTasks } from '@/lib/dal';
+import {
+  getAccessibleTask,
+  getRelatedTasks,
+  getTaskAttachments,
+} from '@/lib/dal';
 import TaskForm from '@/app/components/TaskForm';
 import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -18,7 +22,10 @@ export default async function EditTaskPage({
     notFound();
   }
 
-  const relatedTasks = await getRelatedTasks(taskId);
+  const [relatedTasks, attachments] = await Promise.all([
+    getRelatedTasks(taskId),
+    getTaskAttachments(taskId),
+  ]);
 
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8">
@@ -38,6 +45,7 @@ export default async function EditTaskPage({
           task={task}
           isEditing
           relatedTasks={relatedTasks}
+          initialAttachments={attachments}
         />
       </div>
     </div>

@@ -1,4 +1,8 @@
-import { getAccessibleTask, getRelatedTasks } from '@/lib/dal';
+import {
+  getAccessibleTask,
+  getRelatedTasks,
+  getTaskAttachments,
+} from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 import { Priority, Status } from '@/lib/types';
@@ -7,6 +11,7 @@ import { notFound } from 'next/navigation';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
 import RichText from '@/app/components/RichText';
+import TaskAttachmentsList from '@/app/components/TaskAttachmentsList';
 import { ArrowLeftIcon, Edit2Icon } from 'lucide-react';
 import DeleteTaskButton from '../../components/DeleteTaskButton';
 
@@ -23,7 +28,10 @@ export default async function TaskPage({
     notFound();
   }
 
-  const relatedTasks = await getRelatedTasks(taskIdNum);
+  const [relatedTasks, attachments] = await Promise.all([
+    getRelatedTasks(taskIdNum),
+    getTaskAttachments(taskIdNum),
+  ]);
 
   const { title, description, status, priority, createdAt, updatedAt, user, taskId } =
     task;
@@ -142,7 +150,7 @@ export default async function TaskPage({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 overflow-hidden">
+      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 mb-8 overflow-hidden">
         <h2 className="text-lg font-medium mb-2">Related tasks</h2>
         {relatedTasks.length > 0 ? (
           <ul className="space-y-2">
@@ -167,6 +175,8 @@ export default async function TaskPage({
           <p className="text-gray-500 italic">No related tasks.</p>
         )}
       </div>
+
+      <TaskAttachmentsList attachments={attachments} />
     </div>
   );
 }

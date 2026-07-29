@@ -93,6 +93,21 @@ export const taskRelations = pgTable(
   ],
 );
 
+/** Files attached to a task (bytes live in Vercel Blob; metadata here). */
+export const taskAttachments = pgTable('task_attachments', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id')
+    .notNull()
+    .references(() => tasks.id, { onDelete: 'cascade' }),
+  fileName: text('file_name').notNull(),
+  contentType: text('content_type').notNull(),
+  sizeBytes: integer('size_bytes').notNull(),
+  url: text('url').notNull(),
+  pathname: text('pathname').notNull(),
+  uploadedBy: text('uploaded_by').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Users table
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -122,6 +137,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   }),
   relationsAsA: many(taskRelations, { relationName: 'taskA' }),
   relationsAsB: many(taskRelations, { relationName: 'taskB' }),
+  attachments: many(taskAttachments),
 }));
 
 export const taskRelationsRelations = relations(taskRelations, ({ one }) => ({
@@ -137,6 +153,16 @@ export const taskRelationsRelations = relations(taskRelations, ({ one }) => ({
   }),
 }));
 
+export const taskAttachmentsRelations = relations(
+  taskAttachments,
+  ({ one }) => ({
+    task: one(tasks, {
+      fields: [taskAttachments.taskId],
+      references: [tasks.id],
+    }),
+  }),
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   tasks: many(tasks),
   projects: many(projects),
@@ -147,6 +173,7 @@ export type Task = InferSelectModel<typeof tasks>;
 export type Project = InferSelectModel<typeof projects>;
 export type User = InferSelectModel<typeof users>;
 export type TaskRelation = InferSelectModel<typeof taskRelations>;
+export type TaskAttachment = InferSelectModel<typeof taskAttachments>;
 export type RelatedTaskSummary = Pick<Task, 'id' | 'taskId' | 'title'>;
 
 // Status and priority labels for display

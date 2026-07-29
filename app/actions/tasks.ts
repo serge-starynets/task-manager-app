@@ -7,6 +7,11 @@ import { eq } from 'drizzle-orm';
 import { canManageTask, getCurrentUser, getProject, isAdmin } from '@/lib/dal';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { allocateTaskId } from '@/lib/task-id';
+import {
+  deleteBlobsForTask,
+  linkPendingAttachments,
+} from '@/app/actions/attachments';
+import { parsePendingAttachments } from '@/lib/attachments';
 import { z } from 'zod';
 
 const TaskSchema = z.object({
@@ -35,15 +40,23 @@ const TaskSchema = z.object({
 
 export type TaskData = z.infer<typeof TaskSchema>;
 
+export type CreateTaskInput = TaskData & {
+  pendingAttachmentsJson?: string | null;
+  uploadSessionId?: string | null;
+};
+
 export type ActionResponse = {
   success: boolean;
   message: string;
   errors?: Record<string, string[]>;
   error?: string;
   projectId?: number | null;
+  taskId?: number;
 };
 
-export async function createTask(data: TaskData): Promise<ActionResponse> {
+export async function createTask(
+  data: CreateTaskInput,
+): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -90,16 +103,29 @@ export async function createTask(data: TaskData): Promise<ActionResponse> {
 
     const taskId = await allocateTaskId(projectId, user.id);
 
-    await db.insert(tasks).values({
-      taskId,
-      title: validatedData.title,
-      description: sanitizeRichText(validatedData.description),
-      status: validatedData.status,
-      priority: validatedData.priority,
-      userId: validatedData.userId,
-      projectId,
-      createdAt: validatedData.createdAt,
-    });
+    const [created] = await db
+      .insert(tasks)
+      .values({
+        taskId,
+        title: validatedData.title,
+        description: sanitizeRichText(validatedData.description),
+        status: validatedData.status,
+        priority: validatedData.priority,
+        userId: validatedData.userId,
+        projectId,
+        createdAt: validatedData.createdAt,
+      })
+      .returning();
+
+    if (created && data.uploadSessionId && data.pendingAttachmentsJson) {
+      const pending = parsePendingAttachments(
+        data.pendingAttachmentsJson,
+        user.id,
+        data.uploadSessionId,
+      );
+      await linkPendingAttachments(created.id, user.id, pending);
+    }
+
     revalidateTag('tasks');
     revalidatePath('/dashboard');
     revalidatePath('/tasks', 'layout');
@@ -108,6 +134,7 @@ export async function createTask(data: TaskData): Promise<ActionResponse> {
       success: true,
       message: 'Task created successfully',
       projectId,
+      taskId: created?.id,
     };
   } catch (error) {
     console.error('Error creating task:', error);
@@ -209,6 +236,7 @@ export async function deleteTask(id: number) {
       };
     }
 
+    await deleteBlobsForTask(id);
     await db.delete(tasks).where(eq(tasks.id, id));
 
     revalidateTag('tasks');

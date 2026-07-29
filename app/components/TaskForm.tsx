@@ -1,9 +1,16 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useCallback, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Task, TASK_STATUS, TASK_PRIORITY, type RelatedTaskSummary } from '@/db/schema';
+import { nanoid } from 'nanoid';
+import {
+  Task,
+  TASK_STATUS,
+  TASK_PRIORITY,
+  type RelatedTaskSummary,
+  type TaskAttachment,
+} from '@/db/schema';
 import Button from './ui/Button';
 import {
   Form,
@@ -14,11 +21,18 @@ import {
 } from './ui/Form';
 import RichTextEditor from './RichTextEditor';
 import RelatedTasksPicker from './RelatedTasksPicker';
+import TaskAttachmentsField, {
+  registerUploadedAttachment,
+} from './TaskAttachmentsField';
 import {
   createTask,
   updateTask,
   type ActionResponse,
 } from '@/app/actions/tasks';
+import {
+  stripAttachmentUrlsFromHtml,
+  type PendingAttachment,
+} from '@/lib/attachments';
 
 interface TaskFormProps {
   task?: Task;
@@ -26,6 +40,7 @@ interface TaskFormProps {
   projectId?: number;
   isEditing?: boolean;
   relatedTasks?: RelatedTaskSummary[];
+  initialAttachments?: TaskAttachment[];
 }
 
 const initialState: ActionResponse = {
@@ -40,8 +55,60 @@ export default function TaskForm({
   projectId,
   isEditing = false,
   relatedTasks = [],
+  initialAttachments = [],
 }: TaskFormProps) {
   const router = useRouter();
+  const uploadSessionId = useMemo(
+    () => (isEditing ? undefined : nanoid()),
+    [isEditing],
+  );
+
+  const [description, setDescription] = useState(task?.description ?? '');
+  const [pending, setPending] = useState<PendingAttachment[]>([]);
+  const [savedAttachments, setSavedAttachments] =
+    useState<TaskAttachment[]>(initialAttachments);
+
+  const uploadContext = useMemo(
+    () => ({
+      userId,
+      taskId: isEditing ? task?.id : undefined,
+      uploadSessionId,
+    }),
+    [userId, isEditing, task?.id, uploadSessionId],
+  );
+
+  const handleRemoveUrls = useCallback((urls: string[]) => {
+    setDescription((prev) => stripAttachmentUrlsFromHtml(prev, urls));
+  }, []);
+
+  const handleAttachmentUploaded = useCallback(
+    async (uploaded: PendingAttachment) => {
+      if (isEditing && task?.id) {
+        const result = await registerUploadedAttachment({
+          uploaded,
+          taskId: task.id,
+          pending: [],
+          onPendingChange: () => {},
+          onSaved: (attachment) => {
+            setSavedAttachments((prev) => {
+              if (prev.some((a) => a.id === attachment.id)) return prev;
+              return [...prev, attachment];
+            });
+          },
+        });
+        if (!result) {
+          throw new Error('Failed to register attachment');
+        }
+        return;
+      }
+
+      setPending((prev) => {
+        if (prev.some((p) => p.pathname === uploaded.pathname)) return prev;
+        return [...prev, uploaded];
+      });
+    },
+    [isEditing, task?.id],
+  );
 
   const [state, formAction, isPending] = useActionState<
     ActionResponse,
@@ -69,17 +136,27 @@ export default function TaskForm({
     try {
       const result = isEditing
         ? await updateTask(Number(task!.id), data)
-        : await createTask(data);
+        : await createTask({
+            ...data,
+            pendingAttachmentsJson: formData.get(
+              'pendingAttachments',
+            ) as string,
+            uploadSessionId: formData.get('uploadSessionId') as string,
+          });
 
       if (result.success) {
         toast.success(result.message);
         if (!isEditing) {
-          const redirectProjectId = result.projectId ?? projectId;
-          router.push(
-            redirectProjectId
-              ? `/dashboard?project=${redirectProjectId}`
-              : '/dashboard',
-          );
+          if (result.taskId) {
+            router.push(`/tasks/${result.taskId}`);
+          } else {
+            const redirectProjectId = result.projectId ?? projectId;
+            router.push(
+              redirectProjectId
+                ? `/dashboard?project=${redirectProjectId}`
+                : '/dashboard',
+            );
+          }
         } else {
           router.push(`/tasks/${task!.id}`);
         }
@@ -110,6 +187,17 @@ export default function TaskForm({
 
   return (
     <Form action={formAction}>
+      {!isEditing && uploadSessionId && (
+        <>
+          <input type="hidden" name="uploadSessionId" value={uploadSessionId} />
+          <input
+            type="hidden"
+            name="pendingAttachments"
+            value={JSON.stringify(pending)}
+          />
+        </>
+      )}
+
       <FormGroup>
         <FormLabel htmlFor="title">Title</FormLabel>
         <FormInput
@@ -137,8 +225,11 @@ export default function TaskForm({
           id="description"
           name="description"
           placeholder="Describe the task..."
-          defaultValue={task?.description || ''}
+          value={description}
+          onChange={setDescription}
           disabled={isPending}
+          uploadContext={uploadContext}
+          onAttachmentUploaded={handleAttachmentUploaded}
           aria-describedby="description-error"
           className={state?.errors?.description ? 'border-red-500' : ''}
         />
@@ -192,6 +283,18 @@ export default function TaskForm({
       {isEditing && task && (
         <RelatedTasksPicker taskId={task.id} initialRelated={relatedTasks} />
       )}
+
+      <TaskAttachmentsField
+        userId={userId}
+        taskId={isEditing ? task?.id : undefined}
+        uploadSessionId={uploadSessionId}
+        saved={savedAttachments}
+        pending={pending}
+        onPendingChange={setPending}
+        onSavedChange={setSavedAttachments}
+        onRemoveUrls={handleRemoveUrls}
+        disabled={isPending}
+      />
 
       {state?.errors?.projectId && (
         <p className="text-sm text-red-500 mt-2">{state.errors.projectId[0]}</p>
