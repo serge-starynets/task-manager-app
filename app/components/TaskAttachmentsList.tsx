@@ -27,9 +27,9 @@ export default function TaskAttachmentsList({
   attachments: TaskAttachment[];
 }) {
   return (
-    <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 overflow-hidden">
-      <h2 className="text-lg font-medium mb-2 flex items-center gap-2">
-        <PaperclipIcon size={18} className="text-gray-500" />
+    <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 overflow-hidden">
+      <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
+        <PaperclipIcon size={18} className="text-gray-400" />
         Attachments
       </h2>
       {attachments.length > 0 ? (

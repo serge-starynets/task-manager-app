@@ -12,7 +12,7 @@ import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
 import RichText from '@/app/components/RichText';
 import TaskAttachmentsList from '@/app/components/TaskAttachmentsList';
-import { ArrowLeftIcon, Edit2Icon } from 'lucide-react';
+import { ArrowLeftIcon, Edit2Icon, Link2Icon, UserIcon } from 'lucide-react';
 import DeleteTaskButton from '../../components/DeleteTaskButton';
 
 export default async function TaskPage({
@@ -99,7 +99,7 @@ export default async function TaskPage({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 mb-8 overflow-hidden">
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
         <div className="flex flex-wrap gap-3 mb-6">
           <Badge status={status as Status}>{getStatusLabel(status)}</Badge>
           <Badge priority={priority as Priority}>
@@ -114,8 +114,11 @@ export default async function TaskPage({
         )}
       </div>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 mb-8 overflow-hidden">
-        <h2 className="text-lg font-medium mb-2">Details</h2>
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+        <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
+          <UserIcon size={18} className="text-gray-400" />
+          Details
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium text-gray-500 mb-1">
@@ -150,8 +153,11 @@ export default async function TaskPage({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6 mb-8 overflow-hidden">
-        <h2 className="text-lg font-medium mb-2">Related tasks</h2>
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+        <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
+          <Link2Icon size={18} className="text-gray-400" />
+          Related tasks
+        </h2>
         {relatedTasks.length > 0 ? (
           <ul className="space-y-2">
             {relatedTasks.map((related) => (

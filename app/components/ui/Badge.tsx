@@ -25,14 +25,23 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const statusStyles: Record<StatusType, string> = {
   backlog:
-    'bg-gray-100 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400',
-  todo: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200',
+    'bg-gray-100 text-gray-600 dark:bg-dark-elevated dark:text-gray-400 ring-1 ring-inset ring-gray-200/80 dark:ring-dark-border-subtle',
+  todo: 'bg-zinc-200/80 text-zinc-700 dark:bg-zinc-700/50 dark:text-zinc-200 ring-1 ring-inset ring-zinc-300/60 dark:ring-zinc-600/40',
   in_progress:
-    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  done: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+    'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-800/50',
+  done: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-800/50',
+  rejected: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 ring-1 ring-inset ring-red-200/70 dark:ring-red-800/50',
   closed:
-    'bg-gray-700 text-gray-100 dark:bg-gray-900 dark:text-gray-300',
+    'bg-gray-700 text-gray-100 dark:bg-gray-900/80 dark:text-gray-300 ring-1 ring-inset ring-gray-600/40',
+};
+
+const statusDot: Record<StatusType, string> = {
+  backlog: 'bg-gray-400',
+  todo: 'bg-zinc-500',
+  in_progress: 'bg-blue-500',
+  done: 'bg-emerald-500',
+  rejected: 'bg-red-500',
+  closed: 'bg-gray-400',
 };
 
 export default function Badge({
@@ -64,15 +73,16 @@ export default function Badge({
 
   const variantStyles = {
     default:
-      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-    secondary: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+      'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 ring-1 ring-inset ring-purple-200/70 dark:ring-purple-800/50',
+    secondary:
+      'bg-gray-100 text-gray-700 dark:bg-dark-elevated dark:text-gray-300 ring-1 ring-inset ring-gray-200/80 dark:ring-dark-border-subtle',
     outline:
-      'border border-gray-200 text-gray-800 dark:border-dark-border-medium dark:text-gray-300',
+      'border border-gray-200 text-gray-700 dark:border-dark-border-medium dark:text-gray-300',
     success:
-      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+      'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-800/50',
     warning:
-      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-    danger: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 ring-1 ring-inset ring-amber-200/70 dark:ring-amber-800/50',
+    danger: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 ring-1 ring-inset ring-red-200/70 dark:ring-red-800/50',
   };
 
   const colorClass = status
@@ -82,12 +92,18 @@ export default function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full',
+        'inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium rounded-full tracking-wide',
         colorClass,
         className,
       )}
       {...props}
     >
+      {status && (
+        <span
+          className={cn('h-1.5 w-1.5 rounded-full shrink-0', statusDot[status])}
+          aria-hidden
+        />
+      )}
       {children}
     </span>
   );

@@ -1,5 +1,8 @@
 import { cn } from '@/lib/utils';
 import React, { forwardRef } from 'react';
+import Select, { type SelectOption } from './Select';
+
+export type { SelectOption };
 
 // Form
 interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
@@ -46,6 +49,9 @@ export function FormLabel({ className, children, ...props }: FormLabelProps) {
   );
 }
 
+const inputBase =
+  'flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border-medium dark:bg-dark-elevated dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-purple-500/60';
+
 // Form Input
 type FormInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
@@ -54,10 +60,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <input
         ref={ref}
-        className={cn(
-          'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border-medium dark:bg-dark-high dark:text-gray-100 dark:placeholder:text-gray-500',
-          className,
-        )}
+        className={cn(inputBase, className)}
         {...props}
       />
     );
@@ -74,7 +77,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       <textarea
         ref={ref}
         className={cn(
-          'flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border-medium dark:bg-dark-high dark:text-gray-100 dark:placeholder:text-gray-500',
+          'flex min-h-[80px] w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border-medium dark:bg-dark-elevated dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-purple-500/60',
           className,
         )}
         {...props}
@@ -84,35 +87,24 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
 );
 FormTextarea.displayName = 'FormTextarea';
 
-// Form Select
-interface FormSelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  options?: Array<{ label: string; value: string }>;
+// Form Select — custom dropdown matching the rest of the form controls
+interface FormSelectProps {
+  id?: string;
+  name?: string;
+  options: SelectOption[];
+  value?: string;
+  defaultValue?: string;
+  onChange?: (value: string) => void;
+  disabled?: boolean;
+  required?: boolean;
+  placeholder?: string;
+  className?: string;
+  'aria-describedby'?: string;
 }
 
-export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
-  ({ className, children, options, ...props }, ref) => {
-    return (
-      <select
-        ref={ref}
-        className={cn(
-          'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border-medium dark:bg-dark-high dark:text-gray-100',
-          className,
-        )}
-        {...props}
-      >
-        {options
-          ? options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))
-          : children}
-      </select>
-    );
-  },
-);
-FormSelect.displayName = 'FormSelect';
+export function FormSelect({ className, ...props }: FormSelectProps) {
+  return <Select className={className} {...props} />;
+}
 
 // Form Error
 interface FormErrorProps extends React.HTMLAttributes<HTMLParagraphElement> {

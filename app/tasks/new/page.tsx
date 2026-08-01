@@ -38,7 +38,7 @@ export default async function NewTaskPage({
         </p>
       )}
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6">
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6">
         <Suspense fallback={<div>Loading...</div>}>
           <NewTask projectId={projectId} />
         </Suspense>

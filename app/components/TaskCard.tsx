@@ -76,7 +76,7 @@ export default function TaskCard({ task }: TaskCardProps) {
             </Badge>
           </div>
         </CardContent>
-        <CardFooter className="text-xs text-gray-300">
+        <CardFooter className="text-xs text-gray-400 dark:text-gray-500">
           {formatRelativeTime(new Date(createdAt))}
         </CardFooter>
       </Card>

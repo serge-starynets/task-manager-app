@@ -3,13 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Slightly off-white canvas for softer light mode */
+  --background: #f4f4f5;
+  --foreground: #18181b;
+  --surface-muted: #eaeaeb;
+  --surface-elevated: #ffffff;
+  --border-subtle: #e4e4e7;
+  --border-default: #d4d4d8;
 }
 
 .dark {
-  --background: #121212;
-  --foreground: #ededed;
+  /* Very dark grey — not pure black */
+  --background: #1c1c1e;
+  --foreground: #f4f4f5;
+  --surface-muted: #252528;
+  --surface-elevated: #2c2c30;
+  --border-subtle: #3a3a3e;
+  --border-default: #45454a;
 }
 
 body {
@@ -42,6 +52,12 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Shared raised panel look */
+  .surface-panel {
+    @apply rounded-xl border border-gray-200/80 bg-white shadow-soft
+      dark:border-dark-border-default dark:bg-dark-high dark:shadow-none;
+  }
 }
 
 /* Custom scrollbar */
@@ -72,13 +88,13 @@ body {
 /* Quill (react-quill-new) */
 .rich-text-editor .ql-toolbar.ql-snow {
   border: none;
-  border-bottom: 1px solid #d1d5db;
-  background: #f9fafb;
+  border-bottom: 1px solid #d4d4d8;
+  background: #f4f4f5;
 }
 
 .dark .rich-text-editor .ql-toolbar.ql-snow {
-  border-bottom-color: #333;
-  background: #1a1a1a;
+  border-bottom-color: #45454a;
+  background: #252528;
 }
 
 .rich-text-editor .ql-container.ql-snow {
@@ -100,23 +116,23 @@ body {
 }
 
 .dark .rich-text-editor .ql-editor {
-  color: #f3f4f6;
+  color: #f4f4f5;
 }
 
 .dark .rich-text-editor .ql-editor.ql-blank::before {
-  color: #6b7280;
+  color: #71717a;
 }
 
 .dark .rich-text-editor .ql-stroke {
-  stroke: #9ca3af;
+  stroke: #a1a1aa;
 }
 
 .dark .rich-text-editor .ql-fill {
-  fill: #9ca3af;
+  fill: #a1a1aa;
 }
 
 .dark .rich-text-editor .ql-picker {
-  color: #d1d5db;
+  color: #d4d4d8;
 }
 
 .rich-text-editor .ql-editor img {

@@ -54,12 +54,12 @@ export default function SignInPage() {
   >(handleFormSubmit, initialState);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-dark-base">
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+        <h1 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
           Task Manager
         </h1>
-        <h2 className="mt-2 text-center text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 className="mt-2 text-center text-lg font-medium text-gray-600 dark:text-gray-300">
           Sign in to your account
         </h2>
         <Form action={formAction} className="space-y-6">
@@ -114,7 +114,7 @@ export default function SignInPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-dark-elevated py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100 dark:border-dark-border-subtle">
+        <div className="bg-white dark:bg-dark-high py-8 px-4 shadow-soft sm:rounded-xl sm:px-10 border border-gray-200/80 dark:border-dark-border-default dark:shadow-none">
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Don&apos;t have an account?{' '}

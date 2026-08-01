@@ -15,7 +15,7 @@ function DashboardShellInner({
 
   if (!hasProject) {
     return (
-      <div className="min-h-screen bg-white dark:bg-dark-elevated">
+      <div className="min-h-screen bg-background">
         <main className="min-h-screen">
           <div className="dark:text-white max-w-6xl mx-auto p-4 md:p-8">
             {children}
@@ -26,9 +26,9 @@ function DashboardShellInner({
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {navigation}
-      <main className="bg-white dark:bg-dark-elevated pl-16 md:pl-64 pt-0 min-h-screen">
+      <main className="pl-16 md:pl-64 pt-0 min-h-screen">
         <div className="dark:text-white max-w-6xl mx-auto p-4 md:p-8">
           {children}
         </div>
@@ -47,7 +47,7 @@ export default function DashboardShell({
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-white dark:bg-dark-elevated">
+        <div className="min-h-screen bg-background">
           <main className="min-h-screen">
             <div className="dark:text-white max-w-6xl mx-auto p-4 md:p-8">
               {children}

@@ -17,9 +17,9 @@ export default function ProjectSidebarNav({
   const canCreateMore = projects.length < 10;
 
   return (
-    <nav className="flex-1 flex flex-col space-y-1 overflow-y-auto">
-      <div className="px-2 mb-2 hidden md:block">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+    <nav className="flex-1 flex flex-col space-y-0.5 overflow-y-auto scrollbar-thin">
+      <div className="px-2.5 mb-2 hidden md:block">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           Projects
         </p>
       </div>
@@ -28,7 +28,7 @@ export default function ProjectSidebarNav({
         <NavLink
           key={project.id}
           href={`/dashboard?project=${project.id}`}
-          icon={<FolderIcon size={20} />}
+          icon={<FolderIcon size={18} />}
           label={`${project.abbreviation} · ${project.title}`}
           isActive={selectedProjectId === String(project.id)}
         />
@@ -37,14 +37,16 @@ export default function ProjectSidebarNav({
       {canCreateMore && (
         <NavLink
           href="/projects/new"
-          icon={<FolderPlusIcon size={20} />}
-          label="+ Create Project"
+          icon={<FolderPlusIcon size={18} />}
+          label="Create Project"
         />
       )}
 
+      <div className="my-2 mx-2 border-t border-gray-200/80 dark:border-dark-border-subtle" />
+
       <NavLink
         href="/tasks/new"
-        icon={<PlusIcon size={20} />}
+        icon={<PlusIcon size={18} />}
         label="New Task"
       />
     </nav>

@@ -14,6 +14,14 @@ const config = {
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        surface: {
+          muted: 'var(--surface-muted)',
+          elevated: 'var(--surface-elevated)',
+        },
+        border: {
+          subtle: 'var(--border-subtle)',
+          DEFAULT: 'var(--border-default)',
+        },
         primary: {
           50: '#faf5ff',
           100: '#f3e8ff',
@@ -28,19 +36,27 @@ const config = {
           950: '#3b0764',
         },
         dark: {
-          base: '#121212',
-          elevated: '#1A1A1A',
-          high: '#222222',
+          // Very dark grey canvas (not pure black)
+          base: '#1c1c1e',
+          // Sidebar / recessed surfaces
+          elevated: '#252528',
+          // Cards / raised surfaces
+          high: '#2c2c30',
           border: {
-            subtle: '#2A2A2A',
-            default: '#333333',
-            medium: '#444444',
-            strong: '#555555',
+            subtle: '#3a3a3e',
+            default: '#45454a',
+            medium: '#56565c',
+            strong: '#6b6b72',
           },
         },
       },
       boxShadow: {
-        mode: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+        mode: '0 1px 2px 0 rgba(0, 0, 0, 0.04), 0 1px 3px 0 rgba(0, 0, 0, 0.06)',
+        soft: '0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04)',
+        lift: '0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06)',
+      },
+      transitionTimingFunction: {
+        smooth: 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
     },
   },

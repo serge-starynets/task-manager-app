@@ -14,8 +14,8 @@ export default function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 transition-colors">
-        <div className="w-5 h-5 bg-gray-300 dark:bg-gray-600 rounded animate-pulse" />
+      <button className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200/80 bg-white text-gray-500 shadow-soft dark:border-dark-border-default dark:bg-dark-high dark:text-gray-400 dark:shadow-none transition-colors">
+        <div className="w-4 h-4 bg-gray-200 dark:bg-dark-border-medium rounded animate-pulse" />
       </button>
     );
   }
@@ -23,13 +23,13 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200/80 bg-white text-gray-600 shadow-soft hover:bg-gray-50 hover:border-gray-300 dark:border-dark-border-default dark:bg-dark-high dark:text-gray-300 dark:shadow-none dark:hover:bg-dark-elevated dark:hover:border-dark-border-medium transition-all duration-200 ease-smooth"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       {theme === 'dark' ? (
-        <SunIcon size={20} className="text-yellow-500" />
+        <SunIcon size={18} className="text-amber-400" />
       ) : (
-        <MoonIcon size={20} className="text-gray-600" />
+        <MoonIcon size={18} className="text-gray-600" />
       )}
     </button>
   );

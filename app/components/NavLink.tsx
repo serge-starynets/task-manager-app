@@ -13,14 +13,23 @@ export default function NavLink({ href, icon, label, isActive }: NavLinkProps) {
     <Link
       href={href}
       className={cn(
-        'flex items-center px-2 py-2 text-sm font-medium rounded-md group',
+        'flex items-center px-2.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-smooth group',
         isActive
-          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200'
-          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+          ? 'bg-purple-100/80 text-purple-700 shadow-sm dark:bg-purple-950/60 dark:text-purple-200 dark:shadow-none'
+          : 'text-gray-700 hover:bg-gray-200/60 dark:text-gray-300 dark:hover:bg-dark-high'
       )}
     >
-      <span className="text-gray-500 dark:text-gray-400 mr-3">{icon}</span>
-      <span className="hidden md:inline">{label}</span>
+      <span
+        className={cn(
+          'mr-3 shrink-0 transition-colors',
+          isActive
+            ? 'text-purple-600 dark:text-purple-300'
+            : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200'
+        )}
+      >
+        {icon}
+      </span>
+      <span className="hidden md:inline truncate">{label}</span>
     </Link>
   )
 }

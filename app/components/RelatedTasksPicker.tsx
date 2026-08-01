@@ -115,7 +115,7 @@ export default function RelatedTasksPicker({
         {open && (
           <ul
             role="listbox"
-            className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white py-1 shadow-md dark:border-dark-border-medium dark:bg-dark-elevated"
+            className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200/80 bg-white py-1 shadow-lift dark:border-dark-border-medium dark:bg-dark-high dark:shadow-none"
           >
             {isSearching && results.length === 0 ? (
               <li className="px-3 py-2 text-sm text-gray-500">Searching…</li>

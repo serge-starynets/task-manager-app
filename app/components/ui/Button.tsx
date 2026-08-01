@@ -17,24 +17,24 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    'font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
+    'inline-flex items-center justify-center font-medium transition-all duration-200 ease-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]'
 
   const variants = {
     primary:
-      'bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800',
+      'bg-purple-600 text-white shadow-sm hover:bg-purple-700 hover:shadow-md active:bg-purple-800',
     secondary:
-      'bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
+      'bg-gray-200/80 text-gray-900 hover:bg-gray-300 dark:bg-dark-high dark:text-gray-100 dark:hover:bg-dark-border-medium dark:border dark:border-dark-border-default',
     outline:
-      'border border-gray-300 bg-transparent hover:bg-gray-100 dark:border-dark-border-medium dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:text-gray-100',
+      'border border-gray-300 bg-white/60 backdrop-blur-sm hover:bg-white hover:border-gray-400 dark:border-dark-border-medium dark:bg-dark-high/50 dark:hover:bg-dark-high dark:hover:border-dark-border-strong dark:text-gray-100',
     ghost:
-      'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-100 dark:text-gray-100',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+      'bg-transparent hover:bg-gray-200/70 dark:hover:bg-dark-high dark:text-gray-100',
+    danger: 'bg-red-600 text-white shadow-sm hover:bg-red-700 hover:shadow-md',
   }
 
   const sizes = {
-    sm: 'h-8 px-3 text-xs rounded-md',
-    md: 'h-10 px-4 py-2 text-sm rounded-md',
-    lg: 'h-12 px-6 py-3 text-base rounded-lg',
+    sm: 'h-8 px-3 text-xs rounded-lg gap-1.5',
+    md: 'h-10 px-4 py-2 text-sm rounded-lg gap-2',
+    lg: 'h-12 px-6 py-3 text-base rounded-xl gap-2',
   }
 
   return (

@@ -29,7 +29,7 @@ export default async function EditProjectPage({
 
       <h1 className="text-2xl font-bold mb-6">Edit Project</h1>
 
-      <div className="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border-default rounded-lg shadow-sm p-6">
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6">
         <ProjectForm project={project} isEditing />
       </div>
     </div>

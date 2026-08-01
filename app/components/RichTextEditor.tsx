@@ -218,7 +218,7 @@ export default function RichTextEditor({
   return (
     <div
       className={cn(
-        'rich-text-editor rounded-md border border-gray-300 bg-white dark:border-dark-border-medium dark:bg-dark-high overflow-hidden focus-within:ring-2 focus-within:ring-gray-800 focus-within:border-transparent',
+        'rich-text-editor rounded-lg border border-gray-300 bg-white dark:border-dark-border-medium dark:bg-dark-elevated overflow-hidden focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:border-purple-400',
         disabled && 'opacity-50 pointer-events-none',
         className,
       )}
