@@ -12,6 +12,10 @@ function DashboardShellInner({
 }) {
   const searchParams = useSearchParams();
   const hasProject = Boolean(searchParams.get('project'));
+  const isBoardView = searchParams.get('view') === 'board';
+  const contentClass = isBoardView
+    ? 'dark:text-white w-full mx-auto p-4 md:p-6'
+    : 'dark:text-white max-w-6xl mx-auto p-4 md:p-8';
 
   if (!hasProject) {
     return (
@@ -29,9 +33,7 @@ function DashboardShellInner({
     <div className="min-h-screen bg-background">
       {navigation}
       <main className="pl-16 md:pl-64 pt-0 min-h-screen">
-        <div className="dark:text-white max-w-6xl mx-auto p-4 md:p-8">
-          {children}
-        </div>
+        <div className={contentClass}>{children}</div>
       </main>
     </div>
   );

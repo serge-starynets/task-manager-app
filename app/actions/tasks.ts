@@ -23,7 +23,7 @@ const TaskSchema = z.object({
   description: z.string().optional().nullable(),
 
   status: z.enum(
-    ['backlog', 'todo', 'in_progress', 'done', 'rejected', 'closed'],
+    ['backlog', 'todo', 'in_progress', 'qa', 'done', 'rejected', 'closed'],
     {
       errorMap: () => ({ message: 'Please select a valid status' }),
     },
@@ -216,6 +216,68 @@ export async function updateTask(
       success: false,
       message: 'An error occurred while updating the task',
       error: 'Failed to update task',
+    };
+  }
+}
+
+const StatusSchema = z.enum(
+  ['backlog', 'todo', 'in_progress', 'qa', 'done', 'rejected', 'closed'],
+  {
+    errorMap: () => ({ message: 'Please select a valid status' }),
+  },
+);
+
+export async function updateTaskStatus(
+  id: number,
+  status: z.infer<typeof StatusSchema>,
+): Promise<ActionResponse> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return {
+        success: false,
+        message: 'Unauthorized access',
+        error: 'Unauthorized',
+      };
+    }
+
+    const canManage = await canManageTask(id);
+    if (!canManage) {
+      return {
+        success: false,
+        message: 'You do not have permission to update this task',
+        error: 'Forbidden',
+      };
+    }
+
+    const validationResult = StatusSchema.safeParse(status);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        message: 'Validation failed',
+        errors: { status: ['Please select a valid status'] },
+      };
+    }
+
+    await db
+      .update(tasks)
+      .set({
+        status: validationResult.data,
+        updatedAt: new Date(),
+      })
+      .where(eq(tasks.id, id));
+
+    revalidateTag('tasks');
+    revalidatePath('/dashboard');
+    revalidatePath('/tasks', 'layout');
+
+    return { success: true, message: 'Task status updated successfully' };
+  } catch (error) {
+    console.error('Error updating task status:', error);
+    return {
+      success: false,
+      message: 'An error occurred while updating the task status',
+      error: 'Failed to update task status',
     };
   }
 }

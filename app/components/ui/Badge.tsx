@@ -12,6 +12,7 @@ type StatusType =
   | 'backlog'
   | 'todo'
   | 'in_progress'
+  | 'qa'
   | 'done'
   | 'rejected'
   | 'closed';
@@ -29,6 +30,7 @@ const statusStyles: Record<StatusType, string> = {
   todo: 'bg-zinc-200/80 text-zinc-700 dark:bg-zinc-700/50 dark:text-zinc-200 ring-1 ring-inset ring-zinc-300/60 dark:ring-zinc-600/40',
   in_progress:
     'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-800/50',
+  qa: 'bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 ring-1 ring-inset ring-amber-200/70 dark:ring-amber-800/50',
   done: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-800/50',
   rejected: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 ring-1 ring-inset ring-red-200/70 dark:ring-red-800/50',
   closed:
@@ -39,6 +41,7 @@ const statusDot: Record<StatusType, string> = {
   backlog: 'bg-gray-400',
   todo: 'bg-zinc-500',
   in_progress: 'bg-blue-500',
+  qa: 'bg-amber-500',
   done: 'bg-emerald-500',
   rejected: 'bg-red-500',
   closed: 'bg-gray-400',

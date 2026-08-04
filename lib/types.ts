@@ -4,6 +4,7 @@ export type Status =
   | 'backlog'
   | 'todo'
   | 'in_progress'
+  | 'qa'
   | 'done'
   | 'rejected'
   | 'closed';

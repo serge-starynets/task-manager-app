@@ -22,6 +22,7 @@ import {
   UserIcon,
 } from 'lucide-react';
 import TaskTable from '../components/TaskTable';
+import TaskBoard from '../components/TaskBoard';
 import { PROJECT_STATUS, type Project, type User } from '@/db/schema';
 
 function OrphanedTasksSection({
@@ -156,10 +157,10 @@ function DashboardHome({
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ project?: string }>;
+  searchParams: Promise<{ project?: string; view?: string }>;
 }) {
   const user = await requireUser();
-  const { project: projectParam } = await searchParams;
+  const { project: projectParam, view: viewParam } = await searchParams;
   const projects = await getProjects(user.id);
 
   if (!projectParam) {
@@ -173,7 +174,10 @@ export default async function DashboardPage({
     notFound();
   }
 
-  const orphanedTasks = await getOrphanedTasks(user.id);
+  const isBoardView = viewParam === 'board';
+  const orphanedTasks = isBoardView
+    ? []
+    : await getOrphanedTasks(user.id);
   const projectTasks = await getTasksForProject(user.id, selectedProject.id);
 
   const statusLabel =
@@ -212,7 +216,9 @@ export default async function DashboardPage({
 
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold tracking-tight">Project tasks</h2>
+          <h2 className="text-lg font-semibold tracking-tight">
+            {isBoardView ? 'Board' : 'Backlog'}
+          </h2>
           <Link href={`/tasks/new?project=${selectedProject.id}`}>
             <Button data-testid="new-task-button" size="sm">
               <PlusIcon size={16} />
@@ -220,7 +226,9 @@ export default async function DashboardPage({
             </Button>
           </Link>
         </div>
-        {projectTasks.length > 0 ? (
+        {isBoardView ? (
+          <TaskBoard tasks={projectTasks} />
+        ) : projectTasks.length > 0 ? (
           <TaskTable tasks={projectTasks} />
         ) : (
           <div className="flex flex-col items-center justify-center py-14 text-center surface-panel p-8">
@@ -235,7 +243,7 @@ export default async function DashboardPage({
         )}
       </section>
 
-      <OrphanedTasksSection tasks={orphanedTasks} />
+      {!isBoardView && <OrphanedTasksSection tasks={orphanedTasks} />}
     </div>
   );
 }

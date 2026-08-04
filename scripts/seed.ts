@@ -136,6 +136,7 @@ async function main() {
         | 'backlog'
         | 'todo'
         | 'in_progress'
+        | 'qa'
         | 'done'
         | 'rejected'
         | 'closed',

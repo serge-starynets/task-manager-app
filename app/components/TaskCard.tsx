@@ -28,6 +28,8 @@ export default function TaskCard({ task }: TaskCardProps) {
         return 'Todo';
       case 'in_progress':
         return 'In Progress';
+      case 'qa':
+        return 'QA';
       case 'done':
         return 'Done';
       case 'rejected':

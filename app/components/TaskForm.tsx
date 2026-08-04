@@ -121,6 +121,7 @@ export default function TaskForm({
         | 'backlog'
         | 'todo'
         | 'in_progress'
+        | 'qa'
         | 'done'
         | 'rejected'
         | 'closed',

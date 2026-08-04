@@ -12,6 +12,7 @@ const STATUSES = [
   'backlog',
   'todo',
   'in_progress',
+  'qa',
   'done',
   'rejected',
   'closed',

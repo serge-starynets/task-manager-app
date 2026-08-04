@@ -44,6 +44,8 @@ export default async function TaskPage({
         return 'Todo';
       case 'in_progress':
         return 'In Progress';
+      case 'qa':
+        return 'QA';
       case 'done':
         return 'Done';
       default:
