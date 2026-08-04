@@ -5,11 +5,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { taskAttachments, type TaskAttachment } from '@/db/schema';
-import {
-  canManageTask,
-  getCurrentUser,
-  getTaskAttachments,
-} from '@/lib/dal';
+import { canManageTask, getCurrentUser, getTaskAttachments } from '@/lib/dal';
 import {
   isValidDraftPathname,
   isValidTaskPathname,
@@ -29,7 +25,11 @@ const PendingAttachmentSchema = z.object({
   pathname: z.string().min(1).max(500),
   fileName: z.string().min(1).max(255),
   contentType: z.string().min(1).max(200),
-  sizeBytes: z.number().int().positive().max(25 * 1024 * 1024),
+  sizeBytes: z
+    .number()
+    .int()
+    .positive()
+    .max(25 * 1024 * 1024),
 });
 
 const RegisterSchema = PendingAttachmentSchema.extend({
@@ -86,7 +86,7 @@ export async function registerTaskAttachment(input: {
       })
       .returning();
 
-    revalidateTag('tasks');
+    revalidateTag('tasks', 'max');
     revalidatePath(`/tasks/${data.taskId}`);
     revalidatePath(`/tasks/${data.taskId}/edit`);
 
@@ -143,7 +143,7 @@ export async function deleteTaskAttachment(
       .delete(taskAttachments)
       .where(eq(taskAttachments.id, attachmentId));
 
-    revalidateTag('tasks');
+    revalidateTag('tasks', 'max');
     revalidatePath(`/tasks/${attachment.taskId}`);
     revalidatePath(`/tasks/${attachment.taskId}/edit`);
 

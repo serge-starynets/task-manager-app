@@ -126,7 +126,7 @@ export async function createTask(
       await linkPendingAttachments(created.id, user.id, pending);
     }
 
-    revalidateTag('tasks');
+    revalidateTag('tasks', 'max');
     revalidatePath('/dashboard');
     revalidatePath('/tasks', 'layout');
 
@@ -205,7 +205,7 @@ export async function updateTask(
     updateData.updatedAt = validatedData.updatedAt;
 
     await db.update(tasks).set(updateData).where(eq(tasks.id, id));
-    revalidateTag('tasks');
+    revalidateTag('tasks', 'max');
     revalidatePath('/dashboard');
     revalidatePath('/tasks', 'layout');
 
@@ -267,7 +267,7 @@ export async function updateTaskStatus(
       })
       .where(eq(tasks.id, id));
 
-    revalidateTag('tasks');
+    revalidateTag('tasks', 'max');
     revalidatePath('/dashboard');
     revalidatePath('/tasks', 'layout');
 
@@ -301,7 +301,7 @@ export async function deleteTask(id: number) {
     await deleteBlobsForTask(id);
     await db.delete(tasks).where(eq(tasks.id, id));
 
-    revalidateTag('tasks');
+    revalidateTag('tasks', 'max');
     revalidatePath('/dashboard');
     revalidatePath('/tasks', 'layout');
 

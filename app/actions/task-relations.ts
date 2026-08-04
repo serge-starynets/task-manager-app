@@ -20,7 +20,7 @@ export type RelationActionResponse = {
 };
 
 function revalidateTaskViews(sourceId: number, targetId: number) {
-  revalidateTag('tasks');
+  revalidateTag('tasks', 'max');
   revalidatePath('/dashboard');
   revalidatePath('/tasks', 'layout');
   revalidatePath(`/tasks/${sourceId}`);

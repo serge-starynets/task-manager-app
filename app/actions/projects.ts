@@ -116,7 +116,7 @@ export async function createProject(
       })
       .returning();
 
-    revalidateTag('projects');
+    revalidateTag('projects', 'max');
     revalidatePath('/dashboard');
 
     return {
@@ -202,7 +202,7 @@ export async function updateProject(
 
     await db.update(projects).set(updateData).where(eq(projects.id, id));
 
-    revalidateTag('projects');
+    revalidateTag('projects', 'max');
     revalidatePath('/dashboard');
 
     return {
