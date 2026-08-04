@@ -87,9 +87,37 @@ body {
 
 /* Quill (react-quill-new) */
 .rich-text-editor .ql-toolbar.ql-snow {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  white-space: nowrap;
   border: none;
   border-bottom: 1px solid #d4d4d8;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
   background: #f4f4f5;
+  padding: 8px 10px;
+}
+
+.rich-text-editor .ql-toolbar.ql-snow .ql-formats {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  margin-right: 0;
+  flex-shrink: 0;
+}
+
+.rich-text-editor .ql-toolbar.ql-snow .ql-picker {
+  float: none;
+}
+
+.rich-text-editor .ql-toolbar.ql-snow button,
+.rich-text-editor .ql-toolbar.ql-snow .ql-picker-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dark .rich-text-editor .ql-toolbar.ql-snow {
@@ -101,6 +129,8 @@ body {
   border: none;
   font-size: 0.875rem;
   min-height: 160px;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }
 
 .rich-text-editor .ql-editor {

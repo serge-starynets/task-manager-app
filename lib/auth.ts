@@ -5,6 +5,7 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import * as jose from 'jose'
 import { cache } from 'react'
+import { SESSION_MAX_AGE_SECONDS } from '@/lib/auth-constants'
 
 // JWT types
 interface JWTPayload {
@@ -16,12 +17,6 @@ interface JWTPayload {
 const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET || 'your-secret-key-min-32-chars-long!!!'
 )
-
-// JWT expiration time
-const JWT_EXPIRATION = '7d' // 7 days
-
-// Token refresh threshold (refresh if less than this time left)
-const REFRESH_THRESHOLD = 24 * 60 * 60 // 24 hours in seconds
 
 // Hash a password
 export async function hashPassword(password: string) {
@@ -52,12 +47,12 @@ export async function createUser(email: string, password: string) {
     }
 }
 
-// Generate a JWT token
+// Generate a JWT token (expires after idle window)
 export async function generateJWT(payload: JWTPayload) {
     return await new jose.SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
-        .setExpirationTime(JWT_EXPIRATION)
+        .setExpirationTime(`${SESSION_MAX_AGE_SECONDS}s`)
         .sign(JWT_SECRET)
 }
 
@@ -72,46 +67,49 @@ export async function verifyJWT(token: string): Promise<JWTPayload | null> {
     }
 }
 
-// Check if token needs refresh
-export async function shouldRefreshToken(token: string): Promise<boolean> {
-    try {
-        const { payload } = await jose.jwtVerify(token, JWT_SECRET, {
-            clockTolerance: 15, // 15 seconds tolerance for clock skew
-        })
-
-        // Get expiration time
-        const exp = payload.exp as number
-        const now = Math.floor(Date.now() / 1000)
-
-        // If token expires within the threshold, refresh it
-        return exp - now < REFRESH_THRESHOLD
-    } catch {
-        // If verification fails, token is invalid or expired
-        return false
+function sessionCookieOptions(token: string) {
+    return {
+        name: 'auth_token',
+        value: token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: SESSION_MAX_AGE_SECONDS,
+        path: '/',
+        sameSite: 'lax' as const,
     }
 }
 
 // Create a session using JWT
 export async function createSession(userId: string) {
     try {
-        // Create JWT with user data
         const token = await generateJWT({ userId })
-
-        // Store JWT in a cookie
         const cookieStore = await cookies()
-        cookieStore.set({
-            name: 'auth_token',
-            value: token,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24 * 7, // 1 week
-            path: '/',
-            sameSite: 'lax',
-        })
-
+        cookieStore.set(sessionCookieOptions(token))
         return true
     } catch (error) {
         console.error('Error creating session:', error)
+        return false
+    }
+}
+
+/**
+ * Re-issue the session cookie if the current token is still valid.
+ * Used to slide the idle window while the user is active.
+ */
+export async function refreshSession(): Promise<boolean> {
+    try {
+        const cookieStore = await cookies()
+        const token = cookieStore.get('auth_token')?.value
+        if (!token) return false
+
+        const payload = await verifyJWT(token)
+        if (!payload?.userId) return false
+
+        const nextToken = await generateJWT({ userId: payload.userId })
+        cookieStore.set(sessionCookieOptions(nextToken))
+        return true
+    } catch (error) {
+        console.error('Error refreshing session:', error)
         return false
     }
 }

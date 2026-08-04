@@ -6,6 +6,8 @@ import {
   createSession,
   createUser,
   deleteSession,
+  refreshSession,
+  getSession,
 } from '@/lib/auth';
 import { getUserByEmail } from '@/lib/dal';
 import { redirect } from 'next/navigation';
@@ -163,5 +165,34 @@ export async function signOut(): Promise<void> {
     throw new Error('Failed to sign out');
   } finally {
     redirect('/signin');
+  }
+}
+
+/** Extend the session cookie while the user is active (sliding idle window). */
+export async function touchSession(): Promise<{ ok: boolean }> {
+  try {
+    const ok = await refreshSession();
+    return { ok };
+  } catch (error) {
+    console.error('Touch session error:', error);
+    return { ok: false };
+  }
+}
+
+/**
+ * Clear the session after client-side idle timeout.
+ * Does not redirect when there is no session (e.g. public pages).
+ */
+export async function signOutDueToIdle(): Promise<{ signedOut: boolean }> {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return { signedOut: false };
+    }
+    await deleteSession();
+    return { signedOut: true };
+  } catch (error) {
+    console.error('Idle sign out error:', error);
+    return { signedOut: false };
   }
 }

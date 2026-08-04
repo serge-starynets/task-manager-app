@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
+import IdleTimeoutProvider from './components/IdleTimeoutProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -23,8 +24,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class">
-          <Toaster position="top-right" />
-          {children}
+          <IdleTimeoutProvider>
+            <Toaster position="top-right" />
+            {children}
+          </IdleTimeoutProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -41,6 +41,11 @@ interface RichTextEditorProps {
 type QuillLike = {
   getSelection: (focus?: boolean) => { index: number; length: number } | null;
   getLength: () => number;
+  getText: (index?: number, length?: number) => string;
+  getFormat: (
+    range?: { index: number; length: number },
+  ) => Record<string, unknown>;
+  format: (name: string, value: unknown, source?: string) => void;
   insertEmbed: (
     index: number,
     type: string,
@@ -150,37 +155,89 @@ export default function RichTextEditor({
       input.click();
     }
 
-    const linkRow = uploadsEnabled
+    const mediaControls = uploadsEnabled
       ? (['link', 'image', 'file'] as const)
       : (['link'] as const);
 
+    function normalizeUrl(raw: string) {
+      const trimmed = raw.trim();
+      if (!trimmed) return null;
+      if (/^(https?:|mailto:|tel:|\/|#)/i.test(trimmed)) return trimmed;
+      return `https://${trimmed}`;
+    }
+
     return {
       toolbar: {
+        // Single row of controls (CSS also forces nowrap)
         container: [
-          [{ header: [1, 2, 3, false] }],
-          ['bold', 'italic', 'underline', 'strike'],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          [...linkRow],
-          ['clean'],
+          [
+            { header: [1, 2, 3, false] },
+            'bold',
+            'italic',
+            'underline',
+            'strike',
+            { list: 'ordered' },
+            { list: 'bullet' },
+            ...mediaControls,
+          ],
         ],
-        handlers: uploadsEnabled
-          ? {
-              image: function (this: { quill: QuillLike }) {
-                pickFile(
-                  this.quill,
-                  'image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp',
-                  true,
-                );
-              },
-              file: function (this: { quill: QuillLike }) {
-                pickFile(
-                  this.quill,
-                  '.pdf,.txt,.csv,.md,.docx,.xlsx,application/pdf,text/plain,text/csv',
-                  false,
-                );
-              },
+        handlers: {
+          // Snow's default link tooltip breaks with controlled ReactQuill
+          // (selection change immediately hides it). Prompt is reliable.
+          link: function (this: { quill: QuillLike }, value: boolean) {
+            const quill = this.quill;
+            const range = quill.getSelection(true);
+            if (!range) return;
+
+            if (!value) {
+              quill.format('link', false, 'user');
+              return;
             }
-          : {},
+
+            const selectedText =
+              range.length > 0 ? quill.getText(range.index, range.length) : '';
+            const existingHref = quill.getFormat(range).link;
+
+            let suggested = 'https://';
+            if (typeof existingHref === 'string') {
+              suggested = existingHref;
+            } else if (/^\S+@\S+\.\S+$/.test(selectedText)) {
+              suggested = `mailto:${selectedText}`;
+            } else if (selectedText.startsWith('http')) {
+              suggested = selectedText;
+            }
+
+            const raw = window.prompt('Enter link URL', suggested);
+            if (raw == null) return;
+            const href = normalizeUrl(raw);
+            if (!href) return;
+
+            if (range.length === 0) {
+              quill.insertText(range.index, href, 'link', href, 'user');
+              quill.setSelection(range.index + href.length, 0);
+            } else {
+              quill.format('link', href, 'user');
+            }
+          },
+          ...(uploadsEnabled
+            ? {
+                image: function (this: { quill: QuillLike }) {
+                  pickFile(
+                    this.quill,
+                    'image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp',
+                    true,
+                  );
+                },
+                file: function (this: { quill: QuillLike }) {
+                  pickFile(
+                    this.quill,
+                    '.pdf,.txt,.csv,.md,.docx,.xlsx,application/pdf,text/plain,text/csv',
+                    false,
+                  );
+                },
+              }
+            : {}),
+        },
       },
     };
   }, [uploadsEnabled]);
@@ -218,7 +275,7 @@ export default function RichTextEditor({
   return (
     <div
       className={cn(
-        'rich-text-editor rounded-lg border border-gray-300 bg-white dark:border-dark-border-medium dark:bg-dark-elevated overflow-hidden focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:border-purple-400',
+        'rich-text-editor rounded-lg border border-gray-300 bg-white dark:border-dark-border-medium dark:bg-dark-elevated focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:border-purple-400',
         disabled && 'opacity-50 pointer-events-none',
         className,
       )}
