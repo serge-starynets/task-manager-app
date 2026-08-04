@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
-import { Toaster } from 'react-hot-toast';
+import AppToaster from './components/AppToaster';
 import IdleTimeoutProvider from './components/IdleTimeoutProvider';
 
 const inter = Inter({
@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class">
           <IdleTimeoutProvider>
-            <Toaster position="top-right" />
+            <AppToaster />
             {children}
           </IdleTimeoutProvider>
         </ThemeProvider>
