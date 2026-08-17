@@ -1,13 +1,23 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 import type { PendingAttachment } from '@/lib/attachments';
 import { attachmentFileUrl } from '@/lib/attachments';
 import { uploadAttachmentFile } from '@/lib/upload-attachment';
+import {
+  findQuillEditor,
+  initQuillImageResize,
+} from '@/lib/quill-image-resize';
 import 'react-quill-new/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
@@ -39,6 +49,7 @@ interface RichTextEditorProps {
 }
 
 type QuillLike = {
+  root: HTMLElement;
   getSelection: (focus?: boolean) => { index: number; length: number } | null;
   getLength: () => number;
   getText: (index?: number, length?: number) => string;
@@ -60,6 +71,7 @@ type QuillLike = {
     source?: string,
   ) => void;
   setSelection: (index: number, length: number) => void;
+  getSemanticHTML: () => string;
 };
 
 export default function RichTextEditor({
@@ -78,22 +90,71 @@ export default function RichTextEditor({
   const [uncontrolledValue, setUncontrolledValue] = useState(
     defaultValue ?? '',
   );
+  const editorWrapRef = useRef<HTMLDivElement>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
+  const resizeReadyRef = useRef(false);
   const uploadContextRef = useRef(uploadContext);
   const onAttachmentUploadedRef = useRef(onAttachmentUploaded);
+  const onChangeRef = useRef(onChange);
 
   uploadContextRef.current = uploadContext;
   onAttachmentUploadedRef.current = onAttachmentUploaded;
+  onChangeRef.current = onChange;
 
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : uncontrolledValue;
   const uploadsEnabled = Boolean(uploadContext);
 
-  function setValue(next: string) {
-    if (!isControlled) {
-      setUncontrolledValue(next);
+  const setValue = useCallback(
+    (next: string) => {
+      if (!isControlled) {
+        setUncontrolledValue(next);
+      }
+      onChangeRef.current?.(next);
+    },
+    [isControlled],
+  );
+
+  const ensureImageResize = useCallback(() => {
+    if (!uploadsEnabled || resizeReadyRef.current || !editorWrapRef.current) {
+      return;
     }
-    onChange?.(next);
-  }
+
+    const quill = findQuillEditor(editorWrapRef.current);
+    if (!quill) return;
+
+    resizeCleanupRef.current?.();
+    resizeCleanupRef.current = initQuillImageResize(
+      quill,
+      editorWrapRef.current,
+      () => {
+        setValue(quill.getSemanticHTML());
+      },
+    );
+    resizeReadyRef.current = true;
+  }, [uploadsEnabled, setValue]);
+
+  useEffect(() => {
+    if (!uploadsEnabled) return;
+
+    ensureImageResize();
+    const timer = window.setInterval(ensureImageResize, 200);
+
+    return () => {
+      window.clearInterval(timer);
+      resizeCleanupRef.current?.();
+      resizeCleanupRef.current = null;
+      resizeReadyRef.current = false;
+    };
+  }, [uploadsEnabled, ensureImageResize]);
+
+  const handleChange = useCallback(
+    (next: string) => {
+      setValue(next);
+      ensureImageResize();
+    },
+    [setValue, ensureImageResize],
+  );
 
   const modules = useMemo(() => {
     async function uploadAndInsert(
@@ -168,7 +229,6 @@ export default function RichTextEditor({
 
     return {
       toolbar: {
-        // Single row of controls (CSS also forces nowrap)
         container: [
           [
             { header: [1, 2, 3, false] },
@@ -182,8 +242,6 @@ export default function RichTextEditor({
           ],
         ],
         handlers: {
-          // Snow's default link tooltip breaks with controlled ReactQuill
-          // (selection change immediately hides it). Prompt is reliable.
           link: function (this: { quill: QuillLike }, value: boolean) {
             const quill = this.quill;
             const range = quill.getSelection(true);
@@ -274,6 +332,7 @@ export default function RichTextEditor({
 
   return (
     <div
+      ref={editorWrapRef}
       className={cn(
         'rich-text-editor rounded-lg border border-gray-300 bg-white dark:border-dark-border-medium dark:bg-dark-elevated focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:border-purple-400',
         disabled && 'opacity-50 pointer-events-none',
@@ -284,7 +343,7 @@ export default function RichTextEditor({
       <ReactQuill
         theme="snow"
         value={value}
-        onChange={setValue}
+        onChange={handleChange}
         modules={modules}
         formats={formats}
         placeholder={placeholder}

@@ -189,6 +189,35 @@ export function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/** Extract attachment proxy URLs from `<img src="...">` tags in description HTML. */
+export function extractImageAttachmentUrlsFromHtml(html: string): string[] {
+  if (!html) return [];
+
+  const urls = new Set<string>();
+  const imgPattern = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = imgPattern.exec(html)) !== null) {
+    const src = match[1];
+    if (
+      src.startsWith('/api/attachments/file/') ||
+      src.startsWith('https://')
+    ) {
+      urls.add(src);
+    }
+  }
+  return [...urls];
+}
+
+/** Image attachment URLs present in `prev` but not in `next`. */
+export function findRemovedImageAttachmentUrls(
+  prevHtml: string,
+  nextHtml: string,
+): string[] {
+  const prev = new Set(extractImageAttachmentUrlsFromHtml(prevHtml));
+  const next = new Set(extractImageAttachmentUrlsFromHtml(nextHtml));
+  return [...prev].filter((url) => !next.has(url));
+}
+
 /** Remove img/a tags that point at the given URLs from Quill HTML. */
 export function stripAttachmentUrlsFromHtml(
   html: string,

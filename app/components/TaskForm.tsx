@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useCallback, useMemo, useState } from 'react';
+import { useActionState, useCallback, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { nanoid } from 'nanoid';
@@ -30,6 +30,12 @@ import {
   type ActionResponse,
 } from '@/app/actions/tasks';
 import {
+  deleteDraftBlob,
+  deleteTaskAttachment,
+} from '@/app/actions/attachments';
+import {
+  attachmentFileUrl,
+  findRemovedImageAttachmentUrls,
   stripAttachmentUrlsFromHtml,
   type PendingAttachment,
 } from '@/lib/attachments';
@@ -67,6 +73,13 @@ export default function TaskForm({
   const [pending, setPending] = useState<PendingAttachment[]>([]);
   const [savedAttachments, setSavedAttachments] =
     useState<TaskAttachment[]>(initialAttachments);
+  const descriptionRef = useRef(description);
+  const savedAttachmentsRef = useRef(savedAttachments);
+  const pendingRef = useRef(pending);
+
+  descriptionRef.current = description;
+  savedAttachmentsRef.current = savedAttachments;
+  pendingRef.current = pending;
 
   const uploadContext = useMemo(
     () => ({
@@ -80,6 +93,57 @@ export default function TaskForm({
   const handleRemoveUrls = useCallback((urls: string[]) => {
     setDescription((prev) => stripAttachmentUrlsFromHtml(prev, urls));
   }, []);
+
+  const removeAttachmentsForImageUrls = useCallback(
+    async (urls: string[]) => {
+      for (const url of urls) {
+        const savedMatch = savedAttachmentsRef.current.find(
+          (attachment) =>
+            attachmentFileUrl(attachment.pathname) === url ||
+            attachment.url === url,
+        );
+
+        if (savedMatch) {
+          const result = await deleteTaskAttachment(savedMatch.id);
+          if (result.success) {
+            setSavedAttachments((prev) =>
+              prev.filter((attachment) => attachment.id !== savedMatch.id),
+            );
+          } else {
+            toast.error(result.message);
+          }
+          continue;
+        }
+
+        const pendingMatch = pendingRef.current.find(
+          (item) =>
+            attachmentFileUrl(item.pathname) === url || item.url === url,
+        );
+
+        if (pendingMatch) {
+          if (uploadSessionId) {
+            await deleteDraftBlob(pendingMatch.pathname, uploadSessionId);
+          }
+          setPending((prev) =>
+            prev.filter((item) => item.pathname !== pendingMatch.pathname),
+          );
+        }
+      }
+    },
+    [uploadSessionId],
+  );
+
+  const handleDescriptionChange = useCallback(
+    (next: string) => {
+      const prev = descriptionRef.current;
+      const removedUrls = findRemovedImageAttachmentUrls(prev, next);
+      setDescription(next);
+      if (removedUrls.length > 0) {
+        void removeAttachmentsForImageUrls(removedUrls);
+      }
+    },
+    [removeAttachmentsForImageUrls],
+  );
 
   const handleAttachmentUploaded = useCallback(
     async (uploaded: PendingAttachment) => {
@@ -227,7 +291,7 @@ export default function TaskForm({
           name="description"
           placeholder="Describe the task..."
           value={description}
-          onChange={setDescription}
+          onChange={handleDescriptionChange}
           disabled={isPending}
           uploadContext={uploadContext}
           onAttachmentUploaded={handleAttachmentUploaded}

@@ -48,6 +48,15 @@ export function isEmptyHtml(html: string | null | undefined): boolean {
   return text.length === 0;
 }
 
+function sanitizeImgWidth(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const numeric = value.replace(/px$/i, '').trim();
+  if (!/^\d+$/.test(numeric)) return undefined;
+  const px = Number(numeric);
+  if (px < 1 || px > 4000) return undefined;
+  return numeric;
+}
+
 export function sanitizeRichText(
   html: string | null | undefined,
 ): string | null {
@@ -57,12 +66,26 @@ export function sanitizeRichText(
     allowedTags: ALLOWED_TAGS,
     allowedAttributes: {
       a: ['href', 'name', 'target', 'rel'],
-      img: ['src', 'alt'],
+      img: ['src', 'alt', 'width', 'height'],
       span: ['class'],
       '*': ['class'],
     },
     allowedSchemes: ['http', 'https', 'mailto'],
     allowProtocolRelative: false,
+    transformTags: {
+      img: (_tag, attribs) => {
+        const width = sanitizeImgWidth(attribs.width);
+        const nextAttribs = { ...attribs };
+        if (width) {
+          nextAttribs.width = width;
+        } else {
+          delete nextAttribs.width;
+        }
+        delete nextAttribs.height;
+        delete nextAttribs.style;
+        return { tagName: 'img', attribs: nextAttribs };
+      },
+    },
     exclusiveFilter: (frame) => {
       if (frame.tag === 'img') {
         return !isSafeSrc(frame.attribs.src ?? '');
