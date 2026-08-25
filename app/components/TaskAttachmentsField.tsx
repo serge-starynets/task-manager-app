@@ -18,9 +18,12 @@ import {
 import {
   ALLOWED_EXTENSIONS,
   MAX_ATTACHMENT_BYTES,
+  MAX_TASK_ATTACHMENTS_BYTES,
   attachmentFileUrl,
   formatFileSize,
   isImageContentType,
+  sumAttachmentBytes,
+  validateTaskAttachmentBudget,
   type PendingAttachment,
 } from '@/lib/attachments';
 import { uploadAttachmentFile } from '@/lib/upload-attachment';
@@ -65,14 +68,25 @@ export default function TaskAttachmentsField({
   const [isMutating, startMutate] = useTransition();
 
   const accept = ALLOWED_EXTENSIONS.map((ext) => `.${ext}`).join(',');
+  const usedBytes = sumAttachmentBytes(saved) + sumAttachmentBytes(pending);
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
 
     setUploading(true);
+    let runningTotal = usedBytes;
+    let nextSaved = saved;
+    let nextPending = pending;
+
     try {
       for (const file of Array.from(files)) {
         try {
+          const budget = validateTaskAttachmentBudget(runningTotal, file.size);
+          if (!budget.ok) {
+            toast.error(budget.error);
+            continue;
+          }
+
           const uploaded = await uploadAttachmentFile(file, {
             userId,
             taskId,
@@ -85,13 +99,17 @@ export default function TaskAttachmentsField({
               ...uploaded,
             });
             if (result.success && result.attachment) {
-              onSavedChange([...saved, result.attachment]);
+              nextSaved = [...nextSaved, result.attachment];
+              onSavedChange(nextSaved);
+              runningTotal += uploaded.sizeBytes;
               toast.success(`Attached ${uploaded.fileName}`);
             } else {
               toast.error(result.message);
             }
           } else {
-            onPendingChange([...pending, uploaded]);
+            nextPending = [...nextPending, uploaded];
+            onPendingChange(nextPending);
+            runningTotal += uploaded.sizeBytes;
             toast.success(`Attached ${uploaded.fileName}`);
           }
         } catch (err) {
@@ -134,12 +152,15 @@ export default function TaskAttachmentsField({
   }
 
   const busy = disabled || uploading || isMutating;
+  const atCapacity = usedBytes >= MAX_TASK_ATTACHMENTS_BYTES;
 
   return (
     <FormGroup>
       <FormLabel>Attachments</FormLabel>
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-        Max {formatFileSize(MAX_ATTACHMENT_BYTES)}. Allowed:{' '}
+        Max {formatFileSize(MAX_ATTACHMENT_BYTES)} per file,{' '}
+        {formatFileSize(MAX_TASK_ATTACHMENTS_BYTES)} total per task (
+        {formatFileSize(usedBytes)} used). Allowed:{' '}
         {ALLOWED_EXTENSIONS.map((e) => `.${e}`).join(', ')}
       </p>
 
@@ -213,14 +234,14 @@ export default function TaskAttachmentsField({
         accept={accept}
         multiple
         className="hidden"
-        disabled={busy}
+        disabled={busy || atCapacity}
         onChange={(e) => handleFiles(e.target.files)}
       />
       <Button
         type="button"
         variant="outline"
         size="sm"
-        disabled={busy}
+        disabled={busy || atCapacity}
         isLoading={uploading}
         onClick={() => inputRef.current?.click()}
       >
@@ -237,15 +258,35 @@ export default function TaskAttachmentsField({
 export async function registerUploadedAttachment(opts: {
   uploaded: PendingAttachment;
   taskId?: number;
+  saved?: TaskAttachment[];
   pending: PendingAttachment[];
   onPendingChange: (next: PendingAttachment[]) => void;
   onSaved?: (attachment: TaskAttachment) => void;
 }): Promise<boolean> {
-  const { uploaded, taskId, pending, onPendingChange, onSaved } = opts;
+  const {
+    uploaded,
+    taskId,
+    saved = [],
+    pending,
+    onPendingChange,
+    onSaved,
+  } = opts;
 
   // Avoid duplicate list entries if the same blob was already registered
   if (pending.some((p) => p.pathname === uploaded.pathname)) {
     return true;
+  }
+  if (saved.some((a) => a.pathname === uploaded.pathname)) {
+    return true;
+  }
+
+  const budget = validateTaskAttachmentBudget(
+    sumAttachmentBytes(saved) + sumAttachmentBytes(pending),
+    uploaded.sizeBytes,
+  );
+  if (!budget.ok) {
+    toast.error(budget.error);
+    return false;
   }
 
   if (taskId != null) {

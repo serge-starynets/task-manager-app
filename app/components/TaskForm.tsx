@@ -37,6 +37,8 @@ import {
   attachmentFileUrl,
   findRemovedImageAttachmentUrls,
   stripAttachmentUrlsFromHtml,
+  sumAttachmentBytes,
+  validateTaskAttachmentBudget,
   type PendingAttachment,
 } from '@/lib/attachments';
 
@@ -151,6 +153,7 @@ export default function TaskForm({
         const result = await registerUploadedAttachment({
           uploaded,
           taskId: task.id,
+          saved: savedAttachments,
           pending: [],
           onPendingChange: () => {},
           onSaved: (attachment) => {
@@ -166,12 +169,21 @@ export default function TaskForm({
         return;
       }
 
+      const budgetCheck = validateTaskAttachmentBudget(
+        sumAttachmentBytes(savedAttachments) + sumAttachmentBytes(pending),
+        uploaded.sizeBytes,
+      );
+      if (!budgetCheck.ok) {
+        toast.error(budgetCheck.error);
+        throw new Error(budgetCheck.error);
+      }
+
       setPending((prev) => {
         if (prev.some((p) => p.pathname === uploaded.pathname)) return prev;
         return [...prev, uploaded];
       });
     },
-    [isEditing, task?.id],
+    [isEditing, task?.id, savedAttachments, pending],
   );
 
   const [state, formAction, isPending] = useActionState<

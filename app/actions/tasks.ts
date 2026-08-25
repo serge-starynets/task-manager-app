@@ -138,9 +138,14 @@ export async function createTask(
     };
   } catch (error) {
     console.error('Error creating task:', error);
+    const message =
+      error instanceof Error &&
+      error.message.includes('Task attachments are limited')
+        ? error.message
+        : 'An error occurred while creating the task';
     return {
       success: false,
-      message: 'An error occurred while creating the task',
+      message,
       error: 'Failed to create task',
     };
   }

@@ -1,6 +1,8 @@
 /** Shared attachment rules (client + server). */
 
-export const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024; // 25 MB
+export const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024; // 5 MB per file
+/** Combined size of all attachments on a single task. */
+export const MAX_TASK_ATTACHMENTS_BYTES = 20 * 1024 * 1024; // 20 MB per task
 
 export const ALLOWED_EXTENSIONS = [
   'jpg',
@@ -96,6 +98,30 @@ export function attachmentFileUrl(pathname: string): string {
     .filter(Boolean)
     .map((segment) => encodeURIComponent(segment));
   return `/api/attachments/file/${segments.join('/')}`;
+}
+
+export function sumAttachmentBytes(
+  items: Array<{ sizeBytes: number }>,
+): number {
+  return items.reduce((total, item) => total + (item.sizeBytes || 0), 0);
+}
+
+/** Whether adding `incomingBytes` would stay within the per-task total. */
+export function validateTaskAttachmentBudget(
+  existingBytes: number,
+  incomingBytes: number,
+): { ok: true } | { ok: false; error: string } {
+  if (incomingBytes <= 0) {
+    return { ok: false, error: 'File is empty' };
+  }
+  if (existingBytes + incomingBytes > MAX_TASK_ATTACHMENTS_BYTES) {
+    const remaining = Math.max(0, MAX_TASK_ATTACHMENTS_BYTES - existingBytes);
+    return {
+      ok: false,
+      error: `Task attachments are limited to ${formatFileSize(MAX_TASK_ATTACHMENTS_BYTES)} total (${formatFileSize(remaining)} remaining)`,
+    };
+  }
+  return { ok: true };
 }
 
 export function validateAttachmentFile(file: {

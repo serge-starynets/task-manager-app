@@ -7,8 +7,11 @@ import { db } from '@/db';
 import { taskAttachments, type TaskAttachment } from '@/db/schema';
 import { canManageTask, getCurrentUser, getTaskAttachments } from '@/lib/dal';
 import {
+  MAX_ATTACHMENT_BYTES,
   isValidDraftPathname,
   isValidTaskPathname,
+  sumAttachmentBytes,
+  validateTaskAttachmentBudget,
   type PendingAttachment,
 } from '@/lib/attachments';
 import { z } from 'zod';
@@ -25,11 +28,7 @@ const PendingAttachmentSchema = z.object({
   pathname: z.string().min(1).max(500),
   fileName: z.string().min(1).max(255),
   contentType: z.string().min(1).max(200),
-  sizeBytes: z
-    .number()
-    .int()
-    .positive()
-    .max(25 * 1024 * 1024),
+  sizeBytes: z.number().int().positive().max(MAX_ATTACHMENT_BYTES),
 });
 
 const RegisterSchema = PendingAttachmentSchema.extend({
@@ -70,6 +69,19 @@ export async function registerTaskAttachment(input: {
         success: false,
         message: 'Invalid attachment path',
         error: 'Forbidden',
+      };
+    }
+
+    const existing = await getTaskAttachments(data.taskId);
+    const budget = validateTaskAttachmentBudget(
+      sumAttachmentBytes(existing),
+      data.sizeBytes,
+    );
+    if (!budget.ok) {
+      return {
+        success: false,
+        message: budget.error,
+        error: budget.error,
       };
     }
 
@@ -211,6 +223,15 @@ export async function linkPendingAttachments(
   pending: PendingAttachment[],
 ): Promise<void> {
   if (pending.length === 0) return;
+
+  const existing = await getTaskAttachments(taskId);
+  const budget = validateTaskAttachmentBudget(
+    sumAttachmentBytes(existing),
+    sumAttachmentBytes(pending),
+  );
+  if (!budget.ok) {
+    throw new Error(budget.error);
+  }
 
   await db.insert(taskAttachments).values(
     pending.map((item) => ({
