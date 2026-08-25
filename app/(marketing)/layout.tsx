@@ -78,14 +78,14 @@ export default async function MarketingLayout({
                     Features
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     href="/pricing"
                     className="text-sm text-gray-600 hover:text-purple-600"
                   >
                     Pricing
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <Link
                     href="/faq"
@@ -99,14 +99,14 @@ export default async function MarketingLayout({
             <div>
               <h3 className="text-sm font-semibold mb-4">Resources</h3>
               <ul className="space-y-2">
-                <li>
+                {/* <li>
                   <Link
                     href="/docs"
                     className="text-sm text-gray-600 hover:text-purple-600"
                   >
                     Documentation
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <a
                     href="https://github.com/serge-starynets/task-manager-app"
@@ -124,6 +124,14 @@ export default async function MarketingLayout({
               <ul className="space-y-2">
                 <li>
                   <Link
+                    href="/privacy"
+                    className="text-sm text-gray-600 hover:text-purple-600"
+                  >
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/terms"
                     className="text-sm text-gray-600 hover:text-purple-600"
                   >
@@ -135,7 +143,7 @@ export default async function MarketingLayout({
           </div>
           <div className="mt-8 border-t pt-8 text-center">
             <p className="text-sm text-gray-600">
-              &copy; <Timestamp /> Task Manager. All rights reserved.
+              &copy; <Timestamp /> Serhii Starynets. All rights reserved.
             </p>
           </div>
         </div>

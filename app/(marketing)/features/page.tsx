@@ -9,35 +9,35 @@ export default function FeaturesPage() {
           Features
         </h1>
         <p className="text-xl text-gray-400">
-          Discover how Task Manager App can help you manage your projects more
-          efficiently.
+          Projenda gives you the essential tools to plan and track small
+          personal projects—without the complexity of team-focused software.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         <FeatureCard
-          title="Task Tracking"
-          description="Create, assign, and track tasks with ease. Set priorities, due dates, and statuses to keep your team on track."
+          title="Simple Task Tracking"
+          description="Create tasks, set priorities, and move work through clear statuses from backlog to completion."
         />
         <FeatureCard
-          title="Intuitive UI"
-          description="A clean, modern interface that makes project management a breeze. No clutter, just what you need to get work done."
+          title="Personal Projects"
+          description="Group tasks into focused projects, or keep standalone tasks for ideas and one-off work."
         />
         <FeatureCard
-          title="Collaboration"
-          description="Work together seamlessly. Comment on tasks, mention team members, and keep everyone in the loop."
+          title="List and Board Views"
+          description="Review your backlog in a compact list or use the visual board to move active tasks through your workflow."
         />
         <FeatureCard
-          title="Custom Workflows"
-          description="Create workflows that match your team's process. Customize statuses, labels, and more."
+          title="Rich Task Details"
+          description="Add formatted descriptions, images, and file attachments so the information you need stays with each task."
         />
         <FeatureCard
-          title="Real-time Updates"
-          description="See changes as they happen. No need to refresh or wait for updates."
+          title="Related Tasks"
+          description="Connect related tasks within a project to keep dependencies and supporting work easy to find."
         />
         <FeatureCard
-          title="Powerful Search"
-          description="Find anything instantly with our powerful search. Filter by assignee, status, priority, and more."
+          title="Focused and Intuitive"
+          description="A clean, responsive interface with light and dark themes keeps planning simple and distractions minimal."
         />
       </div>
     </div>
