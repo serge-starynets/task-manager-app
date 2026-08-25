@@ -8,7 +8,9 @@ import {
   pgEnum,
   varchar,
   uniqueIndex,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
+import type { AdapterAccountType } from '@auth/core/adapters';
 
 // Enums for task status, priority, project status, and user role
 export const statusEnum = pgEnum('status', [
@@ -112,11 +114,38 @@ export const taskAttachments = pgTable('task_attachments', {
 // Users table
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
+  name: text('name'),
   email: text('email').notNull().unique(),
-  password: text('password').notNull(),
+  emailVerified: timestamp('email_verified', { mode: 'date' }),
+  image: text('image'),
+  /** Null for OAuth-only accounts. */
+  password: text('password'),
   role: roleEnum('role').default('user').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+/** OAuth provider accounts linked to users (Auth.js). */
+export const accounts = pgTable(
+  'accounts',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').$type<AdapterAccountType>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('provider_account_id').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  (table) => [
+    primaryKey({ columns: [table.provider, table.providerAccountId] }),
+  ],
+);
 
 // Relations between tables
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -167,6 +196,14 @@ export const taskAttachmentsRelations = relations(
 export const usersRelations = relations(users, ({ many }) => ({
   tasks: many(tasks),
   projects: many(projects),
+  accounts: many(accounts),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
 }));
 
 // Types

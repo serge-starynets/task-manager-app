@@ -13,6 +13,8 @@ import {
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { signUp, ActionResponse } from '@/app/actions/auth';
+import GoogleSignInButton from '@/app/components/GoogleSignInButton';
+import AuthDivider from '@/app/components/AuthDivider';
 
 const initialState: ActionResponse = {
   success: false,
@@ -58,6 +60,11 @@ export default function SignUpPage() {
         <h2 className="mt-2 text-center text-lg font-medium text-gray-600 dark:text-gray-300">
           Create a new account
         </h2>
+
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white dark:bg-dark-high py-8 px-4 shadow-soft sm:rounded-xl sm:px-10 border border-gray-200/80 dark:border-dark-border-default dark:shadow-none">
+            <GoogleSignInButton />
+            <AuthDivider />
 
         <Form action={formAction} className="space-y-6">
           {state?.message && !state.success && (
@@ -127,11 +134,13 @@ export default function SignUpPage() {
             </Button>
           </div>
         </Form>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-dark-high py-8 px-4 shadow-soft sm:rounded-xl sm:px-10 border border-gray-200/80 dark:border-dark-border-default dark:shadow-none">
-          <div className="mt-6 text-center">
+          <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{' '}
               <Link

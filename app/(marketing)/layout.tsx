@@ -13,11 +13,14 @@ export default async function MarketingLayout({
       <header className="border-b border-gray-200/80 dark:border-dark-border-subtle bg-surface-elevated/80 backdrop-blur-md dark:bg-dark-base/90 sticky top-0 z-40">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-8">
-            <Link href="/" className="text-xl font-bold tracking-tight flex items-center gap-2">
+            <Link
+              href="/"
+              className="text-xl font-bold tracking-tight flex items-center gap-2"
+            >
               <span className="flex h-7 w-7 items-center justify-center rounded-md bg-purple-600 text-white text-xs font-bold">
-                TM
+                P
               </span>
-              <span className="hidden sm:inline">Task Manager</span>
+              <span className="hidden sm:inline">Projenda</span>
             </Link>
             <nav className="hidden md:flex gap-6">
               <Link
@@ -59,7 +62,7 @@ export default async function MarketingLayout({
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Task Manager</h3>
+              <h3 className="text-lg font-semibold mb-4">Projenda</h3>
               <p className="text-sm text-gray-600">
                 A modern project management tool built with Next.js.
               </p>

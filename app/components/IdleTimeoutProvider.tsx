@@ -2,8 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
-import { signOutDueToIdle, touchSession } from '@/app/actions/auth';
+import { signOutDueToIdle } from '@/app/actions/auth';
 import {
   SESSION_MAX_AGE_SECONDS,
   SESSION_REFRESH_INTERVAL_SECONDS,
@@ -23,10 +24,8 @@ const ACTIVITY_EVENTS = [
 
 /**
  * Tracks user activity and:
- * - refreshes the auth cookie while the user is active (sliding 1h window)
+ * - refreshes the auth session while the user is active (sliding 1h window)
  * - signs out after 1 hour with no activity
- *
- * Safe to mount app-wide: no-ops when there is no session.
  */
 export default function IdleTimeoutProvider({
   children,
@@ -35,13 +34,17 @@ export default function IdleTimeoutProvider({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session, update } = useSession();
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRefreshRef = useRef(0);
   const signingOutRef = useRef(false);
 
   useEffect(() => {
-    // Skip idle tracking on auth pages — no session to manage
     if (pathname === '/signin' || pathname === '/signup') {
+      return;
+    }
+
+    if (!session) {
       return;
     }
 
@@ -81,7 +84,7 @@ export default function IdleTimeoutProvider({
         return;
       }
       lastRefreshRef.current = now;
-      void touchSession();
+      void update();
     }
 
     function onActivity() {
@@ -96,7 +99,6 @@ export default function IdleTimeoutProvider({
       }
     }
 
-    // Initial schedule + opportunistic refresh for already-open sessions
     scheduleIdleTimer();
     refreshIfNeeded();
 
@@ -112,7 +114,7 @@ export default function IdleTimeoutProvider({
       }
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [pathname, router]);
+  }, [pathname, router, session, update]);
 
   return <>{children}</>;
 }

@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { getSession } from './auth';
+import { getSession } from '@/lib/session';
 import { and, asc, eq, ilike, inArray, isNull, notInArray, or } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
@@ -47,17 +47,6 @@ export async function requireUser() {
   }
   return user;
 }
-
-// Get user by email
-export const getUserByEmail = async (email: string) => {
-  try {
-    const result = await db.select().from(users).where(eq(users.email, email));
-    return result[0] || null;
-  } catch (error) {
-    console.error('Error getting user by email:', error);
-    return null;
-  }
-};
 
 async function fetchProjects(userId: string) {
   try {

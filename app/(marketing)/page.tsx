@@ -19,8 +19,8 @@ export default async function LandingPage() {
               </span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-300">
-              A minimal and elegant task tracking tool for modern teams. Manage
-              your projects with ease.
+              A minimal and elegant task tracking tool for solo projects. Manage
+              your ideas with ease.
             </p>
             <div className="mt-10">
               <Link href="/signup">
@@ -38,7 +38,7 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
             <p>
-              © <Timestamp /> Task Manager.
+              © <Timestamp /> Projenda.
             </p>
           </div>
         </div>

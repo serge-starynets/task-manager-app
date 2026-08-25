@@ -2,7 +2,7 @@
 
 A minimal issue-tracking application inspired by Linear. It lets users sign up, create and manage issues (status, priority, descriptions), and keep work organized per account.
 
-**Live demo:** [https://task-manager-app-xi-eight.vercel.app/](https://task-manager-app-xi-eight.vercel.app/)
+**Live demo:** [https://projenda.vercel.app/](https://projenda.vercel.app/)
 
 ## Purpose
 
@@ -10,7 +10,7 @@ This project is a lightweight task/issue manager for individuals and small teams
 
 ## Features
 
-- User authentication (sign up, sign in, sign out)
+- User authentication (Google OAuth + email/password sign up, sign in, sign out)
 - Role-based access (`admin` and `user`)
 - Per-user issue isolation (admins see all issues)
 - Issue management (create, update, delete) with status and priority
@@ -21,8 +21,8 @@ This project is a lightweight task/issue manager for individuals and small teams
 
 - [Next.js](https://nextjs.org/) (App Router) + [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/) for styling
+- [Auth.js](https://authjs.dev/) (NextAuth v5) — Google OAuth + email/password
 - [Drizzle ORM](https://orm.drizzle.team/) + [PostgreSQL](https://www.postgresql.org/) ([Neon](https://neon.tech/) in production)
-- Custom JWT auth (`jose` + `bcrypt`) with HTTP-only cookies
 - [Zod](https://zod.dev/) for validation
 - [Vitest](https://vitest.dev/) for testing
 - Deployed on [Vercel](https://vercel.com/)
@@ -44,7 +44,21 @@ This project is a lightweight task/issue manager for individuals and small teams
    npm install
    ```
 
-2. Copy env values and set `LOCAL_DATABASE_URL`, `DATABASE_URL`, and `JWT_SECRET` in `.env`.
+2. Create `.env` with database and auth values:
+
+   ```bash
+   LOCAL_DATABASE_URL=postgres://user:password@localhost:5432/taskmanager
+   DATABASE_URL=postgresql://...   # Neon connection string (production)
+   AUTH_SECRET=                   # openssl rand -hex 32
+   AUTH_GOOGLE_ID=                # Google Cloud Console OAuth client ID
+   AUTH_GOOGLE_SECRET=            # Google Cloud Console OAuth client secret
+   BLOB_READ_WRITE_TOKEN=         # Vercel Blob (optional, for attachments)
+   ```
+
+   For Google OAuth, add these **Authorized redirect URIs** in [Google Cloud Console](https://console.cloud.google.com/):
+
+   - `http://localhost:3000/api/auth/callback/google` (local)
+   - `https://projenda.vercel.app/api/auth/callback/google` (production)
 
 3. Push the schema and (optionally) seed demo data:
 
@@ -61,6 +75,8 @@ This project is a lightweight task/issue manager for individuals and small teams
 
 5. Open [http://localhost:3000](http://localhost:3000).
 
+Demo email/password accounts (after `npm run seed`): `admin@example.com` / `user@example.com` with password `password123`.
+
 ### Promote a user to admin
 
 ```bash
@@ -73,7 +89,8 @@ npx tsx scripts/promote-admin.ts user@example.com --neon   # production (Neon)
 - `app/` — Next.js App Router pages, server actions, and UI components
 - `app/api/` — REST API routes for issues
 - `db/` — Drizzle schema and database client
-- `lib/` — Auth, data access layer, and shared utilities
+- `auth.ts` — Auth.js config (Google OAuth + credentials)
+- `lib/` — Data access layer, user helpers, and shared utilities
 - `scripts/` — Seed and admin promotion scripts
 
 ## License

@@ -1,24 +1,16 @@
 'use server';
 
 import { z } from 'zod';
-import {
-  verifyPassword,
-  createSession,
-  createUser,
-  deleteSession,
-  refreshSession,
-  getSession,
-} from '@/lib/auth';
-import { getUserByEmail } from '@/lib/dal';
-import { redirect } from 'next/navigation';
+import { signIn as authSignIn, signOut as authSignOut } from '@/auth';
+import { createUser, getUserByEmail } from '@/lib/users';
+import { getSession } from '@/lib/session';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 
-// Define Zod schema for signin validation
 const SignInSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
 });
 
-// Define Zod schema for signup validation
 const SignUpSchema = z
   .object({
     email: z.string().min(1, 'Email is required').email('Invalid email format'),
@@ -42,13 +34,11 @@ export type ActionResponse = {
 
 export async function signIn(formData: FormData): Promise<ActionResponse> {
   try {
-    // Extract data from form
     const data = {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
     };
 
-    // Validate with Zod
     const validationResult = SignInSchema.safeParse(data);
     if (!validationResult.success) {
       return {
@@ -58,7 +48,6 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
       };
     }
 
-    // Find user by email
     const user = await getUserByEmail(data.email);
     if (!user) {
       return {
@@ -70,9 +59,23 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
       };
     }
 
-    // Verify password
-    const isPasswordValid = await verifyPassword(data.password, user.password);
-    if (!isPasswordValid) {
+    if (!user.password) {
+      return {
+        success: false,
+        message: 'This account uses Google sign-in',
+        errors: {
+          email: ['Sign in with Google instead'],
+        },
+      };
+    }
+
+    const result = await authSignIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
       return {
         success: false,
         message: 'Invalid email or password',
@@ -81,9 +84,6 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
         },
       };
     }
-
-    // Create session
-    await createSession(user.id);
 
     return {
       success: true,
@@ -101,14 +101,12 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
 
 export async function signUp(formData: FormData): Promise<ActionResponse> {
   try {
-    // Extract data from form
     const data = {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
       confirmPassword: formData.get('confirmPassword') as string,
     };
 
-    // Validate with Zod
     const validationResult = SignUpSchema.safeParse(data);
     if (!validationResult.success) {
       return {
@@ -118,19 +116,21 @@ export async function signUp(formData: FormData): Promise<ActionResponse> {
       };
     }
 
-    // Check if user already exists
     const existingUser = await getUserByEmail(data.email);
     if (existingUser) {
+      const message = existingUser.password
+        ? 'User with this email already exists'
+        : 'This email is registered with Google. Sign in with Google instead.';
+
       return {
         success: false,
-        message: 'User with this email already exists',
+        message,
         errors: {
-          email: ['User with this email already exists'],
+          email: [message],
         },
       };
     }
 
-    // Create new user
     const user = await createUser(data.email, data.password);
     if (!user) {
       return {
@@ -140,8 +140,19 @@ export async function signUp(formData: FormData): Promise<ActionResponse> {
       };
     }
 
-    // Create session for the newly registered user
-    await createSession(user.id);
+    const result = await authSignIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      return {
+        success: false,
+        message: 'Account created but sign-in failed. Please sign in manually.',
+        error: result.error,
+      };
+    }
 
     return {
       success: true,
@@ -159,20 +170,20 @@ export async function signUp(formData: FormData): Promise<ActionResponse> {
 
 export async function signOut(): Promise<void> {
   try {
-    await deleteSession();
+    await authSignOut({ redirectTo: '/signin' });
   } catch (error) {
+    // Auth.js signs out by calling Next.js `redirect()`, which throws.
+    if (isRedirectError(error)) throw error;
     console.error('Sign out error:', error);
     throw new Error('Failed to sign out');
-  } finally {
-    redirect('/signin');
   }
 }
 
-/** Extend the session cookie while the user is active (sliding idle window). */
+/** Extend the session while the user is active (sliding idle window). */
 export async function touchSession(): Promise<{ ok: boolean }> {
   try {
-    const ok = await refreshSession();
-    return { ok };
+    const session = await getSession();
+    return { ok: Boolean(session) };
   } catch (error) {
     console.error('Touch session error:', error);
     return { ok: false };
@@ -189,7 +200,7 @@ export async function signOutDueToIdle(): Promise<{ signedOut: boolean }> {
     if (!session) {
       return { signedOut: false };
     }
-    await deleteSession();
+    await authSignOut({ redirect: false });
     return { signedOut: true };
   } catch (error) {
     console.error('Idle sign out error:', error);

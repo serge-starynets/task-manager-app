@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import AppToaster from './components/AppToaster';
+import AuthSessionProvider from './components/AuthSessionProvider';
 import IdleTimeoutProvider from './components/IdleTimeoutProvider';
 
 const inter = Inter({
@@ -24,10 +25,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class">
-          <IdleTimeoutProvider>
-            <AppToaster />
-            {children}
-          </IdleTimeoutProvider>
+          <AuthSessionProvider>
+            <IdleTimeoutProvider>
+              <AppToaster />
+              {children}
+            </IdleTimeoutProvider>
+          </AuthSessionProvider>
         </ThemeProvider>
       </body>
     </html>
