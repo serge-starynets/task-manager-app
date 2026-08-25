@@ -4,7 +4,35 @@ import { db } from '../db';
 import { tasks, projects, users } from '../db/schema';
 import { allocateTaskId } from '../lib/task-id';
 
+function assertSafeToSeed() {
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    console.error(
+      'Refusing to seed: this script wipes all data and must never run against production.',
+    );
+    process.exit(1);
+  }
+
+  if (!process.env.LOCAL_DATABASE_URL) {
+    console.error(
+      'Refusing to seed: LOCAL_DATABASE_URL is not set. Seeding only targets the local database.',
+    );
+    process.exit(1);
+  }
+
+  const confirmed =
+    process.argv.includes('--force') || process.env.SEED_FORCE === '1';
+  if (!confirmed) {
+    console.error(
+      'This script DELETES all tasks, projects, and users before seeding.\n' +
+        'Re-run with --force (npm run seed -- --force) or SEED_FORCE=1 to confirm.',
+    );
+    process.exit(1);
+  }
+}
+
 async function main() {
+  assertSafeToSeed();
+
   console.log('Starting database seeding...');
 
   // Clean up existing data (order matters for FKs)

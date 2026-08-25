@@ -1,10 +1,55 @@
 'use server';
 
 import { z } from 'zod';
+import { headers } from 'next/headers';
 import { signIn as authSignIn, signOut as authSignOut } from '@/auth';
-import { createUser, getUserByEmail } from '@/lib/users';
+import { createUser, getUserByEmail, normalizeEmail } from '@/lib/users';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { getSession } from '@/lib/session';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
+
+const AUTH_RATE_LIMIT = 10; // attempts
+const AUTH_RATE_WINDOW_MS = 15 * 60 * 1000;
+
+async function getClientIp(): Promise<string> {
+  const headerList = await headers();
+  const forwarded = headerList.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return headerList.get('x-real-ip') ?? 'unknown';
+}
+
+/** Throttle by IP and by target email so neither can be brute-forced alone. */
+async function checkAuthRateLimit(
+  scope: 'signin' | 'signup',
+  email: string,
+): Promise<boolean> {
+  const ip = await getClientIp();
+  const ipResult = checkRateLimit(
+    `${scope}:ip:${ip}`,
+    AUTH_RATE_LIMIT,
+    AUTH_RATE_WINDOW_MS,
+  );
+  const emailResult = checkRateLimit(
+    `${scope}:email:${normalizeEmail(email)}`,
+    AUTH_RATE_LIMIT,
+    AUTH_RATE_WINDOW_MS,
+  );
+  return ipResult.ok && emailResult.ok;
+}
+
+const RATE_LIMITED_RESPONSE: ActionResponse = {
+  success: false,
+  message: 'Too many attempts. Please try again later.',
+  error: 'Rate limited',
+};
+
+const GENERIC_SIGNIN_FAILURE: ActionResponse = {
+  success: false,
+  message: 'Invalid email or password',
+  errors: {
+    email: ['Invalid email or password'],
+  },
+};
 
 const SignInSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email format'),
@@ -48,25 +93,16 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
       };
     }
 
-    const user = await getUserByEmail(data.email);
-    if (!user) {
-      return {
-        success: false,
-        message: 'Invalid email or password',
-        errors: {
-          email: ['Invalid email or password'],
-        },
-      };
+    const allowed = await checkAuthRateLimit('signin', data.email);
+    if (!allowed) {
+      return RATE_LIMITED_RESPONSE;
     }
 
-    if (!user.password) {
-      return {
-        success: false,
-        message: 'This account uses Google sign-in',
-        errors: {
-          email: ['Sign in with Google instead'],
-        },
-      };
+    // One generic failure for every case (unknown email, OAuth-only account,
+    // wrong password) so responses don't reveal account state.
+    const user = await getUserByEmail(data.email);
+    if (!user?.password) {
+      return GENERIC_SIGNIN_FAILURE;
     }
 
     const result = await authSignIn('credentials', {
@@ -76,13 +112,7 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
     });
 
     if (result?.error) {
-      return {
-        success: false,
-        message: 'Invalid email or password',
-        errors: {
-          password: ['Invalid email or password'],
-        },
-      };
+      return GENERIC_SIGNIN_FAILURE;
     }
 
     return {
@@ -116,11 +146,17 @@ export async function signUp(formData: FormData): Promise<ActionResponse> {
       };
     }
 
+    const allowed = await checkAuthRateLimit('signup', data.email);
+    if (!allowed) {
+      return RATE_LIMITED_RESPONSE;
+    }
+
     const existingUser = await getUserByEmail(data.email);
     if (existingUser) {
-      const message = existingUser.password
-        ? 'User with this email already exists'
-        : 'This email is registered with Google. Sign in with Google instead.';
+      // Same message for credential and OAuth accounts — don't reveal how
+      // (or whether) the email signed up.
+      const message =
+        'This email cannot be used. If you already have an account, sign in instead.';
 
       return {
         success: false,

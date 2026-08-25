@@ -1,4 +1,4 @@
-import { InferSelectModel, relations } from 'drizzle-orm';
+import { InferSelectModel, relations, sql } from 'drizzle-orm';
 import {
   integer,
   pgTable,
@@ -63,7 +63,7 @@ export const tasks = pgTable(
   'tasks',
   {
     id: serial('id').primaryKey(),
-    /** Human-readable ID: {PROJECT_ABBR}-{n}, e.g. WEB-1. Unique globally. */
+    /** Human-readable ID: {PROJECT_ABBR}-{n}, e.g. WEB-1. Unique per user. */
     taskId: varchar('task_id', { length: 32 }).notNull(),
     title: text('title').notNull(),
     /** Quill HTML (sanitized on write). Plain text still works for older rows. */
@@ -75,7 +75,9 @@ export const tasks = pgTable(
     userId: text('user_id').notNull(),
     projectId: integer('project_id').references(() => projects.id),
   },
-  (table) => [uniqueIndex('tasks_task_id_uidx').on(table.taskId)],
+  (table) => [
+    uniqueIndex('tasks_user_id_task_id_uidx').on(table.userId, table.taskId),
+  ],
 );
 
 /** Undirected many-to-many links between tasks. Always stored with taskIdA < taskIdB. */
@@ -112,17 +114,25 @@ export const taskAttachments = pgTable('task_attachments', {
 });
 
 // Users table
-export const users = pgTable('users', {
-  id: text('id').primaryKey(),
-  name: text('name'),
-  email: text('email').notNull().unique(),
-  emailVerified: timestamp('email_verified', { mode: 'date' }),
-  image: text('image'),
-  /** Null for OAuth-only accounts. */
-  password: text('password'),
-  role: roleEnum('role').default('user').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+export const users = pgTable(
+  'users',
+  {
+    id: text('id').primaryKey(),
+    name: text('name'),
+    /** Stored lowercase; always normalize before lookup/write (see lib/users.ts). */
+    email: text('email').notNull().unique(),
+    emailVerified: timestamp('email_verified', { mode: 'date' }),
+    image: text('image'),
+    /** Null for OAuth-only accounts. */
+    password: text('password'),
+    role: roleEnum('role').default('user').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    // Rejects case-variant duplicates even if a caller skips normalization.
+    uniqueIndex('users_email_lower_uidx').on(sql`lower(${table.email})`),
+  ],
+);
 
 /** OAuth provider accounts linked to users (Auth.js). */
 export const accounts = pgTable(

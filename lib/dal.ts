@@ -105,12 +105,22 @@ export async function countUserProjects(userId: string) {
   }
 }
 
+/**
+ * Safe subset of user columns to expose alongside tasks.
+ * Never widen this to the full row — it contains the password hash.
+ */
+export const PUBLIC_USER_COLUMNS = {
+  id: true,
+  email: true,
+  role: true,
+} as const;
+
 async function fetchTasks(userId: string, role: User['role']) {
   try {
     return await db.query.tasks.findMany({
       where: role === 'admin' ? undefined : eq(tasks.userId, userId),
       with: {
-        user: true,
+        user: { columns: PUBLIC_USER_COLUMNS },
       },
       orderBy: (tasksTable, { desc }) => [desc(tasksTable.createdAt)],
     });
@@ -133,7 +143,7 @@ async function fetchTasksForProject(userId: string, projectId: number) {
     return await db.query.tasks.findMany({
       where: and(eq(tasks.userId, userId), eq(tasks.projectId, projectId)),
       with: {
-        user: true,
+        user: { columns: PUBLIC_USER_COLUMNS },
       },
       orderBy: (tasksTable, { desc }) => [desc(tasksTable.updatedAt)],
     });
@@ -156,7 +166,7 @@ async function fetchOrphanedTasks(userId: string) {
     return await db.query.tasks.findMany({
       where: and(eq(tasks.userId, userId), isNull(tasks.projectId)),
       with: {
-        user: true,
+        user: { columns: PUBLIC_USER_COLUMNS },
       },
       orderBy: (tasksTable, { desc }) => [desc(tasksTable.updatedAt)],
     });
@@ -178,7 +188,7 @@ export async function getTask(taskId: number) {
   try {
     const result = await db.query.tasks.findFirst({
       where: eq(tasks.id, taskId),
-      with: { user: true },
+      with: { user: { columns: PUBLIC_USER_COLUMNS } },
     });
     return result;
   } catch (err) {

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { getCurrentUser, getProject, isAdmin } from '@/lib/dal';
-import { sanitizeRichText } from '@/lib/rich-text';
-import { allocateTaskId } from '@/lib/task-id';
+import { getCurrentUser, isAdmin, PUBLIC_USER_COLUMNS } from '@/lib/dal';
+import { createTaskForUser } from '@/lib/task-service';
 
 export async function GET() {
   try {
@@ -15,7 +15,7 @@ export async function GET() {
 
     const allTasks = await db.query.tasks.findMany({
       where: isAdmin(user) ? undefined : eq(tasks.userId, user.id),
-      with: { user: true },
+      with: { user: { columns: PUBLIC_USER_COLUMNS } },
       orderBy: (tasksTable, { desc }) => [desc(tasksTable.createdAt)],
     });
 
@@ -38,36 +38,35 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    if (!data.title) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
-    }
-
     let projectId: number | null = null;
     if (data.projectId != null && data.projectId !== '') {
       projectId = Number(data.projectId);
-      const project = await getProject(projectId);
-      if (!project || project.userId !== user.id) {
-        return NextResponse.json({ error: 'Invalid project' }, { status: 403 });
+      if (!Number.isInteger(projectId)) {
+        return NextResponse.json({ error: 'Invalid project' }, { status: 400 });
       }
     }
 
-    const taskId = await allocateTaskId(projectId, user.id);
+    const result = await createTaskForUser(user, {
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      priority: data.priority,
+      projectId,
+    });
 
-    const newTask = await db
-      .insert(tasks)
-      .values({
-        taskId,
-        title: data.title,
-        description: sanitizeRichText(data.description),
-        status: data.status || 'backlog',
-        priority: data.priority || 'medium',
-        userId: user.id,
-        projectId,
-      })
-      .returning();
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.message, errors: result.errors },
+        { status: result.status },
+      );
+    }
+
+    revalidateTag('tasks', 'max');
+    revalidatePath('/dashboard');
+    revalidatePath('/tasks', 'layout');
 
     return NextResponse.json(
-      { message: 'Task created successfully', task: newTask[0] },
+      { message: 'Task created successfully', task: result.task },
       { status: 201 },
     );
   } catch (error) {

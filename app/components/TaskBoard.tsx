@@ -12,6 +12,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import { updateTaskStatus } from '@/app/actions/tasks';
 import { BOARD_STATUSES } from '@/db/schema';
 import type { Status, TaskWithUser } from '@/lib/types';
@@ -30,6 +31,7 @@ type OptimisticAction = {
 };
 
 export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
+  const router = useRouter();
   const [activeTask, setActiveTask] = useState<TaskWithUser | null>(null);
   const [, startTransition] = useTransition();
 
@@ -92,6 +94,8 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       const result = await updateTaskStatus(taskId, newStatus);
       if (!result.success) {
         toast.error(result.message || 'Failed to update task status');
+        // Re-fetch authoritative data so the card returns to its real column.
+        router.refresh();
       }
     });
   }

@@ -2,6 +2,10 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import React from 'react';
 
+// `server-only` throws when imported outside a Server Component; in tests we
+// import server modules directly, so neutralize the guard.
+vi.mock('server-only', () => ({}));
+
 // Mock Next.js router
 vi.mock('next/navigation', () => ({
   useRouter: () => ({

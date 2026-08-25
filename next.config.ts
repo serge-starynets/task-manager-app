@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // ignore ts errors
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 };
 
 export default nextConfig;

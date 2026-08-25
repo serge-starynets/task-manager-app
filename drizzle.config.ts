@@ -1,20 +1,16 @@
 import type { Config } from 'drizzle-kit';
 import 'dotenv/config';
 
-function resolveDbUrl() {
-  // Treat empty strings as unset (e.g. DRIZZLE_DB_URL="$DATABASE_URL" when shell has no DATABASE_URL)
-  const candidates = [
-    process.env.DRIZZLE_DB_URL,
-    process.env.LOCAL_DATABASE_URL,
-    process.env.DATABASE_URL,
-  ];
-
-  for (const candidate of candidates) {
-    const url = candidate?.trim();
-    if (url) return url;
-  }
-
-  return '';
+/**
+ * Local development config. Deliberately accepts ONLY LOCAL_DATABASE_URL so
+ * `db:push` and friends can never fall back to the production DATABASE_URL.
+ * Production changes go through drizzle.neon.config.ts explicitly.
+ */
+const url = process.env.LOCAL_DATABASE_URL?.trim();
+if (!url) {
+  throw new Error(
+    'LOCAL_DATABASE_URL is not set. This config only targets the local database; use drizzle.neon.config.ts for Neon.',
+  );
 }
 
 export default {
@@ -22,6 +18,6 @@ export default {
   schema: './db/schema.ts',
   out: './drizzle',
   dbCredentials: {
-    url: resolveDbUrl(),
+    url,
   },
 } satisfies Config;

@@ -12,10 +12,20 @@ import { Status, Priority } from '@/lib/types';
 
 const mockUser = {
   id: 'user1',
+  name: null,
   email: 'user1@example.com',
+  emailVerified: null,
+  image: null,
   password: 'hashed-password',
   role: 'user' as const,
   createdAt: new Date(),
+};
+
+/** Matches the narrowed user projection returned with tasks (no password). */
+const mockTaskUser = {
+  id: 'user1',
+  email: 'user1@example.com',
+  role: 'user' as const,
 };
 
 const mockProject = {
@@ -95,13 +105,7 @@ describe('DashboardPage', () => {
         updatedAt: new Date(),
         userId: 'user1',
         projectId: 1,
-        user: {
-          id: 'user1',
-          email: 'user1@example.com',
-          password: 'hashed-password',
-          role: 'user' as const,
-          createdAt: new Date(),
-        },
+        user: mockTaskUser,
       },
       {
         id: 2,
@@ -114,13 +118,7 @@ describe('DashboardPage', () => {
         updatedAt: new Date(),
         userId: 'user1',
         projectId: 1,
-        user: {
-          id: 'user1',
-          email: 'user1@example.com',
-          password: 'hashed-password',
-          role: 'user' as const,
-          createdAt: new Date(),
-        },
+        user: mockTaskUser,
       },
     ];
 
@@ -247,13 +245,7 @@ describe('DashboardPage', () => {
         updatedAt: new Date(),
         userId: 'user1',
         projectId: null,
-        user: {
-          id: 'user1',
-          email: 'user1@example.com',
-          password: 'hashed-password',
-          role: 'user' as const,
-          createdAt: new Date(),
-        },
+        user: mockTaskUser,
       },
     ];
 

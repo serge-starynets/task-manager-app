@@ -4,14 +4,9 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { canManageTask, getCurrentUser, getProject, isAdmin } from '@/lib/dal';
+import { canManageTask, getCurrentUser, isAdmin } from '@/lib/dal';
 import { sanitizeRichText } from '@/lib/rich-text';
-import { allocateTaskId } from '@/lib/task-id';
-import {
-  deleteBlobsForTask,
-  linkPendingAttachments,
-} from '@/app/actions/attachments';
-import { parsePendingAttachments } from '@/lib/attachments';
+import { createTaskForUser, deleteTaskForUser } from '@/lib/task-service';
 import { z } from 'zod';
 
 const TaskSchema = z.object({
@@ -67,63 +62,23 @@ export async function createTask(
       };
     }
 
-    const timestamp = Date.now();
-    const createdDate = new Date(timestamp);
-
-    const newTaskData = {
-      ...data,
-      userId: user.id,
-      createdAt: createdDate,
+    const result = await createTaskForUser(user, {
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      priority: data.priority,
       projectId: data.projectId ?? null,
-    };
+      pendingAttachmentsJson: data.pendingAttachmentsJson,
+      uploadSessionId: data.uploadSessionId,
+    });
 
-    const validationResult = TaskSchema.safeParse(newTaskData);
-    if (!validationResult.success) {
+    if (!result.ok) {
       return {
         success: false,
-        message: 'Validation failed',
-        errors: validationResult.error.flatten().fieldErrors,
+        message: result.message,
+        errors: result.errors,
+        error: result.status === 403 ? 'Forbidden' : result.message,
       };
-    }
-
-    const validatedData = validationResult.data;
-    const projectId: number | null = validatedData.projectId ?? null;
-
-    if (projectId !== null) {
-      const project = await getProject(projectId);
-      if (!project || project.userId !== user.id) {
-        return {
-          success: false,
-          message: 'Invalid project',
-          error: 'Forbidden',
-          errors: { projectId: ['Please select a valid project'] },
-        };
-      }
-    }
-
-    const taskId = await allocateTaskId(projectId, user.id);
-
-    const [created] = await db
-      .insert(tasks)
-      .values({
-        taskId,
-        title: validatedData.title,
-        description: sanitizeRichText(validatedData.description),
-        status: validatedData.status,
-        priority: validatedData.priority,
-        userId: validatedData.userId,
-        projectId,
-        createdAt: validatedData.createdAt,
-      })
-      .returning();
-
-    if (created && data.uploadSessionId && data.pendingAttachmentsJson) {
-      const pending = parsePendingAttachments(
-        data.pendingAttachmentsJson,
-        user.id,
-        data.uploadSessionId,
-      );
-      await linkPendingAttachments(created.id, user.id, pending);
     }
 
     revalidateTag('tasks', 'max');
@@ -133,8 +88,8 @@ export async function createTask(
     return {
       success: true,
       message: 'Task created successfully',
-      projectId,
-      taskId: created?.id,
+      projectId: result.task.projectId,
+      taskId: result.task.id,
     };
   } catch (error) {
     console.error('Error creating task:', error);
@@ -294,17 +249,14 @@ export async function deleteTask(id: number) {
       throw new Error('Unauthorized');
     }
 
-    const canManage = await canManageTask(id);
-    if (!canManage) {
+    const result = await deleteTaskForUser(id);
+    if (!result.ok) {
       return {
         success: false,
         message: 'An error occurred while deleting the task.',
         error: 'Failed to delete task of another user',
       };
     }
-
-    await deleteBlobsForTask(id);
-    await db.delete(tasks).where(eq(tasks.id, id));
 
     revalidateTag('tasks', 'max');
     revalidatePath('/dashboard');

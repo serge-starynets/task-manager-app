@@ -1,6 +1,6 @@
 'use server';
 
-import { del } from '@vercel/blob';
+import { del, head } from '@vercel/blob';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -12,7 +12,6 @@ import {
   isValidTaskPathname,
   sumAttachmentBytes,
   validateTaskAttachmentBudget,
-  type PendingAttachment,
 } from '@/lib/attachments';
 import { z } from 'zod';
 
@@ -72,10 +71,32 @@ export async function registerTaskAttachment(input: {
       };
     }
 
+    // Client-sent size/url/contentType are untrusted; read the authoritative
+    // values from the blob store for the validated pathname.
+    let blobMeta;
+    try {
+      blobMeta = await head(data.pathname);
+    } catch (headError) {
+      console.error('Error reading blob metadata:', headError);
+      return {
+        success: false,
+        message: 'Uploaded file not found',
+        error: 'Not found',
+      };
+    }
+
+    if (blobMeta.size > MAX_ATTACHMENT_BYTES) {
+      return {
+        success: false,
+        message: 'File is too large',
+        error: 'File is too large',
+      };
+    }
+
     const existing = await getTaskAttachments(data.taskId);
     const budget = validateTaskAttachmentBudget(
       sumAttachmentBytes(existing),
-      data.sizeBytes,
+      blobMeta.size,
     );
     if (!budget.ok) {
       return {
@@ -90,10 +111,10 @@ export async function registerTaskAttachment(input: {
       .values({
         taskId: data.taskId,
         fileName: data.fileName,
-        contentType: data.contentType,
-        sizeBytes: data.sizeBytes,
-        url: data.url,
-        pathname: data.pathname,
+        contentType: blobMeta.contentType || data.contentType,
+        sizeBytes: blobMeta.size,
+        url: blobMeta.url,
+        pathname: blobMeta.pathname,
         uploadedBy: user.id,
       })
       .returning();
@@ -204,44 +225,4 @@ export async function deleteDraftBlob(
       error: 'Failed to remove file',
     };
   }
-}
-
-export async function deleteBlobsForTask(taskId: number): Promise<void> {
-  const attachments = await getTaskAttachments(taskId);
-  if (attachments.length === 0) return;
-
-  try {
-    await del(attachments.map((a) => a.url));
-  } catch (error) {
-    console.error('Error deleting task blobs:', taskId, error);
-  }
-}
-
-export async function linkPendingAttachments(
-  taskId: number,
-  userId: string,
-  pending: PendingAttachment[],
-): Promise<void> {
-  if (pending.length === 0) return;
-
-  const existing = await getTaskAttachments(taskId);
-  const budget = validateTaskAttachmentBudget(
-    sumAttachmentBytes(existing),
-    sumAttachmentBytes(pending),
-  );
-  if (!budget.ok) {
-    throw new Error(budget.error);
-  }
-
-  await db.insert(taskAttachments).values(
-    pending.map((item) => ({
-      taskId,
-      fileName: item.fileName,
-      contentType: item.contentType,
-      sizeBytes: item.sizeBytes,
-      url: item.url,
-      pathname: item.pathname,
-      uploadedBy: userId,
-    })),
-  );
 }

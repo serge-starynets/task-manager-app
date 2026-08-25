@@ -1,7 +1,6 @@
-import { db } from '@/db';
-import { tasks } from '@/db/schema';
-import { canManageTask, getCurrentUser, getTask, isAdmin } from '@/lib/dal';
-import { eq } from 'drizzle-orm';
+import { getCurrentUser, getTask, isAdmin } from '@/lib/dal';
+import { deleteTaskForUser } from '@/lib/task-service';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const GET = async (
@@ -40,13 +39,18 @@ export const DELETE = async (
 
     const { id } = await params;
     const taskId = parseInt(id);
-    const canManage = await canManageTask(taskId);
 
-    if (!canManage) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const result = await deleteTaskForUser(taskId);
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.message },
+        { status: result.status },
+      );
     }
 
-    await db.delete(tasks).where(eq(tasks.id, taskId));
+    revalidateTag('tasks', 'max');
+    revalidatePath('/dashboard');
+    revalidatePath('/tasks', 'layout');
 
     return NextResponse.json({ message: 'Task deleted successfully' });
   } catch (e) {
