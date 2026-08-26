@@ -32,6 +32,7 @@ export const projectStatusEnum = pgEnum('project_status', [
   'not_started',
   'ongoing',
   'completed',
+  'paused',
 ]);
 export const roleEnum = pgEnum('role', ['admin', 'user']);
 
@@ -256,4 +257,5 @@ export const PROJECT_STATUS = {
   not_started: { label: 'Not started', value: 'not_started' },
   ongoing: { label: 'Ongoing', value: 'ongoing' },
   completed: { label: 'Completed', value: 'completed' },
+  paused: { label: 'Paused', value: 'paused' },
 };

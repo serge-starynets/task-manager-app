@@ -15,13 +15,13 @@ function DashboardShellInner({
   const isBoardView = searchParams.get('view') === 'board';
   const contentClass = isBoardView
     ? 'dark:text-white w-full mx-auto p-4 md:p-6'
-    : 'dark:text-white max-w-6xl mx-auto p-4 md:p-8';
+    : 'dark:text-white max-w-[86.4rem] mx-auto p-4 md:p-8';
 
   if (!hasProject) {
     return (
       <div className="min-h-screen bg-background">
         <main className="min-h-screen">
-          <div className="dark:text-white max-w-6xl mx-auto p-4 md:p-8">
+          <div className="dark:text-white max-w-[86.4rem] mx-auto p-4 md:p-8">
             {children}
           </div>
         </main>
@@ -51,7 +51,7 @@ export default function DashboardShell({
       fallback={
         <div className="min-h-screen bg-background">
           <main className="min-h-screen">
-            <div className="dark:text-white max-w-6xl mx-auto p-4 md:p-8">
+            <div className="dark:text-white max-w-[86.4rem] mx-auto p-4 md:p-8">
               {children}
             </div>
           </main>

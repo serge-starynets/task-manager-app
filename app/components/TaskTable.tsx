@@ -28,16 +28,16 @@ export default function TaskTable({
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200/80 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-soft dark:shadow-none">
-      <div className="grid grid-cols-12 gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 bg-gray-50/80 dark:bg-dark-elevated border-b border-gray-200/80 dark:border-dark-border-default">
-        <div className="col-span-2 flex items-center gap-1.5">
+      <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,4.5fr)_minmax(0,1.8fr)_minmax(0,1.1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 bg-gray-50/80 dark:bg-dark-elevated border-b border-gray-200/80 dark:border-dark-border-default">
+        <div className="flex items-center gap-1.5">
           <ListTodoIcon size={12} className="opacity-60" />
           ID
         </div>
-        <div className="col-span-3">Title</div>
-        <div className="col-span-2">Status</div>
-        <div className="col-span-1">Priority</div>
-        <div className="col-span-2">Created</div>
-        <div className="col-span-2">Updated</div>
+        <div>Title</div>
+        <div>Status</div>
+        <div>Priority</div>
+        <div>Created</div>
+        <div>Updated</div>
       </div>
 
       <div className="divide-y divide-gray-100 dark:divide-dark-border-subtle">
@@ -47,27 +47,27 @@ export default function TaskTable({
             href={`/tasks/${task.id}`}
             className="block hover:bg-gray-50/80 dark:hover:bg-dark-elevated/80 transition-colors duration-150"
           >
-            <div className="grid grid-cols-12 gap-4 px-6 py-3.5 items-center">
-              <div className="col-span-2 text-sm font-mono text-gray-500 dark:text-gray-400 truncate">
+            <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,4.5fr)_minmax(0,1.8fr)_minmax(0,1.1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-4 px-6 py-3.5 items-center">
+              <div className="text-sm font-mono text-gray-500 dark:text-gray-400 truncate">
                 {task.taskId}
               </div>
-              <div className="font-medium truncate col-span-3 text-gray-900 dark:text-gray-100">
+              <div className="font-medium truncate text-gray-900 dark:text-gray-100">
                 {task.title}
               </div>
-              <div className="col-span-2">
+              <div>
                 <Badge status={task.status as Status}>
                   {TASK_STATUS[task.status as Status].label}
                 </Badge>
               </div>
-              <div className="col-span-1">
+              <div>
                 <Badge priority={task.priority as Priority}>
                   {TASK_PRIORITY[task.priority as Priority].label}
                 </Badge>
               </div>
-              <div className="col-span-2 text-xs text-gray-400 dark:text-gray-500">
+              <div className="text-xs text-gray-400 dark:text-gray-500">
                 {formatRelativeTime(new Date(task.createdAt))}
               </div>
-              <div className="col-span-2 text-xs text-gray-400 dark:text-gray-500">
+              <div className="text-xs text-gray-400 dark:text-gray-500">
                 {formatRelativeTime(new Date(task.updatedAt))}
               </div>
             </div>

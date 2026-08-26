@@ -582,7 +582,8 @@
       "values": [
         "not_started",
         "ongoing",
-        "completed"
+        "completed",
+		"paused"
       ]
     },
     "public.role": {

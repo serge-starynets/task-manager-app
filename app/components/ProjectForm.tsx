@@ -49,7 +49,8 @@ export default function ProjectForm({
             status: formData.get('status') as
               | 'not_started'
               | 'ongoing'
-              | 'completed',
+              | 'completed'
+              | 'paused',
           })
         : await createProject({
             title: formData.get('title') as string,
@@ -58,7 +59,8 @@ export default function ProjectForm({
             status: formData.get('status') as
               | 'not_started'
               | 'ongoing'
-              | 'completed',
+              | 'completed'
+              | 'paused',
           });
 
       if (result.success) {

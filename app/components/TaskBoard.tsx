@@ -112,7 +112,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="flex w-full gap-3 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex w-max max-w-full gap-3 overflow-x-auto pb-2 scrollbar-thin">
         {STATUS_ORDER.map((status) => (
           <BoardColumn
             key={status}

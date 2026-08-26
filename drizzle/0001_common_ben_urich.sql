@@ -1,4 +1,4 @@
-CREATE TYPE "public"."project_status" AS ENUM('not_started', 'ongoing', 'completed');--> statement-breakpoint
+CREATE TYPE "public"."project_status" AS ENUM('not_started', 'ongoing', 'completed', 'paused');--> statement-breakpoint
 CREATE TYPE "public"."role" AS ENUM('admin', 'user');--> statement-breakpoint
 ALTER TYPE "public"."status" ADD VALUE 'qa' BEFORE 'done';--> statement-breakpoint
 CREATE TABLE "accounts" (

@@ -186,61 +186,63 @@ export default async function DashboardPage({
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4 mb-8">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold tracking-tight">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl font-bold tracking-tight min-w-0">
             <span className="text-gray-500 dark:text-gray-400 font-semibold mr-2">
               {selectedProject.abbreviation}
             </span>
             {selectedProject.title}
           </h1>
-          <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mt-1">
-            {statusLabel}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-            {selectedProject.description
-              ? stripHtml(selectedProject.description)
-              : ''}
-          </p>
-        </div>
-        <Link
-          href={`/projects/${selectedProject.id}/edit`}
-          className="shrink-0"
-        >
-          <Button variant="outline" size="sm">
-            <Edit2Icon size={16} />
-            Edit
-          </Button>
-        </Link>
-      </div>
-
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold tracking-tight">
-            {isBoardView ? 'Board' : 'Backlog'}
-          </h2>
-          <Link href={`/tasks/new?project=${selectedProject.id}`}>
-            <Button data-testid="new-task-button" size="sm">
-              <PlusIcon size={16} />
-              New Task
+          <Link
+            href={`/projects/${selectedProject.id}/edit`}
+            className="shrink-0"
+          >
+            <Button variant="outline" size="sm">
+              <Edit2Icon size={16} />
+              Edit
             </Button>
           </Link>
         </div>
-        {isBoardView ? (
-          <TaskBoard tasks={projectTasks} />
-        ) : projectTasks.length > 0 ? (
-          <TaskTable tasks={projectTasks} />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-14 text-center surface-panel p-8">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-dark-elevated dark:text-gray-500">
-              <ListTodoIcon size={24} />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              Get started by creating your first task in this project.
-            </p>
+        <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mt-1">
+          {statusLabel}
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+          {selectedProject.description
+            ? stripHtml(selectedProject.description)
+            : ''}
+        </p>
+      </div>
+
+      <section className="mb-10">
+        <div className={isBoardView ? 'w-fit max-w-full' : undefined}>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h2 className="text-lg font-semibold tracking-tight">
+              {isBoardView ? 'Board' : 'Backlog'}
+            </h2>
+            <Link href={`/tasks/new?project=${selectedProject.id}`}>
+              <Button data-testid="new-task-button" size="sm">
+                <PlusIcon size={16} />
+                New Task
+              </Button>
+            </Link>
           </div>
-        )}
+          {isBoardView ? (
+            <TaskBoard tasks={projectTasks} />
+          ) : projectTasks.length > 0 ? (
+            <TaskTable tasks={projectTasks} />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-14 text-center surface-panel p-8">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-dark-elevated dark:text-gray-500">
+                <ListTodoIcon size={24} />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Get started by creating your first task in this project.
+              </p>
+            </div>
+          )}
+        </div>
       </section>
 
       {!isBoardView && <OrphanedTasksSection tasks={orphanedTasks} />}

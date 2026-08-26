@@ -31,7 +31,7 @@ const ProjectSchema = z.object({
     .max(8, 'Abbreviation must be at most 8 characters')
     .regex(/^[A-Za-z]+$/, 'Abbreviation may only contain latin letters'),
   description: z.string().optional().nullable(),
-  status: z.enum(['not_started', 'ongoing', 'completed'], {
+  status: z.enum(['not_started', 'ongoing', 'completed', 'paused'], {
     errorMap: () => ({ message: 'Please select a valid status' }),
   }),
 });

@@ -9,7 +9,7 @@ export type Status =
   | 'rejected'
   | 'closed';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
-export type ProjectStatus = 'not_started' | 'ongoing' | 'completed';
+export type ProjectStatus = 'not_started' | 'ongoing' | 'completed' | 'paused';
 
 export type TaskWithUser = Task & {
   user: {

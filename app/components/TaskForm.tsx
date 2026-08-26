@@ -308,7 +308,11 @@ export default function TaskForm({
           uploadContext={uploadContext}
           onAttachmentUploaded={handleAttachmentUploaded}
           aria-describedby="description-error"
-          className={state?.errors?.description ? 'border-red-500' : ''}
+          className={
+            state?.errors?.description
+              ? 'rich-text-editor--tall border-red-500'
+              : 'rich-text-editor--tall'
+          }
         />
         {state?.errors?.description && (
           <p id="description-error" className="text-sm text-red-500">

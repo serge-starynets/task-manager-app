@@ -9,23 +9,27 @@ export default function DashboardSkeleton() {
       {/* Skeleton for tasks list */}
       <div className="overflow-hidden rounded-xl border border-gray-200/80 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-soft dark:shadow-none">
         {/* Header row skeleton */}
-        <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50/80 dark:bg-dark-elevated border-b border-gray-200/80 dark:border-dark-border-default">
-          <div className="col-span-5 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
-          <div className="col-span-2 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
-          <div className="col-span-2 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
-          <div className="col-span-3 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+        <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,4.5fr)_minmax(0,1.8fr)_minmax(0,1.1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-4 px-6 py-3 bg-gray-50/80 dark:bg-dark-elevated border-b border-gray-200/80 dark:border-dark-border-default">
+          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
         </div>
         {/* Task row skeletons */}
         <div className="divide-y divide-gray-100 dark:divide-dark-border-subtle">
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="grid grid-cols-12 gap-4 px-6 py-4 items-center"
+              className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,4.5fr)_minmax(0,1.8fr)_minmax(0,1.1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-4 px-6 py-4 items-center"
             >
-              <div className="col-span-5 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
-              <div className="col-span-2 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
-              <div className="col-span-2 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
-              <div className="col-span-3 h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded" />
             </div>
           ))}
         </div>

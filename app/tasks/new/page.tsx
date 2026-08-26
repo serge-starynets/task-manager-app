@@ -20,25 +20,25 @@ export default async function NewTaskPage({
     : '/dashboard';
 
   return (
-    <div className="max-w-3xl mx-auto p-4 md:p-8">
+    <div className="w-[70%] mx-auto p-4 md:p-8 h-dvh flex flex-col overflow-hidden">
       <Link
         href={backHref}
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mb-6"
+        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mb-6 shrink-0"
       >
         <ArrowLeftIcon size={16} className="mr-1" />
         Back to Dashboard
       </Link>
 
-      <h1 className="text-2xl font-bold mb-6">
+      <h1 className="text-2xl font-bold mb-6 shrink-0">
         {projectId ? 'Create New Task' : 'Create Task'}
       </h1>
       {!projectId && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 shrink-0">
           This task will not be assigned to a project.
         </p>
       )}
 
-      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6">
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 md:p-8 flex-1 min-h-0 overflow-y-auto">
         <Suspense fallback={<div>Loading...</div>}>
           <NewTask projectId={projectId} />
         </Suspense>

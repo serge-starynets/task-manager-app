@@ -140,6 +140,19 @@ body {
   white-space: pre-wrap;
 }
 
+/* Task form description editor — 3× default height, capped to viewport;
+   scrolls inside the editor when description content grows */
+.rich-text-editor.rich-text-editor--tall .ql-container.ql-snow {
+  min-height: min(480px, calc(100dvh - 28rem));
+  max-height: min(480px, calc(100dvh - 28rem));
+}
+
+.rich-text-editor.rich-text-editor--tall .ql-editor {
+  min-height: min(480px, calc(100dvh - 28rem));
+  max-height: min(480px, calc(100dvh - 28rem));
+  overflow-y: auto;
+}
+
 .rich-text {
   overflow-wrap: anywhere;
   word-break: break-word;
