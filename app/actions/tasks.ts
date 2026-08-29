@@ -7,38 +7,14 @@ import { eq } from 'drizzle-orm';
 import { canManageTask, getCurrentUser, isAdmin } from '@/lib/dal';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { createTaskForUser, deleteTaskForUser } from '@/lib/task-service';
-import { z } from 'zod';
+import {
+  CreateTaskActionInput,
+  TaskData,
+  TaskStatusSchema,
+  UpdateTaskSchema,
+} from '@/lib/validations/task';
 
-const TaskSchema = z.object({
-  title: z
-    .string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(100, 'Title must be less than 100 characters'),
-
-  description: z.string().optional().nullable(),
-
-  status: z.enum(
-    ['backlog', 'todo', 'in_progress', 'qa', 'done', 'rejected', 'closed'],
-    {
-      errorMap: () => ({ message: 'Please select a valid status' }),
-    },
-  ),
-
-  priority: z.enum(['low', 'medium', 'high', 'critical'], {
-    errorMap: () => ({ message: 'Please select a valid priority' }),
-  }),
-  userId: z.string().min(1, 'User ID is required'),
-  projectId: z.number().int().positive().optional().nullable(),
-  updatedAt: z.date().optional(),
-  createdAt: z.date().optional(),
-});
-
-export type TaskData = z.infer<typeof TaskSchema>;
-
-export type CreateTaskInput = TaskData & {
-  pendingAttachmentsJson?: string | null;
-  uploadSessionId?: string | null;
-};
+export type { CreateTaskActionInput as CreateTaskInput, TaskData } from '@/lib/validations/task';
 
 export type ActionResponse = {
   success: boolean;
@@ -50,7 +26,7 @@ export type ActionResponse = {
 };
 
 export async function createTask(
-  data: CreateTaskInput,
+  data: CreateTaskActionInput,
 ): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
@@ -137,7 +113,6 @@ export async function updateTask(
       updatedAt: updatedDate,
     };
 
-    const UpdateTaskSchema = TaskSchema.partial();
     const validationResult = UpdateTaskSchema.safeParse(newData);
 
     if (!validationResult.success) {
@@ -180,16 +155,9 @@ export async function updateTask(
   }
 }
 
-const StatusSchema = z.enum(
-  ['backlog', 'todo', 'in_progress', 'qa', 'done', 'rejected', 'closed'],
-  {
-    errorMap: () => ({ message: 'Please select a valid status' }),
-  },
-);
-
 export async function updateTaskStatus(
   id: number,
-  status: z.infer<typeof StatusSchema>,
+  status: TaskData['status'],
 ): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
@@ -210,7 +178,7 @@ export async function updateTaskStatus(
       };
     }
 
-    const validationResult = StatusSchema.safeParse(status);
+    const validationResult = TaskStatusSchema.safeParse(status);
     if (!validationResult.success) {
       return {
         success: false,

@@ -15,28 +15,14 @@ import {
   normalizeAbbreviation,
 } from '@/lib/project-abbreviation';
 import { sanitizeRichText } from '@/lib/rich-text';
-import { z } from 'zod';
+import {
+  MAX_PROJECTS_PER_USER,
+  ProjectData,
+  ProjectSchema,
+  UpdateProjectSchema,
+} from '@/lib/validations/project';
 
-const MAX_PROJECTS_PER_USER = 10;
-
-const ProjectSchema = z.object({
-  title: z
-    .string()
-    .min(2, 'Title must be at least 2 characters')
-    .max(100, 'Title must be less than 100 characters'),
-  abbreviation: z
-    .string()
-    .trim()
-    .min(1, 'Abbreviation is required')
-    .max(8, 'Abbreviation must be at most 8 characters')
-    .regex(/^[A-Za-z]+$/, 'Abbreviation may only contain latin letters'),
-  description: z.string().optional().nullable(),
-  status: z.enum(['not_started', 'ongoing', 'completed', 'paused'], {
-    errorMap: () => ({ message: 'Please select a valid status' }),
-  }),
-});
-
-export type ProjectData = z.infer<typeof ProjectSchema>;
+export type { ProjectData } from '@/lib/validations/project';
 
 export type ActionResponse = {
   success: boolean;
@@ -170,9 +156,6 @@ export async function updateProject(
       };
     }
 
-    const UpdateProjectSchema = ProjectSchema.omit({
-      abbreviation: true,
-    }).partial();
     const validationResult = UpdateProjectSchema.safeParse(data);
 
     if (!validationResult.success) {

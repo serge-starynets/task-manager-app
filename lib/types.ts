@@ -1,15 +1,9 @@
 import { Task, Project } from '@/db/schema';
-
-export type Status =
-  | 'backlog'
-  | 'todo'
-  | 'in_progress'
-  | 'qa'
-  | 'done'
-  | 'rejected'
-  | 'closed';
-export type Priority = 'low' | 'medium' | 'high' | 'critical';
-export type ProjectStatus = 'not_started' | 'ongoing' | 'completed' | 'paused';
+export type {
+  TaskStatus as Status,
+  TaskPriority as Priority,
+  ProjectStatus,
+} from '@/lib/validations';
 
 export type TaskWithUser = Task & {
   user: {

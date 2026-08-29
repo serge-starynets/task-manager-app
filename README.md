@@ -87,11 +87,34 @@ npx tsx scripts/promote-admin.ts user@example.com --neon   # production (Neon)
 ## Project Structure
 
 - `app/` — Next.js App Router pages, server actions, and UI components
-- `app/api/` — REST API routes for issues
+- `app/api/` — REST API routes (see [API Routes](#api-routes) below)
+- `app/actions/` — Server Actions used by the web UI
 - `db/` — Drizzle schema and database client
 - `auth.ts` — Auth.js config (Google OAuth + credentials)
-- `lib/` — Data access layer, user helpers, and shared utilities
+- `lib/` — Data access layer, validation schemas, services, and shared utilities
+- `lib/validations/` — Shared Zod schemas (used by actions, services, and future API v1)
+- `lib/env.ts` — Environment variable validation (Zod)
 - `scripts/` — Seed and admin promotion scripts
+
+## API Routes
+
+The web UI primarily uses **Server Actions** for mutations. REST routes under `app/api/` serve file uploads, Auth.js, and external/mobile clients (Phase 2 will add `/api/v1/`).
+
+**Authentication:** Session cookies via Auth.js. Route handlers call `getCurrentUser()` — there is no global API middleware gate yet. Mobile Bearer token auth is planned for Phase 2.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET`, `POST` | `/api/auth/[...nextauth]` | Public | Auth.js handlers (OAuth callbacks, session) |
+| `GET` | `/api/tasks` | Session | List tasks for current user (admins see all) |
+| `POST` | `/api/tasks` | Session | Create a task |
+| `GET` | `/api/tasks/[id]` | Session | Get a single task |
+| `DELETE` | `/api/tasks/[id]` | Session | Delete a task |
+| `POST` | `/api/attachments/upload` | Session | Vercel Blob client upload token |
+| `GET` | `/api/attachments/file/[...pathname]` | Session | Stream a private attachment |
+
+**Error shape (REST):** `{ error: string }` or `{ error: string, errors?: Record<string, string[]> }`
+
+**Planned:** Versioned `/api/v1/` routes with Bearer token auth for the mobile app.
 
 ## License
 

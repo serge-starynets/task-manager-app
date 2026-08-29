@@ -2,6 +2,10 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import React from 'react';
 
+process.env.AUTH_SECRET ??= 'test-auth-secret';
+process.env.LOCAL_DATABASE_URL ??=
+  'postgres://user:password@localhost:5432/taskmanager_test';
+
 // `server-only` throws when imported outside a Server Component; in tests we
 // import server modules directly, so neutralize the guard.
 vi.mock('server-only', () => ({}));

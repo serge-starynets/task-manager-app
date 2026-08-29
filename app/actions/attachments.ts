@@ -13,7 +13,7 @@ import {
   sumAttachmentBytes,
   validateTaskAttachmentBudget,
 } from '@/lib/attachments';
-import { z } from 'zod';
+import { RegisterAttachmentSchema } from '@/lib/validations/attachment';
 
 export type AttachmentActionResponse = {
   success: boolean;
@@ -21,18 +21,6 @@ export type AttachmentActionResponse = {
   attachment?: TaskAttachment;
   error?: string;
 };
-
-const PendingAttachmentSchema = z.object({
-  url: z.string().url(),
-  pathname: z.string().min(1).max(500),
-  fileName: z.string().min(1).max(255),
-  contentType: z.string().min(1).max(200),
-  sizeBytes: z.number().int().positive().max(MAX_ATTACHMENT_BYTES),
-});
-
-const RegisterSchema = PendingAttachmentSchema.extend({
-  taskId: z.number().int().positive(),
-});
 
 export async function registerTaskAttachment(input: {
   taskId: number;
@@ -48,7 +36,7 @@ export async function registerTaskAttachment(input: {
       return { success: false, message: 'Unauthorized', error: 'Unauthorized' };
     }
 
-    const parsed = RegisterSchema.safeParse(input);
+    const parsed = RegisterAttachmentSchema.safeParse(input);
     if (!parsed.success) {
       return {
         success: false,

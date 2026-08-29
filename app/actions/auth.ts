@@ -1,12 +1,14 @@
 'use server';
 
-import { z } from 'zod';
 import { headers } from 'next/headers';
 import { signIn as authSignIn, signOut as authSignOut } from '@/auth';
 import { createUser, getUserByEmail, normalizeEmail } from '@/lib/users';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getSession } from '@/lib/session';
+import { SignInSchema, SignUpSchema } from '@/lib/validations/auth';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
+
+export type { SignInData, SignUpData } from '@/lib/validations/auth';
 
 const AUTH_RATE_LIMIT = 10; // attempts
 const AUTH_RATE_WINDOW_MS = 15 * 60 * 1000;
@@ -50,25 +52,6 @@ const GENERIC_SIGNIN_FAILURE: ActionResponse = {
     email: ['Invalid email or password'],
   },
 };
-
-const SignInSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email format'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-const SignUpSchema = z
-  .object({
-    email: z.string().min(1, 'Email is required').email('Invalid email format'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-export type SignInData = z.infer<typeof SignInSchema>;
-export type SignUpData = z.infer<typeof SignUpSchema>;
 
 export type ActionResponse = {
   success: boolean;

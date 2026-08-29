@@ -5,6 +5,7 @@ import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { db } from '@/db';
 import { accounts, users } from '@/db/schema';
 import { SESSION_MAX_AGE_SECONDS } from '@/lib/auth-constants';
+import { env } from '@/lib/env';
 import { getUserByEmail } from '@/lib/users';
 import { verifyPassword } from '@/lib/password';
 
@@ -76,6 +77,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: '/signin',
   },
-  secret: process.env.AUTH_SECRET ?? process.env.JWT_SECRET,
+  secret: env.AUTH_SECRET ?? env.JWT_SECRET,
   trustHost: true,
 });

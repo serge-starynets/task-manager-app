@@ -1,6 +1,5 @@
 import 'server-only';
 
-import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { del, head } from '@vercel/blob';
 import { db } from '@/db';
@@ -16,33 +15,12 @@ import {
   validateTaskAttachmentBudget,
   type PendingAttachment,
 } from '@/lib/attachments';
+import {
+  CreateTaskSchema,
+  type CreateTaskServiceInput,
+} from '@/lib/validations/task';
 
-export const TaskStatusSchema = z.enum(
-  ['backlog', 'todo', 'in_progress', 'qa', 'done', 'rejected', 'closed'],
-  {
-    errorMap: () => ({ message: 'Please select a valid status' }),
-  },
-);
-
-export const TaskPrioritySchema = z.enum(['low', 'medium', 'high', 'critical'], {
-  errorMap: () => ({ message: 'Please select a valid priority' }),
-});
-
-const CreateTaskInputSchema = z.object({
-  title: z
-    .string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(100, 'Title must be less than 100 characters'),
-  description: z.string().optional().nullable(),
-  status: TaskStatusSchema.default('backlog'),
-  priority: TaskPrioritySchema.default('medium'),
-  projectId: z.number().int().positive().optional().nullable(),
-});
-
-export type CreateTaskServiceInput = z.input<typeof CreateTaskInputSchema> & {
-  pendingAttachmentsJson?: string | null;
-  uploadSessionId?: string | null;
-};
+export type { CreateTaskServiceInput } from '@/lib/validations/task';
 
 export type ServiceFailure = {
   ok: false;
@@ -96,7 +74,7 @@ export async function createTaskForUser(
   user: Pick<User, 'id'>,
   input: CreateTaskServiceInput,
 ): Promise<CreateTaskResult> {
-  const validationResult = CreateTaskInputSchema.safeParse(input);
+  const validationResult = CreateTaskSchema.safeParse(input);
   if (!validationResult.success) {
     return {
       ok: false,
