@@ -1,17 +1,12 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { db } from '@/db';
-import { taskRelations } from '@/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { getCurrentUser, searchRelatableTasks as searchRelatableTasksDal } from '@/lib/dal';
 import {
-  areTasksRelatable,
-  canManageTask,
-  getCurrentUser,
-  getTask,
-  orderedTaskPair,
-  searchRelatableTasks as searchRelatableTasksDal,
-} from '@/lib/dal';
+  addTaskRelation as addTaskRelationService,
+  removeTaskRelation as removeTaskRelationService,
+} from '@/lib/services/relation-service';
+import { relationErrorCode } from '@/lib/actions/helpers';
 
 export type RelationActionResponse = {
   success: boolean;
@@ -50,41 +45,16 @@ export async function addTaskRelation(
       };
     }
 
-    const canManageSource = await canManageTask(sourceId);
-    const canManageTarget = await canManageTask(targetId);
-    if (!canManageSource || !canManageTarget) {
+    const result = await addTaskRelationService(sourceId, targetId);
+    if (!result.ok) {
       return {
         success: false,
-        message: 'You do not have permission to relate these tasks',
-        error: 'Forbidden',
+        message: result.message,
+        error: relationErrorCode(result.status),
       };
     }
-
-    const source = await getTask(sourceId);
-    const target = await getTask(targetId);
-    if (!source || !target) {
-      return {
-        success: false,
-        message: 'Task not found',
-        error: 'NotFound',
-      };
-    }
-
-    if (!areTasksRelatable(source, target)) {
-      return {
-        success: false,
-        message:
-          'Tasks can only be related within the same project, or both without a project',
-        error: 'Invalid',
-      };
-    }
-
-    const [taskIdA, taskIdB] = orderedTaskPair(sourceId, targetId);
-
-    await db.insert(taskRelations).values({ taskIdA, taskIdB });
 
     revalidateTaskViews(sourceId, targetId);
-
     return { success: true, message: 'Related task added' };
   } catch (error) {
     console.error('Error adding task relation:', error);
@@ -110,36 +80,16 @@ export async function removeTaskRelation(
       };
     }
 
-    const canManageSource = await canManageTask(sourceId);
-    if (!canManageSource) {
+    const result = await removeTaskRelationService(sourceId, targetId);
+    if (!result.ok) {
       return {
         success: false,
-        message: 'You do not have permission to update this task',
-        error: 'Forbidden',
+        message: result.message,
+        error: relationErrorCode(result.status),
       };
     }
-
-    if (sourceId === targetId) {
-      return {
-        success: false,
-        message: 'Invalid relation',
-        error: 'Invalid',
-      };
-    }
-
-    const [taskIdA, taskIdB] = orderedTaskPair(sourceId, targetId);
-
-    await db
-      .delete(taskRelations)
-      .where(
-        and(
-          eq(taskRelations.taskIdA, taskIdA),
-          eq(taskRelations.taskIdB, taskIdB),
-        ),
-      );
 
     revalidateTaskViews(sourceId, targetId);
-
     return { success: true, message: 'Related task removed' };
   } catch (error) {
     console.error('Error removing task relation:', error);

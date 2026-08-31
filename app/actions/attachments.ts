@@ -1,19 +1,14 @@
 'use server';
 
-import { del, head } from '@vercel/blob';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { eq } from 'drizzle-orm';
-import { db } from '@/db';
-import { taskAttachments, type TaskAttachment } from '@/db/schema';
-import { canManageTask, getCurrentUser, getTaskAttachments } from '@/lib/dal';
+import { type TaskAttachment } from '@/db/schema';
+import { getCurrentUser } from '@/lib/dal';
 import {
-  MAX_ATTACHMENT_BYTES,
-  isValidDraftPathname,
-  isValidTaskPathname,
-  sumAttachmentBytes,
-  validateTaskAttachmentBudget,
-} from '@/lib/attachments';
-import { RegisterAttachmentSchema } from '@/lib/validations/attachment';
+  deleteDraftBlobForUser,
+  deleteTaskAttachmentById,
+  registerTaskAttachmentForUser,
+} from '@/lib/services/attachment-service';
+import { attachmentErrorCode } from '@/lib/actions/helpers';
 
 export type AttachmentActionResponse = {
   success: boolean;
@@ -36,85 +31,23 @@ export async function registerTaskAttachment(input: {
       return { success: false, message: 'Unauthorized', error: 'Unauthorized' };
     }
 
-    const parsed = RegisterAttachmentSchema.safeParse(input);
-    if (!parsed.success) {
+    const result = await registerTaskAttachmentForUser(user.id, input);
+    if (!result.ok) {
       return {
         success: false,
-        message: 'Invalid attachment data',
-        error: 'Validation failed',
+        message: result.message,
+        error: attachmentErrorCode(result.status, result.message),
       };
     }
-
-    const data = parsed.data;
-    const canManage = await canManageTask(data.taskId);
-    if (!canManage) {
-      return { success: false, message: 'Forbidden', error: 'Forbidden' };
-    }
-
-    if (!isValidTaskPathname(data.pathname, data.taskId)) {
-      return {
-        success: false,
-        message: 'Invalid attachment path',
-        error: 'Forbidden',
-      };
-    }
-
-    // Client-sent size/url/contentType are untrusted; read the authoritative
-    // values from the blob store for the validated pathname.
-    let blobMeta;
-    try {
-      blobMeta = await head(data.pathname);
-    } catch (headError) {
-      console.error('Error reading blob metadata:', headError);
-      return {
-        success: false,
-        message: 'Uploaded file not found',
-        error: 'Not found',
-      };
-    }
-
-    if (blobMeta.size > MAX_ATTACHMENT_BYTES) {
-      return {
-        success: false,
-        message: 'File is too large',
-        error: 'File is too large',
-      };
-    }
-
-    const existing = await getTaskAttachments(data.taskId);
-    const budget = validateTaskAttachmentBudget(
-      sumAttachmentBytes(existing),
-      blobMeta.size,
-    );
-    if (!budget.ok) {
-      return {
-        success: false,
-        message: budget.error,
-        error: budget.error,
-      };
-    }
-
-    const [attachment] = await db
-      .insert(taskAttachments)
-      .values({
-        taskId: data.taskId,
-        fileName: data.fileName,
-        contentType: blobMeta.contentType || data.contentType,
-        sizeBytes: blobMeta.size,
-        url: blobMeta.url,
-        pathname: blobMeta.pathname,
-        uploadedBy: user.id,
-      })
-      .returning();
 
     revalidateTag('tasks', 'max');
-    revalidatePath(`/tasks/${data.taskId}`);
-    revalidatePath(`/tasks/${data.taskId}/edit`);
+    revalidatePath(`/tasks/${input.taskId}`);
+    revalidatePath(`/tasks/${input.taskId}/edit`);
 
     return {
       success: true,
       message: 'Attachment added',
-      attachment,
+      attachment: result.data,
     };
   } catch (error) {
     console.error('Error registering attachment:', error);
@@ -135,38 +68,18 @@ export async function deleteTaskAttachment(
       return { success: false, message: 'Unauthorized', error: 'Unauthorized' };
     }
 
-    const [attachment] = await db
-      .select()
-      .from(taskAttachments)
-      .where(eq(taskAttachments.id, attachmentId))
-      .limit(1);
-
-    if (!attachment) {
+    const result = await deleteTaskAttachmentById(attachmentId);
+    if (!result.ok) {
       return {
         success: false,
-        message: 'Attachment not found',
-        error: 'Not found',
+        message: result.message,
+        error: attachmentErrorCode(result.status, result.message),
       };
     }
 
-    const canManage = await canManageTask(attachment.taskId);
-    if (!canManage) {
-      return { success: false, message: 'Forbidden', error: 'Forbidden' };
-    }
-
-    try {
-      await del(attachment.url);
-    } catch (blobError) {
-      console.error('Error deleting blob:', blobError);
-    }
-
-    await db
-      .delete(taskAttachments)
-      .where(eq(taskAttachments.id, attachmentId));
-
     revalidateTag('tasks', 'max');
-    revalidatePath(`/tasks/${attachment.taskId}`);
-    revalidatePath(`/tasks/${attachment.taskId}/edit`);
+    revalidatePath(`/tasks/${result.data.taskId}`);
+    revalidatePath(`/tasks/${result.data.taskId}/edit`);
 
     return { success: true, message: 'Attachment removed' };
   } catch (error) {
@@ -190,18 +103,17 @@ export async function deleteDraftBlob(
       return { success: false, message: 'Unauthorized', error: 'Unauthorized' };
     }
 
-    if (!isValidDraftPathname(pathname, user.id, uploadSessionId)) {
+    const result = await deleteDraftBlobForUser(
+      user.id,
+      pathname,
+      uploadSessionId,
+    );
+    if (!result.ok) {
       return {
         success: false,
-        message: 'Invalid draft path',
+        message: result.message,
         error: 'Forbidden',
       };
-    }
-
-    try {
-      await del(pathname);
-    } catch (blobError) {
-      console.error('Error deleting draft blob:', blobError);
     }
 
     return { success: true, message: 'Draft file removed' };

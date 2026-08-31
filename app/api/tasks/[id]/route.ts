@@ -1,5 +1,5 @@
 import { getCurrentUser, getTask, isAdmin } from '@/lib/dal';
-import { deleteTaskForUser } from '@/lib/task-service';
+import { deleteTaskForUser } from '@/lib/services/task-service';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 

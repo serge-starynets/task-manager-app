@@ -1,26 +1,13 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { eq } from 'drizzle-orm';
-import { db } from '@/db';
-import { projects } from '@/db/schema';
+import { getCurrentUser } from '@/lib/dal';
 import {
-  countUserProjects,
-  getAccessibleProject,
-  getCurrentUser,
-} from '@/lib/dal';
-import {
-  isAbbreviationTaken,
-  isUniqueViolation,
-  normalizeAbbreviation,
-} from '@/lib/project-abbreviation';
-import { sanitizeRichText } from '@/lib/rich-text';
-import {
-  MAX_PROJECTS_PER_USER,
-  ProjectData,
-  ProjectSchema,
-  UpdateProjectSchema,
-} from '@/lib/validations/project';
+  createProjectForUser,
+  updateProjectForUser,
+} from '@/lib/services/project-service';
+import { forbiddenOrMessage } from '@/lib/actions/helpers';
+import type { ProjectData } from '@/lib/validations/project';
 
 export type { ProjectData } from '@/lib/validations/project';
 
@@ -45,62 +32,15 @@ export async function createProject(
       };
     }
 
-    const projectCount = await countUserProjects(user.id);
-    if (projectCount >= MAX_PROJECTS_PER_USER) {
+    const result = await createProjectForUser(user, data);
+    if (!result.ok) {
       return {
         success: false,
-        message: `You can have at most ${MAX_PROJECTS_PER_USER} projects`,
-        error: 'Project limit reached',
+        message: result.message,
+        errors: result.errors,
+        error: forbiddenOrMessage(result.status, result.message),
       };
     }
-
-    const validationResult = ProjectSchema.safeParse(data);
-    if (!validationResult.success) {
-      return {
-        success: false,
-        message: 'Validation failed',
-        errors: validationResult.error.flatten().fieldErrors,
-      };
-    }
-
-    const validatedData = validationResult.data;
-    const abbreviation = normalizeAbbreviation(validatedData.abbreviation);
-
-    if (!abbreviation) {
-      return {
-        success: false,
-        message: 'Validation failed',
-        errors: {
-          abbreviation: ['Abbreviation may only contain latin letters (A–Z)'],
-        },
-      };
-    }
-
-    if (await isAbbreviationTaken(user.id, abbreviation)) {
-      return {
-        success: false,
-        message: 'Validation failed',
-        errors: {
-          abbreviation: [
-            'This abbreviation is already used by another project',
-          ],
-        },
-      };
-    }
-
-    const now = new Date();
-    const [created] = await db
-      .insert(projects)
-      .values({
-        title: validatedData.title,
-        abbreviation,
-        description: sanitizeRichText(validatedData.description),
-        status: validatedData.status,
-        userId: user.id,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
 
     revalidateTag('projects', 'max');
     revalidatePath('/dashboard');
@@ -108,23 +48,10 @@ export async function createProject(
     return {
       success: true,
       message: 'Project created successfully',
-      projectId: created.id,
+      projectId: result.data.id,
     };
   } catch (error) {
     console.error('Error creating project:', error);
-
-    if (isUniqueViolation(error)) {
-      return {
-        success: false,
-        message: 'Validation failed',
-        errors: {
-          abbreviation: [
-            'This abbreviation is already used by another project',
-          ],
-        },
-      };
-    }
-
     return {
       success: false,
       message: 'An error occurred while creating the project',
@@ -147,43 +74,15 @@ export async function updateProject(
       };
     }
 
-    const project = await getAccessibleProject(id);
-    if (!project) {
+    const result = await updateProjectForUser(user, id, data);
+    if (!result.ok) {
       return {
         success: false,
-        message: 'You do not have permission to update this project',
-        error: 'Forbidden',
+        message: result.message,
+        errors: result.errors,
+        error: forbiddenOrMessage(result.status, result.message),
       };
     }
-
-    const validationResult = UpdateProjectSchema.safeParse(data);
-
-    if (!validationResult.success) {
-      return {
-        success: false,
-        message: 'Validation failed',
-        errors: validationResult.error.flatten().fieldErrors,
-      };
-    }
-
-    const validatedData = validationResult.data;
-    const updateData: Record<string, unknown> = {
-      updatedAt: new Date(),
-    };
-
-    if (validatedData.title !== undefined) {
-      updateData.title = validatedData.title;
-    }
-
-    if (validatedData.description !== undefined) {
-      updateData.description = sanitizeRichText(validatedData.description);
-    }
-
-    if (validatedData.status !== undefined) {
-      updateData.status = validatedData.status;
-    }
-
-    await db.update(projects).set(updateData).where(eq(projects.id, id));
 
     revalidateTag('projects', 'max');
     revalidatePath('/dashboard');
@@ -195,7 +94,6 @@ export async function updateProject(
     };
   } catch (error) {
     console.error('Error updating project:', error);
-
     return {
       success: false,
       message: 'An error occurred while updating the project',

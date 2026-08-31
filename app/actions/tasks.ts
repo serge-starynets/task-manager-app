@@ -1,17 +1,17 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { db } from '@/db';
-import { tasks } from '@/db/schema';
-import { eq } from 'drizzle-orm';
-import { canManageTask, getCurrentUser, isAdmin } from '@/lib/dal';
-import { sanitizeRichText } from '@/lib/rich-text';
-import { createTaskForUser, deleteTaskForUser } from '@/lib/task-service';
+import { getCurrentUser } from '@/lib/dal';
+import {
+  createTaskForUser,
+  deleteTaskForUser,
+  updateTaskForUser,
+  updateTaskStatusForUser,
+} from '@/lib/services/task-service';
+import { forbiddenOrMessage } from '@/lib/actions/helpers';
 import {
   CreateTaskActionInput,
   TaskData,
-  TaskStatusSchema,
-  UpdateTaskSchema,
 } from '@/lib/validations/task';
 
 export type { CreateTaskActionInput as CreateTaskInput, TaskData } from '@/lib/validations/task';
@@ -53,7 +53,7 @@ export async function createTask(
         success: false,
         message: result.message,
         errors: result.errors,
-        error: result.status === 403 ? 'Forbidden' : result.message,
+        error: forbiddenOrMessage(result.status, result.message),
       };
     }
 
@@ -64,8 +64,8 @@ export async function createTask(
     return {
       success: true,
       message: 'Task created successfully',
-      projectId: result.task.projectId,
-      taskId: result.task.id,
+      projectId: result.data.projectId,
+      taskId: result.data.id,
     };
   } catch (error) {
     console.error('Error creating task:', error);
@@ -96,50 +96,16 @@ export async function updateTask(
       };
     }
 
-    const canManage = await canManageTask(id);
-    if (!canManage) {
+    const result = await updateTaskForUser(user, id, data);
+    if (!result.ok) {
       return {
         success: false,
-        message: 'You do not have permission to update this task',
-        error: 'Forbidden',
+        message: result.message,
+        errors: result.errors,
+        error: forbiddenOrMessage(result.status, result.message),
       };
     }
 
-    const timestamp = Date.now();
-    const updatedDate = new Date(timestamp);
-
-    const newData = {
-      ...data,
-      updatedAt: updatedDate,
-    };
-
-    const validationResult = UpdateTaskSchema.safeParse(newData);
-
-    if (!validationResult.success) {
-      return {
-        success: false,
-        message: 'Validation failed',
-        errors: validationResult.error.flatten().fieldErrors,
-      };
-    }
-
-    const validatedData = validationResult.data;
-    const updateData: Record<string, unknown> = {};
-
-    if (validatedData.title !== undefined)
-      updateData.title = validatedData.title;
-    if (validatedData.description !== undefined)
-      updateData.description = sanitizeRichText(validatedData.description);
-    if (validatedData.status !== undefined)
-      updateData.status = validatedData.status;
-    if (validatedData.priority !== undefined)
-      updateData.priority = validatedData.priority;
-    if (validatedData.userId !== undefined && isAdmin(user)) {
-      updateData.userId = validatedData.userId;
-    }
-    updateData.updatedAt = validatedData.updatedAt;
-
-    await db.update(tasks).set(updateData).where(eq(tasks.id, id));
     revalidateTag('tasks', 'max');
     revalidatePath('/dashboard');
     revalidatePath('/tasks', 'layout');
@@ -169,31 +135,15 @@ export async function updateTaskStatus(
       };
     }
 
-    const canManage = await canManageTask(id);
-    if (!canManage) {
+    const result = await updateTaskStatusForUser(id, status);
+    if (!result.ok) {
       return {
         success: false,
-        message: 'You do not have permission to update this task',
-        error: 'Forbidden',
+        message: result.message,
+        errors: result.errors,
+        error: forbiddenOrMessage(result.status, result.message),
       };
     }
-
-    const validationResult = TaskStatusSchema.safeParse(status);
-    if (!validationResult.success) {
-      return {
-        success: false,
-        message: 'Validation failed',
-        errors: { status: ['Please select a valid status'] },
-      };
-    }
-
-    await db
-      .update(tasks)
-      .set({
-        status: validationResult.data,
-        updatedAt: new Date(),
-      })
-      .where(eq(tasks.id, id));
 
     revalidateTag('tasks', 'max');
     revalidatePath('/dashboard');

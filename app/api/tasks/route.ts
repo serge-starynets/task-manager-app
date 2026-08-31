@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { tasks } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getCurrentUser, isAdmin, PUBLIC_USER_COLUMNS } from '@/lib/dal';
-import { createTaskForUser } from '@/lib/task-service';
+import { createTaskForUser } from '@/lib/services/task-service';
 
 export async function GET() {
   try {
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     revalidatePath('/tasks', 'layout');
 
     return NextResponse.json(
-      { message: 'Task created successfully', task: result.task },
+      { message: 'Task created successfully', task: result.data },
       { status: 201 },
     );
   } catch (error) {
