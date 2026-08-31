@@ -6,11 +6,10 @@ import { useRouter } from 'next/navigation';
 import { nanoid } from 'nanoid';
 import {
   Task,
-  TASK_STATUS,
-  TASK_PRIORITY,
   type RelatedTaskSummary,
   type TaskAttachment,
 } from '@/db/schema';
+import { TASK_STATUS, TASK_PRIORITY } from '@/lib/constants/tasks';
 import Button from './ui/Button';
 import {
   Form,

@@ -7,7 +7,7 @@ import {
   getProjects,
   requireUser,
 } from '@/lib/dal';
-import { TASK_STATUS, TASK_PRIORITY } from '@/db/schema';
+import { TASK_STATUS, TASK_PRIORITY } from '@/lib/constants/tasks';
 import { Status, Priority } from '@/lib/types';
 
 const mockUser = {

@@ -2,7 +2,7 @@
 
 import { useDroppable } from '@dnd-kit/core';
 import type { Status, TaskWithUser } from '@/lib/types';
-import { TASK_STATUS } from '@/db/schema';
+import { TASK_STATUS } from '@/lib/constants/tasks';
 import { cn } from '@/lib/utils';
 import BoardCard from './BoardCard';
 

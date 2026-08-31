@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 import TaskTable from '../components/TaskTable';
 import TaskBoard from '../components/TaskBoard';
-import { PROJECT_STATUS, type Project, type User } from '@/db/schema';
+import { PROJECT_STATUS } from '@/lib/constants/projects';
+import { type Project, type User } from '@/db/schema';
 
 function OrphanedTasksSection({
   tasks,

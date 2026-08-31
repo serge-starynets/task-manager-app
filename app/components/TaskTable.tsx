@@ -3,7 +3,7 @@ import { ClipboardListIcon, ListTodoIcon } from 'lucide-react';
 import Badge from './ui/Badge';
 import { formatRelativeTime } from '@/lib/utils';
 import { Priority, Status } from '@/lib/types';
-import { TASK_STATUS, TASK_PRIORITY } from '@/db/schema';
+import { TASK_STATUS, TASK_PRIORITY } from '@/lib/constants/tasks';
 import type { TaskWithUser } from '@/lib/types';
 
 interface TaskTableProps {

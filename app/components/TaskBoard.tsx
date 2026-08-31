@@ -14,7 +14,7 @@ import {
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { updateTaskStatus } from '@/app/actions/tasks';
-import { BOARD_STATUSES } from '@/db/schema';
+import { BOARD_STATUSES } from '@/lib/constants/tasks';
 import type { Status, TaskWithUser } from '@/lib/types';
 import BoardColumn from './BoardColumn';
 import { BoardCardOverlay } from './BoardCard';

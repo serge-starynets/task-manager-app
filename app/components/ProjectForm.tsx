@@ -3,7 +3,8 @@
 import { useActionState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Project, PROJECT_STATUS } from '@/db/schema';
+import { Project } from '@/db/schema';
+import { PROJECT_STATUS } from '@/lib/constants/projects';
 import Button from './ui/Button';
 import {
   Form,

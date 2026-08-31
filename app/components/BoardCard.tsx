@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useDraggable } from '@dnd-kit/core';
 import Badge from './ui/Badge';
-import { TASK_PRIORITY } from '@/db/schema';
+import { TASK_PRIORITY } from '@/lib/constants/tasks';
 import type { Priority, TaskWithUser } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
