@@ -1,14 +1,19 @@
 'use server';
 
-import { revalidatePath, revalidateTag } from 'next/cache';
 import { getCurrentUser } from '@/lib/dal';
+import {
+  actionError,
+  createTaskErrorMessage,
+  revalidateTaskList,
+  toActionResponse,
+  unauthorizedResponse,
+} from '@/lib/actions/helpers';
 import {
   createTaskForUser,
   deleteTaskForUser,
   updateTaskForUser,
   updateTaskStatusForUser,
 } from '@/lib/services/task-service';
-import { forbiddenOrMessage } from '@/lib/actions/helpers';
 import {
   CreateTaskActionInput,
   TaskData,
@@ -30,13 +35,7 @@ export async function createTask(
 ): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return {
-        success: false,
-        message: 'Unauthorized access',
-        error: 'Unauthorized',
-      };
-    }
+    if (!user) return unauthorizedResponse();
 
     const result = await createTaskForUser(user, {
       title: data.title,
@@ -48,18 +47,9 @@ export async function createTask(
       uploadSessionId: data.uploadSessionId,
     });
 
-    if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        errors: result.errors,
-        error: forbiddenOrMessage(result.status, result.message),
-      };
-    }
+    if (!result.ok) return toActionResponse(result);
 
-    revalidateTag('tasks', 'max');
-    revalidatePath('/dashboard');
-    revalidatePath('/tasks', 'layout');
+    revalidateTaskList();
 
     return {
       success: true,
@@ -69,16 +59,7 @@ export async function createTask(
     };
   } catch (error) {
     console.error('Error creating task:', error);
-    const message =
-      error instanceof Error &&
-      error.message.includes('Task attachments are limited')
-        ? error.message
-        : 'An error occurred while creating the task';
-    return {
-      success: false,
-      message,
-      error: 'Failed to create task',
-    };
+    return actionError(createTaskErrorMessage(error), 'Failed to create task');
   }
 }
 
@@ -88,36 +69,19 @@ export async function updateTask(
 ): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return {
-        success: false,
-        message: 'Unauthorized access',
-        error: 'Unauthorized',
-      };
-    }
+    if (!user) return unauthorizedResponse();
 
     const result = await updateTaskForUser(user, id, data);
-    if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        errors: result.errors,
-        error: forbiddenOrMessage(result.status, result.message),
-      };
-    }
+    if (!result.ok) return toActionResponse(result);
 
-    revalidateTag('tasks', 'max');
-    revalidatePath('/dashboard');
-    revalidatePath('/tasks', 'layout');
-
+    revalidateTaskList();
     return { success: true, message: 'Task updated successfully' };
   } catch (error) {
     console.error('Error updating task:', error);
-    return {
-      success: false,
-      message: 'An error occurred while updating the task',
-      error: 'Failed to update task',
-    };
+    return actionError(
+      'An error occurred while updating the task',
+      'Failed to update task',
+    );
   }
 }
 
@@ -127,66 +91,42 @@ export async function updateTaskStatus(
 ): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return {
-        success: false,
-        message: 'Unauthorized access',
-        error: 'Unauthorized',
-      };
-    }
+    if (!user) return unauthorizedResponse();
 
     const result = await updateTaskStatusForUser(id, status);
-    if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        errors: result.errors,
-        error: forbiddenOrMessage(result.status, result.message),
-      };
-    }
+    if (!result.ok) return toActionResponse(result);
 
-    revalidateTag('tasks', 'max');
-    revalidatePath('/dashboard');
-    revalidatePath('/tasks', 'layout');
-
+    revalidateTaskList();
     return { success: true, message: 'Task status updated successfully' };
   } catch (error) {
     console.error('Error updating task status:', error);
-    return {
-      success: false,
-      message: 'An error occurred while updating the task status',
-      error: 'Failed to update task status',
-    };
+    return actionError(
+      'An error occurred while updating the task status',
+      'Failed to update task status',
+    );
   }
 }
 
 export async function deleteTask(id: number) {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      throw new Error('Unauthorized');
-    }
+    if (!user) throw new Error('Unauthorized');
 
     const result = await deleteTaskForUser(id);
     if (!result.ok) {
-      return {
-        success: false,
-        message: 'An error occurred while deleting the task.',
-        error: 'Failed to delete task of another user',
-      };
+      return actionError(
+        'An error occurred while deleting the task.',
+        'Failed to delete task of another user',
+      );
     }
 
-    revalidateTag('tasks', 'max');
-    revalidatePath('/dashboard');
-    revalidatePath('/tasks', 'layout');
-
+    revalidateTaskList();
     return { success: true, message: 'Task deleted successfully' };
   } catch (error) {
     console.error('Error deleting task:', error);
-    return {
-      success: false,
-      message: 'An error occurred while deleting the task',
-      error: 'Failed to delete task',
-    };
+    return actionError(
+      'An error occurred while deleting the task',
+      'Failed to delete task',
+    );
   }
 }

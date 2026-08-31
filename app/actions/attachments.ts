@@ -1,14 +1,19 @@
 'use server';
 
-import { revalidatePath, revalidateTag } from 'next/cache';
 import { type TaskAttachment } from '@/db/schema';
 import { getCurrentUser } from '@/lib/dal';
+import {
+  actionError,
+  attachmentErrorCode,
+  revalidateTaskDetail,
+  toActionResponse,
+  unauthorizedResponse,
+} from '@/lib/actions/helpers';
 import {
   deleteDraftBlobForUser,
   deleteTaskAttachmentById,
   registerTaskAttachmentForUser,
 } from '@/lib/services/attachment-service';
-import { attachmentErrorCode } from '@/lib/actions/helpers';
 
 export type AttachmentActionResponse = {
   success: boolean;
@@ -33,16 +38,10 @@ export async function registerTaskAttachment(input: {
 
     const result = await registerTaskAttachmentForUser(user.id, input);
     if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        error: attachmentErrorCode(result.status, result.message),
-      };
+      return toActionResponse(result, attachmentErrorCode);
     }
 
-    revalidateTag('tasks', 'max');
-    revalidatePath(`/tasks/${input.taskId}`);
-    revalidatePath(`/tasks/${input.taskId}/edit`);
+    revalidateTaskDetail(input.taskId);
 
     return {
       success: true,
@@ -51,11 +50,10 @@ export async function registerTaskAttachment(input: {
     };
   } catch (error) {
     console.error('Error registering attachment:', error);
-    return {
-      success: false,
-      message: 'Failed to save attachment',
-      error: 'Failed to save attachment',
-    };
+    return actionError(
+      'Failed to save attachment',
+      'Failed to save attachment',
+    );
   }
 }
 
@@ -70,25 +68,17 @@ export async function deleteTaskAttachment(
 
     const result = await deleteTaskAttachmentById(attachmentId);
     if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        error: attachmentErrorCode(result.status, result.message),
-      };
+      return toActionResponse(result, attachmentErrorCode);
     }
 
-    revalidateTag('tasks', 'max');
-    revalidatePath(`/tasks/${result.data.taskId}`);
-    revalidatePath(`/tasks/${result.data.taskId}/edit`);
-
+    revalidateTaskDetail(result.data.taskId);
     return { success: true, message: 'Attachment removed' };
   } catch (error) {
     console.error('Error deleting attachment:', error);
-    return {
-      success: false,
-      message: 'Failed to remove attachment',
-      error: 'Failed to remove attachment',
-    };
+    return actionError(
+      'Failed to remove attachment',
+      'Failed to remove attachment',
+    );
   }
 }
 
@@ -109,20 +99,12 @@ export async function deleteDraftBlob(
       uploadSessionId,
     );
     if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        error: 'Forbidden',
-      };
+      return actionError(result.message, 'Forbidden');
     }
 
     return { success: true, message: 'Draft file removed' };
   } catch (error) {
     console.error('Error deleting draft blob:', error);
-    return {
-      success: false,
-      message: 'Failed to remove file',
-      error: 'Failed to remove file',
-    };
+    return actionError('Failed to remove file', 'Failed to remove file');
   }
 }

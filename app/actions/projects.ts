@@ -1,12 +1,16 @@
 'use server';
 
-import { revalidatePath, revalidateTag } from 'next/cache';
 import { getCurrentUser } from '@/lib/dal';
+import {
+  actionError,
+  revalidateProjectViews,
+  toActionResponse,
+  unauthorizedResponse,
+} from '@/lib/actions/helpers';
 import {
   createProjectForUser,
   updateProjectForUser,
 } from '@/lib/services/project-service';
-import { forbiddenOrMessage } from '@/lib/actions/helpers';
 import type { ProjectData } from '@/lib/validations/project';
 
 export type { ProjectData } from '@/lib/validations/project';
@@ -24,26 +28,12 @@ export async function createProject(
 ): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return {
-        success: false,
-        message: 'Unauthorized access',
-        error: 'Unauthorized',
-      };
-    }
+    if (!user) return unauthorizedResponse();
 
     const result = await createProjectForUser(user, data);
-    if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        errors: result.errors,
-        error: forbiddenOrMessage(result.status, result.message),
-      };
-    }
+    if (!result.ok) return toActionResponse(result);
 
-    revalidateTag('projects', 'max');
-    revalidatePath('/dashboard');
+    revalidateProjectViews();
 
     return {
       success: true,
@@ -52,11 +42,10 @@ export async function createProject(
     };
   } catch (error) {
     console.error('Error creating project:', error);
-    return {
-      success: false,
-      message: 'An error occurred while creating the project',
-      error: 'Failed to create project',
-    };
+    return actionError(
+      'An error occurred while creating the project',
+      'Failed to create project',
+    );
   }
 }
 
@@ -66,26 +55,12 @@ export async function updateProject(
 ): Promise<ActionResponse> {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return {
-        success: false,
-        message: 'Unauthorized access',
-        error: 'Unauthorized',
-      };
-    }
+    if (!user) return unauthorizedResponse();
 
     const result = await updateProjectForUser(user, id, data);
-    if (!result.ok) {
-      return {
-        success: false,
-        message: result.message,
-        errors: result.errors,
-        error: forbiddenOrMessage(result.status, result.message),
-      };
-    }
+    if (!result.ok) return toActionResponse(result);
 
-    revalidateTag('projects', 'max');
-    revalidatePath('/dashboard');
+    revalidateProjectViews();
 
     return {
       success: true,
@@ -94,10 +69,9 @@ export async function updateProject(
     };
   } catch (error) {
     console.error('Error updating project:', error);
-    return {
-      success: false,
-      message: 'An error occurred while updating the project',
-      error: 'Failed to update project',
-    };
+    return actionError(
+      'An error occurred while updating the project',
+      'Failed to update project',
+    );
   }
 }
