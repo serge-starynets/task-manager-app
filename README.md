@@ -87,6 +87,10 @@ npx tsx scripts/promote-admin.ts user@example.com --neon   # production (Neon)
 ## Project Structure
 
 - `app/` — Next.js App Router pages, server actions, and UI components
+  - `(app)/` — Authenticated app shell (dashboard, tasks, projects)
+  - `(auth)/` — Sign-in and sign-up
+  - `(marketing)/` — Public marketing pages
+- `app/components/` — Shared UI (`ui/`, `layout/`, `auth/`, `tasks/`, `projects/`)
 - `app/api/` — REST API routes (see [API Routes](#api-routes) below)
 - `app/actions/` — Server Actions used by the web UI
 - `db/` — Drizzle schema and database client

@@ -6,7 +6,7 @@ import { verifyRefreshToken } from '@/lib/auth/jwt';
 import { issueTokenPair } from '@/lib/auth/tokens';
 import { verifyPassword } from '@/lib/password';
 import { getUserByEmail } from '@/lib/users';
-import type { AuthTokensDto } from '@/lib/dto/auth';
+import type { AuthTokensDto } from '@/lib/dto/auth-tokens';
 
 export type CredentialsResult =
   | { ok: true; user: User }

@@ -13,8 +13,8 @@ import {
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { signIn, ActionResponse } from '@/app/actions/auth';
-import GoogleSignInButton from '@/app/components/GoogleSignInButton';
-import AuthDivider from '@/app/components/AuthDivider';
+import GoogleSignInButton from '@/app/components/auth/GoogleSignInButton';
+import AuthDivider from '@/app/components/auth/AuthDivider';
 
 const initialState: ActionResponse = {
   success: false,

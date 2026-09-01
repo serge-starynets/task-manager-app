@@ -1,0 +1,190 @@
+import {
+  getAccessibleTask,
+  getRelatedTasks,
+  getTaskAttachments,
+} from '@/lib/dal';
+import { formatRelativeTime } from '@/lib/utils';
+import { isEmptyHtml } from '@/lib/rich-text';
+import { Priority, Status } from '@/lib/types';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import Badge from '@/app/components/ui/Badge';
+import Button from '@/app/components/ui/Button';
+import RichText from '@/app/components/tasks/RichText';
+import TaskAttachmentsList from '@/app/components/tasks/TaskAttachmentsList';
+import { ArrowLeftIcon, Edit2Icon, Link2Icon, UserIcon } from 'lucide-react';
+import DeleteTaskButton from '@/app/components/tasks/DeleteTaskButton';
+
+export default async function TaskPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const taskIdNum = parseInt(id);
+  const task = await getAccessibleTask(taskIdNum);
+
+  if (!task) {
+    notFound();
+  }
+
+  const [relatedTasks, attachments] = await Promise.all([
+    getRelatedTasks(taskIdNum),
+    getTaskAttachments(taskIdNum),
+  ]);
+
+  const { title, description, status, priority, createdAt, updatedAt, user, taskId } =
+    task;
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'backlog':
+        return 'Backlog';
+      case 'todo':
+        return 'Todo';
+      case 'in_progress':
+        return 'In Progress';
+      case 'qa':
+        return 'QA';
+      case 'done':
+        return 'Done';
+      default:
+        return status;
+    }
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'low':
+        return 'Low';
+      case 'medium':
+        return 'Medium';
+      case 'high':
+        return 'High';
+      default:
+        return priority;
+    }
+  };
+
+  const backHref = task.projectId
+    ? `/dashboard?project=${task.projectId}`
+    : '/dashboard';
+
+  return (
+    <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
+      <div className="mb-8">
+        <Link
+          href={backHref}
+          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mb-4"
+        >
+          <ArrowLeftIcon size={16} className="mr-1" />
+          Back to Tasks
+        </Link>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-mono text-gray-500 dark:text-gray-400 mb-1">
+              {taskId}
+            </p>
+            <h1 className="text-3xl font-bold break-words">{title}</h1>
+          </div>
+          <div className="flex items-center space-x-2 shrink-0">
+            <Link href={`/tasks/${id}/edit`}>
+              <Button variant="outline" size="sm">
+                <span className="flex items-center">
+                  <Edit2Icon size={16} className="mr-1" />
+                  Edit
+                </span>
+              </Button>
+            </Link>
+            <DeleteTaskButton id={taskIdNum} projectId={task.projectId} />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+        <div className="flex flex-wrap gap-3 mb-6">
+          <Badge status={status as Status}>{getStatusLabel(status)}</Badge>
+          <Badge priority={priority as Priority}>
+            {getPriorityLabel(priority)}
+          </Badge>
+        </div>
+
+        {!isEmptyHtml(description) ? (
+          <RichText html={description} />
+        ) : (
+          <p className="text-gray-500 italic">No description provided.</p>
+        )}
+      </div>
+
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+        <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
+          <UserIcon size={18} className="text-gray-400" />
+          Details
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-gray-500 mb-1">
+              Assigned to
+            </p>
+            <p className="break-words">{user?.email}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Status</p>
+            <Badge status={status as Status}>{getStatusLabel(status)}</Badge>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Priority</p>
+            <Badge priority={priority as Priority}>
+              {getPriorityLabel(priority)}
+            </Badge>
+          </div>
+          <div className="flex gap-8">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">Created</p>
+              <p className="text-xs text-gray-400">
+                {formatRelativeTime(new Date(createdAt))}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">Updated</p>
+              <p className="text-xs text-gray-400">
+                {formatRelativeTime(new Date(updatedAt))}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+        <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
+          <Link2Icon size={18} className="text-gray-400" />
+          Related tasks
+        </h2>
+        {relatedTasks.length > 0 ? (
+          <ul className="space-y-2">
+            {relatedTasks.map((related) => (
+              <li key={related.id}>
+                <Link
+                  href={`/tasks/${related.id}`}
+                  className="text-sm text-gray-800 hover:underline dark:text-gray-200"
+                >
+                  <span className="font-mono text-gray-500 dark:text-gray-400">
+                    {related.taskId}
+                  </span>
+                  <span className="mx-2 text-gray-300 dark:text-gray-600">
+                    ·
+                  </span>
+                  <span className="break-words">{related.title}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500 italic">No related tasks.</p>
+        )}
+      </div>
+
+      <TaskAttachmentsList attachments={attachments} />
+    </div>
+  );
+}
