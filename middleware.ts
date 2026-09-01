@@ -3,18 +3,10 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { verifyAccessToken } from '@/lib/auth/jwt';
 
-const PROTECTED_PAGE_PREFIXES = ['/dashboard', '/tasks', '/projects'];
-
 const PUBLIC_API_V1_PATHS = new Set([
   '/api/v1/auth/login',
   '/api/v1/auth/refresh',
 ]);
-
-function isProtectedPage(pathname: string): boolean {
-  return PROTECTED_PAGE_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
-}
 
 function hasSessionToken(
   token: Awaited<ReturnType<typeof getToken>>,
@@ -28,6 +20,14 @@ function hasSessionToken(
   return typeof token.sub === 'string';
 }
 
+async function getAuthToken(request: NextRequest) {
+  return getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET,
+    secureCookie: request.nextUrl.protocol === 'https:',
+  });
+}
+
 async function hasBearerAccessToken(request: NextRequest): Promise<boolean> {
   const authHeader = request.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) {
@@ -39,10 +39,7 @@ async function hasBearerAccessToken(request: NextRequest): Promise<boolean> {
 }
 
 async function hasValidApiAuth(request: NextRequest): Promise<boolean> {
-  const session = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-  });
+  const session = await getAuthToken(request);
   if (hasSessionToken(session)) {
     return true;
   }
@@ -53,38 +50,21 @@ async function hasValidApiAuth(request: NextRequest): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith('/api/v1/')) {
-    if (PUBLIC_API_V1_PATHS.has(pathname)) {
-      return NextResponse.next();
-    }
-
-    if (!(await hasValidApiAuth(request))) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+  if (!pathname.startsWith('/api/v1/')) {
     return NextResponse.next();
   }
 
-  if (isProtectedPage(pathname)) {
-    const session = await getToken({
-      req: request,
-      secret: process.env.AUTH_SECRET,
-    });
-    if (!hasSessionToken(session)) {
-      const signInUrl = new URL('/signin', request.url);
-      signInUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(signInUrl);
-    }
+  if (PUBLIC_API_V1_PATHS.has(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (!(await hasValidApiAuth(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/tasks/:path*',
-    '/projects/:path*',
-    '/api/v1/:path*',
-  ],
+  matcher: ['/api/v1/:path*'],
 };

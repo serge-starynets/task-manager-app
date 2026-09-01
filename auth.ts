@@ -58,6 +58,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     jwt({ token, user, trigger }) {
       if (user?.id) {
         token.userId = user.id;
+      } else if (
+        typeof token.userId !== 'string' &&
+        typeof token.sub === 'string'
+      ) {
+        token.userId = token.sub;
       }
 
       if (trigger === 'update') {
@@ -68,8 +73,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     session({ session, token }) {
-      if (typeof token.userId === 'string') {
-        session.user.id = token.userId;
+      const userId =
+        typeof token.userId === 'string' ? token.userId : token.sub;
+      if (typeof userId === 'string') {
+        session.user.id = userId;
       }
       return session;
     },

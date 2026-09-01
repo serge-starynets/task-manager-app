@@ -107,7 +107,7 @@ npx tsx scripts/promote-admin.ts user@example.com --neon   # production (Neon)
 
 The web UI primarily uses **Server Actions** for mutations. Versioned REST routes under `/api/v1/` are the stable contract for mobile and external clients. OpenAPI spec: [`openapi.yaml`](openapi.yaml).
 
-**Authentication (v1):** Dual-mode — Auth.js session cookies for the web UI, or `Authorization: Bearer <accessToken>` for mobile clients. Obtain tokens via `POST /api/v1/auth/login` (credentials) and refresh with `POST /api/v1/auth/refresh`. Route handlers resolve the user via `getApiUser()` / `requireApiUser()`. Root `middleware.ts` protects app pages and `/api/v1/*` (except login/refresh).
+**Authentication (v1):** Dual-mode — Auth.js session cookies for the web UI, or `Authorization: Bearer <accessToken>` for mobile clients. Obtain tokens via `POST /api/v1/auth/login` (credentials) and refresh with `POST /api/v1/auth/refresh`. Route handlers resolve the user via `getApiUser()` / `requireApiUser()`. Root `middleware.ts` protects `/api/v1/*` (except login/refresh); authenticated app pages are gated by `app/(app)/layout.tsx`.
 
 ### API v1 — Auth
 

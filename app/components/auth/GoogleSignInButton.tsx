@@ -1,15 +1,18 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 import Button from '@/app/components/ui/Button';
 
 export default function GoogleSignInButton() {
   const [isPending, startTransition] = useTransition();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      void signIn('google', { callbackUrl: '/dashboard' });
+      void signIn('google', { callbackUrl });
     });
   };
 
