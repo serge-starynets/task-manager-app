@@ -100,7 +100,6 @@ export default function IdleTimeoutProvider({
     }
 
     scheduleIdleTimer();
-    refreshIfNeeded();
 
     for (const event of ACTIVITY_EVENTS) {
       window.addEventListener(event, onActivity, { passive: true });

@@ -92,29 +92,51 @@ npx tsx scripts/promote-admin.ts user@example.com --neon   # production (Neon)
 - `db/` — Drizzle schema and database client
 - `auth.ts` — Auth.js config (Google OAuth + credentials)
 - `lib/` — Data access layer, validation schemas, services, and shared utilities
-- `lib/validations/` — Shared Zod schemas (used by actions, services, and future API v1)
+- `lib/validations/` — Shared Zod schemas (used by actions, services, and API v1)
+- `lib/dto/` — Stable API response shapes for `/api/v1/`
+- `lib/api/` — API helpers (responses, mappers, handlers)
 - `lib/env.ts` — Environment variable validation (Zod)
 - `scripts/` — Seed and admin promotion scripts
 
 ## API Routes
 
-The web UI primarily uses **Server Actions** for mutations. REST routes under `app/api/` serve file uploads, Auth.js, and external/mobile clients (Phase 2 will add `/api/v1/`).
+The web UI primarily uses **Server Actions** for mutations. Versioned REST routes under `/api/v1/` are the stable contract for mobile and external clients. OpenAPI spec: [`openapi.yaml`](openapi.yaml).
 
-**Authentication:** Session cookies via Auth.js. Route handlers call `getCurrentUser()` — there is no global API middleware gate yet. Mobile Bearer token auth is planned for Phase 2.
+**Authentication (v1):** Session cookies via Auth.js. Route handlers call `requireApiUser()`. Bearer token auth is planned for Phase 2b.
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `GET`, `POST` | `/api/auth/[...nextauth]` | Public | Auth.js handlers (OAuth callbacks, session) |
-| `GET` | `/api/tasks` | Session | List tasks for current user (admins see all) |
-| `POST` | `/api/tasks` | Session | Create a task |
-| `GET` | `/api/tasks/[id]` | Session | Get a single task |
-| `DELETE` | `/api/tasks/[id]` | Session | Delete a task |
-| `POST` | `/api/attachments/upload` | Session | Vercel Blob client upload token |
-| `GET` | `/api/attachments/file/[...pathname]` | Session | Stream a private attachment |
+### API v1
 
-**Error shape (REST):** `{ error: string }` or `{ error: string, errors?: Record<string, string[]> }`
+| Method   | Path                                     | Description                            |
+| -------- | ---------------------------------------- | -------------------------------------- |
+| `GET`    | `/api/v1/tasks`                          | List tasks (`?projectId=`, `?status=`) |
+| `POST`   | `/api/v1/tasks`                          | Create a task                          |
+| `GET`    | `/api/v1/tasks/[id]`                     | Get a task                             |
+| `PATCH`  | `/api/v1/tasks/[id]`                     | Update a task                          |
+| `DELETE` | `/api/v1/tasks/[id]`                     | Delete a task                          |
+| `PATCH`  | `/api/v1/tasks/[id]/status`              | Update task status (`{ status }`)      |
+| `GET`    | `/api/v1/tasks/[id]/relations`           | List related tasks                     |
+| `POST`   | `/api/v1/tasks/[id]/relations`           | Add relation (`{ targetId }`)          |
+| `DELETE` | `/api/v1/tasks/[id]/relations?targetId=` | Remove relation                        |
+| `GET`    | `/api/v1/tasks/[id]/attachments`         | List attachments                       |
+| `POST`   | `/api/v1/tasks/[id]/attachments`         | Register uploaded attachment           |
+| `GET`    | `/api/v1/projects`                       | List projects                          |
+| `POST`   | `/api/v1/projects`                       | Create a project                       |
+| `GET`    | `/api/v1/projects/[id]`                  | Get a project                          |
+| `PATCH`  | `/api/v1/projects/[id]`                  | Update a project                       |
 
-**Planned:** Versioned `/api/v1/` routes with Bearer token auth for the mobile app.
+### Other routes
+
+| Method          | Path                                  | Auth    | Description                                 |
+| --------------- | ------------------------------------- | ------- | ------------------------------------------- |
+| `GET`, `POST`   | `/api/auth/[...nextauth]`             | Public  | Auth.js handlers (OAuth callbacks, session) |
+| `GET`, `POST`   | `/api/tasks`                          | Session | **Deprecated** — use `/api/v1/tasks`        |
+| `GET`, `DELETE` | `/api/tasks/[id]`                     | Session | **Deprecated** — use `/api/v1/tasks/[id]`   |
+| `POST`          | `/api/attachments/upload`             | Session | Vercel Blob client upload token             |
+| `GET`           | `/api/attachments/file/[...pathname]` | Session | Stream a private attachment                 |
+
+**Success shape:** `{ data: T }` or `{ message: string }`
+
+**Error shape:** `{ error: string }` or `{ error: string, errors?: Record<string, string[]> }`
 
 ## License
 

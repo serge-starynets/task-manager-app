@@ -1,0 +1,441 @@
+openapi: 3.0.3
+info:
+  title: Task Manager API
+  version: 1.0.0
+  description: |
+    REST API v1 for the Task Manager app. Authentication uses Auth.js session cookies.
+    Bearer token auth is planned for mobile clients (Phase 2b).
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://projenda.vercel.app
+    description: Production
+
+tags:
+  - name: Tasks
+  - name: Projects
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: authjs.session-token
+      description: Auth.js session cookie (set after sign-in)
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        taskId:
+          type: string
+          example: WEB-1
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [backlog, todo, in_progress, qa, done, rejected, closed]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        projectId:
+          type: integer
+          nullable: true
+        userId:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        abbreviation:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [not_started, ongoing, completed, paused]
+        userId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RelatedTask:
+      type: object
+      properties:
+        id:
+          type: integer
+        taskId:
+          type: string
+        title:
+          type: string
+
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: integer
+        taskId:
+          type: integer
+        fileName:
+          type: string
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+        url:
+          type: string
+        pathname:
+          type: string
+        uploadedBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+security:
+  - sessionCookie: []
+
+paths:
+  /api/v1/tasks:
+    get:
+      tags: [Tasks]
+      summary: List tasks
+      parameters:
+        - name: projectId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [backlog, todo, in_progress, qa, done, rejected, closed]
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags: [Tasks]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                  nullable: true
+                status:
+                  type: string
+                priority:
+                  type: string
+                projectId:
+                  type: integer
+                  nullable: true
+      responses:
+        '201':
+          description: Task created
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+
+  /api/v1/tasks/{id}:
+    get:
+      tags: [Tasks]
+      summary: Get a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task details
+        '404':
+          description: Not found
+    patch:
+      tags: [Tasks]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+                priority:
+                  type: string
+      responses:
+        '200':
+          description: Updated task
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    delete:
+      tags: [Tasks]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+        '403':
+          description: Forbidden
+
+  /api/v1/tasks/{id}/status:
+    patch:
+      tags: [Tasks]
+      summary: Update task status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Updated task
+
+  /api/v1/tasks/{id}/relations:
+    get:
+      tags: [Tasks]
+      summary: List related tasks
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Related tasks
+    post:
+      tags: [Tasks]
+      summary: Add a related task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetId]
+              properties:
+                targetId:
+                  type: integer
+      responses:
+        '201':
+          description: Relation added
+    delete:
+      tags: [Tasks]
+      summary: Remove a related task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: targetId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Relation removed
+
+  /api/v1/tasks/{id}/attachments:
+    get:
+      tags: [Tasks]
+      summary: List task attachments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Attachments
+    post:
+      tags: [Tasks]
+      summary: Register an uploaded attachment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, pathname, fileName, contentType, sizeBytes]
+              properties:
+                url:
+                  type: string
+                pathname:
+                  type: string
+                fileName:
+                  type: string
+                contentType:
+                  type: string
+                sizeBytes:
+                  type: integer
+
+  /api/v1/projects:
+    get:
+      tags: [Projects]
+      summary: List projects
+      responses:
+        '200':
+          description: Project list
+    post:
+      tags: [Projects]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, abbreviation, status]
+              properties:
+                title:
+                  type: string
+                abbreviation:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '201':
+          description: Project created
+
+  /api/v1/projects/{id}:
+    get:
+      tags: [Projects]
+      summary: Get a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Project details
+    patch:
+      tags: [Projects]
+      summary: Update a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Updated project

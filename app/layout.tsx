@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
+import { auth } from '@/auth';
 import './globals.css';
 import AppToaster from './components/AppToaster';
 import AuthSessionProvider from './components/AuthSessionProvider';
@@ -16,16 +17,18 @@ export const metadata: Metadata = {
   description: 'A modern task tracking application built with Next.js 15',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class">
-          <AuthSessionProvider>
+          <AuthSessionProvider session={session}>
             <IdleTimeoutProvider>
               <AppToaster />
               {children}
