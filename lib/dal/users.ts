@@ -19,21 +19,21 @@ export function isAdmin(user: Pick<User, 'role'>) {
   return user.role === 'admin';
 }
 
-export const getCurrentUser = cache(async () => {
-  const session = await getSession();
-  if (!session) return null;
-
+export async function getUserById(id: string): Promise<User | null> {
   try {
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, session.userId));
-
-    return result[0] || null;
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0] ?? null;
   } catch (error) {
     console.error('Error getting user by ID:', error);
     return null;
   }
+}
+
+export const getCurrentUser = cache(async () => {
+  const session = await getSession();
+  if (!session) return null;
+
+  return getUserById(session.userId);
 });
 
 export async function requireUser() {

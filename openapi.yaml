@@ -3,8 +3,9 @@ info:
   title: Task Manager API
   version: 1.0.0
   description: |
-    REST API v1 for the Task Manager app. Authentication uses Auth.js session cookies.
-    Bearer token auth is planned for mobile clients (Phase 2b).
+    REST API v1 for the Task Manager app. Supports dual-mode authentication:
+    Auth.js session cookies (web) or `Authorization: Bearer <accessToken>` (mobile).
+    Obtain tokens via `POST /api/v1/auth/login` and refresh via `POST /api/v1/auth/refresh`.
 
 servers:
   - url: http://localhost:3000
@@ -13,6 +14,7 @@ servers:
     description: Production
 
 tags:
+  - name: Auth
   - name: Tasks
   - name: Projects
 
@@ -22,7 +24,12 @@ components:
       type: apiKey
       in: cookie
       name: authjs.session-token
-      description: Auth.js session cookie (set after sign-in)
+      description: Auth.js session cookie (set after web sign-in)
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token from POST /api/v1/auth/login or /refresh
 
   schemas:
     Error:
@@ -48,6 +55,40 @@ components:
         role:
           type: string
           enum: [admin, user]
+
+    AuthTokens:
+      type: object
+      required: [accessToken, refreshToken, expiresIn, tokenType, user]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Access token lifetime in seconds
+        tokenType:
+          type: string
+          enum: [Bearer]
+        user:
+          $ref: '#/components/schemas/User'
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
 
     Task:
       type: object
@@ -141,8 +182,76 @@ components:
 
 security:
   - sessionCookie: []
+  - bearerAuth: []
 
 paths:
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Credentials login (mobile)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Token pair issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid credentials
+        '429':
+          description: Rate limited
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: New token pair issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AuthTokens'
+        '401':
+          description: Invalid or expired refresh token
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user profile
+      responses:
+        '200':
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+
   /api/v1/tasks:
     get:
       tags: [Tasks]

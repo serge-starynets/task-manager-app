@@ -95,6 +95,7 @@ npx tsx scripts/promote-admin.ts user@example.com --neon   # production (Neon)
 - `lib/validations/` — Shared Zod schemas (used by actions, services, and API v1)
 - `lib/dto/` — Stable API response shapes for `/api/v1/`
 - `lib/api/` — API helpers (responses, mappers, handlers)
+- `lib/auth/` — Dual-mode auth (session cookies + Bearer JWT for mobile)
 - `lib/env.ts` — Environment variable validation (Zod)
 - `scripts/` — Seed and admin promotion scripts
 
@@ -102,9 +103,17 @@ npx tsx scripts/promote-admin.ts user@example.com --neon   # production (Neon)
 
 The web UI primarily uses **Server Actions** for mutations. Versioned REST routes under `/api/v1/` are the stable contract for mobile and external clients. OpenAPI spec: [`openapi.yaml`](openapi.yaml).
 
-**Authentication (v1):** Session cookies via Auth.js. Route handlers call `requireApiUser()`. Bearer token auth is planned for Phase 2b.
+**Authentication (v1):** Dual-mode — Auth.js session cookies for the web UI, or `Authorization: Bearer <accessToken>` for mobile clients. Obtain tokens via `POST /api/v1/auth/login` (credentials) and refresh with `POST /api/v1/auth/refresh`. Route handlers resolve the user via `getApiUser()` / `requireApiUser()`. Root `middleware.ts` protects app pages and `/api/v1/*` (except login/refresh).
 
-### API v1
+### API v1 — Auth
+
+| Method | Path                   | Auth    | Description                                      |
+| ------ | ---------------------- | ------- | ------------------------------------------------ |
+| `POST` | `/api/v1/auth/login`   | Public  | Credentials login → access + refresh tokens        |
+| `POST` | `/api/v1/auth/refresh` | Public  | Exchange refresh token for a new token pair      |
+| `GET`  | `/api/v1/auth/me`      | Session | Current user profile (session cookie or Bearer)  |
+
+### API v1 — Resources
 
 | Method   | Path                                     | Description                            |
 | -------- | ---------------------------------------- | -------------------------------------- |

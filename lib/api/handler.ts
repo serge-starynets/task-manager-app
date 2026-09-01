@@ -1,10 +1,10 @@
 import type { User } from '@/db/schema';
-import { getCurrentUser } from '@/lib/dal';
+import { getApiUser } from '@/lib/auth/api-auth';
 import { jsonUnauthorized } from '@/lib/api/responses';
 import type { ServiceFailure, ServiceResult } from '@/lib/services/types';
 
 export async function requireApiUser(): Promise<User | Response> {
-  const user = await getCurrentUser();
+  const user = await getApiUser();
   if (!user) {
     return jsonUnauthorized();
   }

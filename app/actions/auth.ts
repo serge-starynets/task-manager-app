@@ -1,43 +1,13 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { signIn as authSignIn, signOut as authSignOut } from '@/auth';
-import { createUser, getUserByEmail, normalizeEmail } from '@/lib/users';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { createUser, getUserByEmail } from '@/lib/users';
+import { checkAuthRateLimit } from '@/lib/auth/rate-limit';
 import { getSession } from '@/lib/session';
 import { SignInSchema, SignUpSchema } from '@/lib/validations/auth';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 
 export type { SignInData, SignUpData } from '@/lib/validations/auth';
-
-const AUTH_RATE_LIMIT = 10; // attempts
-const AUTH_RATE_WINDOW_MS = 15 * 60 * 1000;
-
-async function getClientIp(): Promise<string> {
-  const headerList = await headers();
-  const forwarded = headerList.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0].trim();
-  return headerList.get('x-real-ip') ?? 'unknown';
-}
-
-/** Throttle by IP and by target email so neither can be brute-forced alone. */
-async function checkAuthRateLimit(
-  scope: 'signin' | 'signup',
-  email: string,
-): Promise<boolean> {
-  const ip = await getClientIp();
-  const ipResult = checkRateLimit(
-    `${scope}:ip:${ip}`,
-    AUTH_RATE_LIMIT,
-    AUTH_RATE_WINDOW_MS,
-  );
-  const emailResult = checkRateLimit(
-    `${scope}:email:${normalizeEmail(email)}`,
-    AUTH_RATE_LIMIT,
-    AUTH_RATE_WINDOW_MS,
-  );
-  return ipResult.ok && emailResult.ok;
-}
 
 const RATE_LIMITED_RESPONSE: ActionResponse = {
   success: false,
