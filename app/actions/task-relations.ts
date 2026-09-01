@@ -1,6 +1,6 @@
 'use server';
 
-import { getCurrentUser, searchRelatableTasks as searchRelatableTasksDal } from '@/lib/dal';
+import { getCurrentUser, searchRelatableTasks as searchRelatableTasksDal, searchRelatableTasksForNewTask as searchRelatableTasksForNewTaskDal } from '@/lib/dal';
 import {
   actionError,
   revalidateRelatedTaskViews,
@@ -24,6 +24,22 @@ export async function searchRelatableTasks(
   query: string,
 ) {
   return searchRelatableTasksDal(sourceTaskId, query);
+}
+
+export async function searchRelatableTasksForNewTask(
+  projectId: number | null,
+  query: string,
+  excludeIds: number[],
+) {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  return searchRelatableTasksForNewTaskDal(
+    user.id,
+    projectId,
+    query,
+    excludeIds,
+  );
 }
 
 export async function addTaskRelation(

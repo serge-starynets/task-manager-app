@@ -79,11 +79,40 @@ export async function searchRelatableTasks(
   const excludeIds =
     relatedIds.length > 0 ? [sourceTaskId, ...relatedIds] : [sourceTaskId];
 
-  const pattern = `%${trimmed}%`;
+  return searchRelatableTasksForUser(
+    source.userId,
+    source.projectId,
+    trimmed,
+    excludeIds,
+  );
+}
+
+export async function searchRelatableTasksForNewTask(
+  userId: string,
+  projectId: number | null,
+  query: string,
+  excludeIds: number[] = [],
+): Promise<RelatedTaskSummary[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 1) return [];
+
+  return searchRelatableTasksForUser(userId, projectId, trimmed, excludeIds);
+}
+
+async function searchRelatableTasksForUser(
+  userId: string,
+  projectId: number | null,
+  trimmedQuery: string,
+  excludeIds: number[],
+): Promise<RelatedTaskSummary[]> {
+  const pattern = `%${trimmedQuery}%`;
   const eligibility =
-    source.projectId === null
+    projectId === null
       ? isNull(tasks.projectId)
-      : eq(tasks.projectId, source.projectId);
+      : eq(tasks.projectId, projectId);
+
+  const exclude =
+    excludeIds.length > 0 ? notInArray(tasks.id, excludeIds) : undefined;
 
   try {
     return await db
@@ -95,9 +124,9 @@ export async function searchRelatableTasks(
       .from(tasks)
       .where(
         and(
-          eq(tasks.userId, source.userId),
+          eq(tasks.userId, userId),
           eligibility,
-          notInArray(tasks.id, excludeIds),
+          exclude,
           or(ilike(tasks.title, pattern), ilike(tasks.taskId, pattern)),
         ),
       )

@@ -33,6 +33,7 @@ export const CreateTaskSchema = z.object({
   status: TaskStatusSchema.default('backlog'),
   priority: TaskPrioritySchema.default('medium'),
   projectId: z.number().int().positive().optional().nullable(),
+  relatedTaskIds: z.array(z.number().int().positive()).optional(),
 });
 
 export type CreateTaskInput = z.input<typeof CreateTaskSchema>;
@@ -40,6 +41,7 @@ export type CreateTaskInput = z.input<typeof CreateTaskSchema>;
 export type CreateTaskServiceInput = CreateTaskInput & {
   pendingAttachmentsJson?: string | null;
   uploadSessionId?: string | null;
+  relatedTaskIds?: number[];
 };
 
 /** Full task schema for server actions (includes userId, timestamps). */
@@ -64,4 +66,5 @@ export const UpdateTaskSchema = TaskSchema.partial();
 export type CreateTaskActionInput = TaskData & {
   pendingAttachmentsJson?: string | null;
   uploadSessionId?: string | null;
+  relatedTaskIds?: number[];
 };

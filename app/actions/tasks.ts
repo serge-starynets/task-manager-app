@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/dal';
 import {
   actionError,
   createTaskErrorMessage,
+  revalidateRelatedTaskViews,
   revalidateTaskList,
   toActionResponse,
   unauthorizedResponse,
@@ -45,11 +46,18 @@ export async function createTask(
       projectId: data.projectId ?? null,
       pendingAttachmentsJson: data.pendingAttachmentsJson,
       uploadSessionId: data.uploadSessionId,
+      relatedTaskIds: data.relatedTaskIds,
     });
 
     if (!result.ok) return toActionResponse(result);
 
     revalidateTaskList();
+
+    if (data.relatedTaskIds?.length) {
+      for (const relatedId of data.relatedTaskIds) {
+        revalidateRelatedTaskViews(result.data.id, relatedId);
+      }
+    }
 
     return {
       success: true,

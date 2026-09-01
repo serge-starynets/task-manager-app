@@ -71,6 +71,7 @@ export default function TaskForm({
   );
 
   const [description, setDescription] = useState(task?.description ?? '');
+  const [relatedDraft, setRelatedDraft] = useState<RelatedTaskSummary[]>([]);
   const [pending, setPending] = useState<PendingAttachment[]>([]);
   const [savedAttachments, setSavedAttachments] =
     useState<TaskAttachment[]>(initialAttachments);
@@ -218,6 +219,7 @@ export default function TaskForm({
               'pendingAttachments',
             ) as string,
             uploadSessionId: formData.get('uploadSessionId') as string,
+            relatedTaskIds: relatedDraft.map((task) => task.id),
           });
 
       if (result.success) {
@@ -360,8 +362,19 @@ export default function TaskForm({
         </FormGroup>
       </div>
 
-      {isEditing && task && (
-        <RelatedTasksPicker taskId={task.id} initialRelated={relatedTasks} />
+      {isEditing && task ? (
+        <RelatedTasksPicker
+          mode="edit"
+          taskId={task.id}
+          initialRelated={relatedTasks}
+        />
+      ) : (
+        <RelatedTasksPicker
+          mode="create"
+          projectId={projectId ?? null}
+          selected={relatedDraft}
+          onSelectedChange={setRelatedDraft}
+        />
       )}
 
       <TaskAttachmentsField

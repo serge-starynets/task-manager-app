@@ -12,6 +12,7 @@ import {
 } from '@/lib/dal';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { allocateTaskId } from '@/lib/task-id';
+import { linkRelatedTasks } from '@/lib/services/relation-service';
 import {
   MAX_ATTACHMENT_BYTES,
   formatFileSize,
@@ -156,6 +157,15 @@ export async function createTaskForUser(
     } catch (error) {
       await db.delete(tasks).where(eq(tasks.id, created.id));
       throw error;
+    }
+  }
+
+  const relatedTaskIds = data.relatedTaskIds ?? [];
+  if (relatedTaskIds.length > 0) {
+    const relationResult = await linkRelatedTasks(created.id, relatedTaskIds);
+    if (!relationResult.ok) {
+      await db.delete(tasks).where(eq(tasks.id, created.id));
+      return relationResult;
     }
   }
 

@@ -9,7 +9,7 @@ import {
   getTask,
   orderedTaskPair,
 } from '@/lib/dal';
-import type { ServiceResult, ServiceVoidResult } from '@/lib/services/types';
+import type { ServiceVoidResult } from '@/lib/services/types';
 
 export async function addTaskRelation(
   sourceId: number,
@@ -73,6 +73,24 @@ export async function removeTaskRelation(
         eq(taskRelations.taskIdB, taskIdB),
       ),
     );
+
+  return { ok: true };
+}
+
+export async function linkRelatedTasks(
+  sourceId: number,
+  targetIds: number[],
+): Promise<ServiceVoidResult> {
+  const uniqueTargetIds = [...new Set(targetIds)].filter(
+    (id) => id !== sourceId,
+  );
+
+  for (const targetId of uniqueTargetIds) {
+    const result = await addTaskRelation(sourceId, targetId);
+    if (!result.ok) {
+      return result;
+    }
+  }
 
   return { ok: true };
 }
