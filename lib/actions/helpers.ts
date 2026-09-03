@@ -55,8 +55,12 @@ export function toActionResponse(
   };
 }
 
-export function revalidateTaskList() {
+export function revalidateTaskCache() {
   revalidateTag('tasks', 'max');
+}
+
+export function revalidateTaskList() {
+  revalidateTaskCache();
   revalidatePath('/dashboard');
 }
 

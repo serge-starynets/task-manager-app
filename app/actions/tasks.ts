@@ -6,6 +6,7 @@ import {
   actionError,
   createTaskErrorMessage,
   revalidateRelatedTaskViews,
+  revalidateTaskCache,
   revalidateTaskList,
   toActionResponse,
   unauthorizedResponse,
@@ -139,7 +140,7 @@ export async function moveTaskOnBoard(
     const result = await moveTaskOnBoardForUser(id, { status, orderedTaskIds });
     if (!result.ok) return toActionResponse(result);
 
-    revalidateTaskList();
+    revalidateTaskCache();
     return { success: true, message: 'Board order updated successfully' };
   } catch (error) {
     console.error('Error updating board order:', error);

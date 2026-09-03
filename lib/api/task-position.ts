@@ -5,7 +5,7 @@ import {
   serviceFailureToBody,
 } from '@/lib/api/handler';
 import { taskToDto } from '@/lib/api/mappers';
-import { revalidateTaskList } from '@/lib/api/revalidate';
+import { revalidateTaskCache } from '@/lib/api/revalidate';
 import { jsonError, jsonOk } from '@/lib/api/responses';
 import { moveTaskOnBoardForUser } from '@/lib/services/task-service';
 import { MoveTaskOnBoardSchema } from '@/lib/validations/task';
@@ -41,7 +41,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return jsonError(failure.error, failure.status, failure.errors);
     }
 
-    revalidateTaskList();
+    revalidateTaskCache();
     return jsonOk(taskToDto(result.data));
   } catch (error) {
     console.error('Error updating board order:', error);
