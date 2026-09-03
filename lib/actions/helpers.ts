@@ -1,4 +1,4 @@
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import type { ServiceFailure } from '@/lib/services/types';
 
 export type BaseActionResponse = {
@@ -57,6 +57,11 @@ export function toActionResponse(
 
 export function revalidateTaskCache() {
   revalidateTag('tasks', 'max');
+}
+
+/** Immediate cache expiry for Server Actions so the following RSC refresh is not stale. */
+export function updateTaskCache() {
+  updateTag('tasks');
 }
 
 export function revalidateTaskList() {
