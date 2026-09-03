@@ -15,6 +15,13 @@
       "when": 1787652382831,
       "tag": "0001_common_ben_urich",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788462776444,
+      "tag": "0002_flat_sister_grimm",
+      "breakpoints": true
     }
   ]
 }

@@ -28,6 +28,17 @@ export const priorityEnum = pgEnum('priority', [
   'high',
   'critical',
 ]);
+export const ticketTypeEnum = pgEnum('ticket_type', ['task', 'bug']);
+export const severityEnum = pgEnum('severity', [
+  'low',
+  'medium',
+  'high',
+  'critical',
+]);
+export const relationKindEnum = pgEnum('relation_kind', [
+  'related',
+  'blocked_by',
+]);
 export const projectStatusEnum = pgEnum('project_status', [
   'not_started',
   'ongoing',
@@ -71,6 +82,8 @@ export const tasks = pgTable(
     description: text('description'),
     status: statusEnum('status').default('backlog').notNull(),
     priority: priorityEnum('priority').default('medium').notNull(),
+    type: ticketTypeEnum('type').default('task').notNull(),
+    severity: severityEnum('severity'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
     userId: text('user_id').notNull(),
@@ -81,7 +94,10 @@ export const tasks = pgTable(
   ],
 );
 
-/** Undirected many-to-many links between tasks. Always stored with taskIdA < taskIdB. */
+/**
+ * Links between tickets. `related` is undirected (always taskIdA < taskIdB).
+ * `blocked_by` is directed: taskIdA is blocked by taskIdB.
+ */
 export const taskRelations = pgTable(
   'task_relations',
   {
@@ -92,10 +108,15 @@ export const taskRelations = pgTable(
     taskIdB: integer('task_id_b')
       .notNull()
       .references(() => tasks.id, { onDelete: 'cascade' }),
+    kind: relationKindEnum('kind').default('related').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('task_relations_pair_uidx').on(table.taskIdA, table.taskIdB),
+    uniqueIndex('task_relations_pair_kind_uidx').on(
+      table.taskIdA,
+      table.taskIdB,
+      table.kind,
+    ),
   ],
 );
 
@@ -223,4 +244,7 @@ export type Project = InferSelectModel<typeof projects>;
 export type User = InferSelectModel<typeof users>;
 export type TaskRelation = InferSelectModel<typeof taskRelations>;
 export type TaskAttachment = InferSelectModel<typeof taskAttachments>;
-export type RelatedTaskSummary = Pick<Task, 'id' | 'taskId' | 'title'>;
+export type RelatableTaskSummary = Pick<Task, 'id' | 'taskId' | 'title' | 'type'>;
+export type RelatedTaskSummary = RelatableTaskSummary & {
+  kind: TaskRelation['kind'];
+};

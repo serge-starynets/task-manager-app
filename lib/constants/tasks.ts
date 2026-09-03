@@ -24,3 +24,20 @@ export const TASK_PRIORITY = {
   high: { label: 'High', value: 'high' },
   critical: { label: 'Critical', value: 'critical' },
 };
+
+export const TICKET_TYPE = {
+  task: { label: 'Task', value: 'task' },
+  bug: { label: 'Bug', value: 'bug' },
+};
+
+export const TASK_SEVERITY = {
+  low: { label: 'Low', value: 'low' },
+  medium: { label: 'Medium', value: 'medium' },
+  high: { label: 'High', value: 'high' },
+  critical: { label: 'Critical', value: 'critical' },
+};
+
+export const RELATION_KIND = {
+  related: { label: 'Related to', value: 'related' },
+  blocked_by: { label: 'Blocked by', value: 'blocked_by' },
+};

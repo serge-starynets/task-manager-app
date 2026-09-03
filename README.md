@@ -127,9 +127,9 @@ The web UI primarily uses **Server Actions** for mutations. Versioned REST route
 | `PATCH`  | `/api/v1/tasks/[id]`                     | Update a task                          |
 | `DELETE` | `/api/v1/tasks/[id]`                     | Delete a task                          |
 | `PATCH`  | `/api/v1/tasks/[id]/status`              | Update task status (`{ status }`)      |
-| `GET`    | `/api/v1/tasks/[id]/relations`           | List related tasks                     |
-| `POST`   | `/api/v1/tasks/[id]/relations`           | Add relation (`{ targetId }`)          |
-| `DELETE` | `/api/v1/tasks/[id]/relations?targetId=` | Remove relation                        |
+| `GET`    | `/api/v1/tasks/[id]/relations`           | List related tickets (`type`, `kind`)  |
+| `POST`   | `/api/v1/tasks/[id]/relations`           | Add relation (`{ targetId, kind }`)    |
+| `DELETE` | `/api/v1/tasks/[id]/relations?targetId=` | Remove relation (optional `?kind=`)    |
 | `GET`    | `/api/v1/tasks/[id]/attachments`         | List attachments                       |
 | `POST`   | `/api/v1/tasks/[id]/attachments`         | Register uploaded attachment           |
 | `GET`    | `/api/v1/projects`                       | List projects                          |

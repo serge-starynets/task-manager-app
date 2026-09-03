@@ -43,25 +43,33 @@ export async function createTask(
       description: data.description,
       status: data.status,
       priority: data.priority,
+      type: data.type,
+      severity: data.severity,
       projectId: data.projectId ?? null,
       pendingAttachmentsJson: data.pendingAttachmentsJson,
       uploadSessionId: data.uploadSessionId,
       relatedTaskIds: data.relatedTaskIds,
+      relations: data.relations,
     });
 
     if (!result.ok) return toActionResponse(result);
 
     revalidateTaskList();
 
-    if (data.relatedTaskIds?.length) {
-      for (const relatedId of data.relatedTaskIds) {
-        revalidateRelatedTaskViews(result.data.id, relatedId);
-      }
+    const linkedIds = [
+      ...(data.relatedTaskIds ?? []),
+      ...(data.relations ?? []).map((relation) => relation.targetId),
+    ];
+    for (const relatedId of linkedIds) {
+      revalidateRelatedTaskViews(result.data.id, relatedId);
     }
 
     return {
       success: true,
-      message: 'Task created successfully',
+      message:
+        data.type === 'bug'
+          ? 'Bug created successfully'
+          : 'Task created successfully',
       projectId: result.data.projectId,
       taskId: result.data.id,
     };

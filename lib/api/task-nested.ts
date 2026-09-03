@@ -25,6 +25,7 @@ import {
 } from '@/lib/services/relation-service';
 import { registerTaskAttachmentForUser } from '@/lib/services/attachment-service';
 import { RegisterAttachmentSchema } from '@/lib/validations/attachment';
+import { RelationKindSchema } from '@/lib/validations/task';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -32,6 +33,7 @@ type RouteContext = {
 
 const RelationBodySchema = z.object({
   targetId: z.number().int().positive(),
+  kind: RelationKindSchema.default('related'),
 });
 
 export async function GETRelations(_request: Request, context: RouteContext) {
@@ -71,7 +73,11 @@ export async function POSTRelation(request: Request, context: RouteContext) {
       });
     }
 
-    const result = await addTaskRelation(taskId, parsed.data.targetId);
+    const result = await addTaskRelation(
+      taskId,
+      parsed.data.targetId,
+      parsed.data.kind,
+    );
     if (!result.ok) {
       const failure = serviceFailureToBody(result);
       return jsonError(failure.error, failure.status);
@@ -103,7 +109,14 @@ export async function DELETERelation(
       return jsonError('targetId query parameter is required', 400);
     }
 
-    const result = await removeTaskRelation(taskId, targetId);
+    const kindResult = RelationKindSchema.safeParse(
+      searchParams.get('kind') ?? 'related',
+    );
+    if (!kindResult.success) {
+      return jsonError('Invalid kind', 400);
+    }
+
+    const result = await removeTaskRelation(taskId, targetId, kindResult.data);
     if (!result.ok) {
       const failure = serviceFailureToBody(result);
       return jsonError(failure.error, failure.status);

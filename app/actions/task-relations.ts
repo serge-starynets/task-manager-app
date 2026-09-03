@@ -1,6 +1,10 @@
 'use server';
 
-import { getCurrentUser, searchRelatableTasks as searchRelatableTasksDal, searchRelatableTasksForNewTask as searchRelatableTasksForNewTaskDal } from '@/lib/dal';
+import {
+  getCurrentUser,
+  searchRelatableTasks as searchRelatableTasksDal,
+  searchRelatableTasksForNewTask as searchRelatableTasksForNewTaskDal,
+} from '@/lib/dal';
 import {
   actionError,
   revalidateRelatedTaskViews,
@@ -12,6 +16,7 @@ import {
   addTaskRelation as addTaskRelationService,
   removeTaskRelation as removeTaskRelationService,
 } from '@/lib/services/relation-service';
+import type { RelationKind, TicketType } from '@/lib/validations/task';
 
 export type RelationActionResponse = {
   success: boolean;
@@ -22,14 +27,22 @@ export type RelationActionResponse = {
 export async function searchRelatableTasks(
   sourceTaskId: number,
   query: string,
+  targetType: TicketType,
+  excludeIds: number[] = [],
 ) {
-  return searchRelatableTasksDal(sourceTaskId, query);
+  return searchRelatableTasksDal(
+    sourceTaskId,
+    query,
+    targetType,
+    excludeIds,
+  );
 }
 
 export async function searchRelatableTasksForNewTask(
   projectId: number | null,
   query: string,
   excludeIds: number[],
+  targetType: TicketType,
 ) {
   const user = await getCurrentUser();
   if (!user) return [];
@@ -39,24 +52,26 @@ export async function searchRelatableTasksForNewTask(
     projectId,
     query,
     excludeIds,
+    targetType,
   );
 }
 
 export async function addTaskRelation(
   sourceId: number,
   targetId: number,
+  kind: RelationKind = 'related',
 ): Promise<RelationActionResponse> {
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const result = await addTaskRelationService(sourceId, targetId);
+    const result = await addTaskRelationService(sourceId, targetId, kind);
     if (!result.ok) {
       return toActionResponse(result, relationErrorCode);
     }
 
     revalidateRelatedTaskViews(sourceId, targetId);
-    return { success: true, message: 'Related task added' };
+    return { success: true, message: 'Related ticket added' };
   } catch (error) {
     console.error('Error adding task relation:', error);
     return actionError(
@@ -69,18 +84,19 @@ export async function addTaskRelation(
 export async function removeTaskRelation(
   sourceId: number,
   targetId: number,
+  kind: RelationKind = 'related',
 ): Promise<RelationActionResponse> {
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const result = await removeTaskRelationService(sourceId, targetId);
+    const result = await removeTaskRelationService(sourceId, targetId, kind);
     if (!result.ok) {
       return toActionResponse(result, relationErrorCode);
     }
 
     revalidateRelatedTaskViews(sourceId, targetId);
-    return { success: true, message: 'Related task removed' };
+    return { success: true, message: 'Related ticket removed' };
   } catch (error) {
     console.error('Error removing task relation:', error);
     return actionError(

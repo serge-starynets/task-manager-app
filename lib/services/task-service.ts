@@ -7,12 +7,13 @@ import { tasks, taskAttachments, type Task, type User } from '@/db/schema';
 import {
   canManageTask,
   getProject,
+  getTask,
   getTaskAttachments,
   isAdmin,
 } from '@/lib/dal';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { allocateTaskId } from '@/lib/task-id';
-import { linkRelatedTasks } from '@/lib/services/relation-service';
+import { linkTicketRelations } from '@/lib/services/relation-service';
 import {
   MAX_ATTACHMENT_BYTES,
   formatFileSize,
@@ -28,7 +29,19 @@ import {
   UpdateTaskSchema,
   type CreateTaskServiceInput,
   type TaskData,
+  type TicketRelationInput,
 } from '@/lib/validations/task';
+
+function mergeCreateRelations(
+  relations: TicketRelationInput[] | undefined,
+  relatedTaskIds: number[] | undefined,
+): TicketRelationInput[] {
+  const fromAlias = (relatedTaskIds ?? []).map((targetId) => ({
+    targetId,
+    kind: 'related' as const,
+  }));
+  return [...fromAlias, ...(relations ?? [])];
+}
 
 export type { CreateTaskServiceInput } from '@/lib/validations/task';
 
@@ -124,6 +137,8 @@ export async function createTaskForUser(
           description: sanitizeRichText(data.description),
           status: data.status,
           priority: data.priority,
+          type: data.type,
+          severity: data.type === 'bug' ? (data.severity ?? null) : null,
           userId: user.id,
           projectId,
         })
@@ -160,9 +175,15 @@ export async function createTaskForUser(
     }
   }
 
-  const relatedTaskIds = data.relatedTaskIds ?? [];
-  if (relatedTaskIds.length > 0) {
-    const relationResult = await linkRelatedTasks(created.id, relatedTaskIds);
+  const relationsToLink = mergeCreateRelations(
+    data.relations,
+    data.relatedTaskIds,
+  );
+  if (relationsToLink.length > 0) {
+    const relationResult = await linkTicketRelations(
+      created.id,
+      relationsToLink,
+    );
     if (!relationResult.ok) {
       await db.delete(tasks).where(eq(tasks.id, created.id));
       return relationResult;
@@ -211,6 +232,11 @@ export async function updateTaskForUser(
   if (validatedData.status !== undefined) updateData.status = validatedData.status;
   if (validatedData.priority !== undefined) {
     updateData.priority = validatedData.priority;
+  }
+  if (validatedData.severity !== undefined) {
+    const current = await getTask(taskId);
+    updateData.severity =
+      current?.type === 'bug' ? validatedData.severity : null;
   }
   if (validatedData.userId !== undefined && isAdmin(user)) {
     updateData.userId = validatedData.userId;

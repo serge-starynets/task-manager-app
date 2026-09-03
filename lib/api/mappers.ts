@@ -31,6 +31,8 @@ export function taskToDto(task: Task | TaskWithUser): TaskDto {
     description: task.description,
     status: task.status,
     priority: task.priority,
+    type: task.type,
+    severity: task.severity,
     projectId: task.projectId,
     userId: task.userId,
     createdAt: toIsoString(task.createdAt),
@@ -49,6 +51,8 @@ export function relatedTaskToDto(task: RelatedTaskSummary): RelatedTaskDto {
     id: task.id,
     taskId: task.taskId,
     title: task.title,
+    type: task.type,
+    kind: task.kind,
   };
 }
 

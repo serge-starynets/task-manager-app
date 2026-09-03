@@ -109,6 +109,13 @@ components:
         priority:
           type: string
           enum: [low, medium, high, critical]
+        type:
+          type: string
+          enum: [task, bug]
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+          nullable: true
         projectId:
           type: integer
           nullable: true
@@ -156,6 +163,12 @@ components:
           type: string
         title:
           type: string
+        type:
+          type: string
+          enum: [task, bug]
+        kind:
+          type: string
+          enum: [related, blocked_by]
 
     Attachment:
       type: object
@@ -304,9 +317,32 @@ paths:
                   type: string
                 priority:
                   type: string
+                type:
+                  type: string
+                  enum: [task, bug]
+                severity:
+                  type: string
+                  enum: [low, medium, high, critical]
+                  nullable: true
                 projectId:
                   type: integer
                   nullable: true
+                relatedTaskIds:
+                  type: array
+                  items:
+                    type: integer
+                relations:
+                  type: array
+                  items:
+                    type: object
+                    required: [targetId]
+                    properties:
+                      targetId:
+                        type: integer
+                      kind:
+                        type: string
+                        enum: [related, blocked_by]
+                        default: related
       responses:
         '201':
           description: Task created
@@ -353,6 +389,10 @@ paths:
                   type: string
                 priority:
                   type: string
+                severity:
+                  type: string
+                  enum: [low, medium, high, critical]
+                  nullable: true
       responses:
         '200':
           description: Updated task
@@ -425,6 +465,10 @@ paths:
               properties:
                 targetId:
                   type: integer
+                kind:
+                  type: string
+                  enum: [related, blocked_by]
+                  default: related
       responses:
         '201':
           description: Relation added
@@ -442,6 +486,13 @@ paths:
           required: true
           schema:
             type: integer
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [related, blocked_by]
+            default: related
       responses:
         '200':
           description: Relation removed

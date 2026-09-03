@@ -21,7 +21,8 @@ export default function BoardColumn({ status, tasks }: BoardColumnProps) {
     <div
       className={cn(
         'flex w-[268px] shrink-0 flex-col rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-dark-border-default dark:bg-dark-elevated/60',
-        isOver && 'ring-2 ring-purple-400/50 border-purple-300 dark:border-purple-700',
+        isOver &&
+          'ring-2 ring-purple-400/50 border-purple-300 dark:border-purple-700',
       )}
     >
       <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-gray-200/80 dark:border-dark-border-subtle">
@@ -42,7 +43,7 @@ export default function BoardColumn({ status, tasks }: BoardColumnProps) {
         ))}
         {tasks.length === 0 && (
           <p className="text-xs text-center text-gray-400 dark:text-gray-500 py-6">
-            Drop tasks here
+            Drop a ticket here
           </p>
         )}
       </div>

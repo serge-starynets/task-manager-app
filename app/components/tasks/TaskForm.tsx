@@ -9,7 +9,8 @@ import {
   type RelatedTaskSummary,
   type TaskAttachment,
 } from '@/db/schema';
-import { TASK_STATUS, TASK_PRIORITY } from '@/lib/constants/tasks';
+import { TASK_STATUS, TASK_PRIORITY, TASK_SEVERITY } from '@/lib/constants/tasks';
+import type { TicketType } from '@/lib/types';
 import Button from '@/app/components/ui/Button';
 import {
   Form,
@@ -46,6 +47,7 @@ interface TaskFormProps {
   userId: string;
   projectId?: number;
   isEditing?: boolean;
+  ticketType?: TicketType;
   relatedTasks?: RelatedTaskSummary[];
   initialAttachments?: TaskAttachment[];
 }
@@ -61,17 +63,28 @@ export default function TaskForm({
   userId,
   projectId,
   isEditing = false,
+  ticketType,
   relatedTasks = [],
   initialAttachments = [],
 }: TaskFormProps) {
   const router = useRouter();
+  const type: TicketType = task?.type ?? ticketType ?? 'task';
+  const noun = type === 'bug' ? 'Bug' : 'Task';
+  const nounLower = type === 'bug' ? 'bug' : 'task';
+  const relatedTaskLinks = relatedTasks.filter((item) => item.type === 'task');
+  const relatedBugLinks = relatedTasks.filter((item) => item.type === 'bug');
   const uploadSessionId = useMemo(
     () => (isEditing ? undefined : nanoid()),
     [isEditing],
   );
 
   const [description, setDescription] = useState(task?.description ?? '');
-  const [relatedDraft, setRelatedDraft] = useState<RelatedTaskSummary[]>([]);
+  const [relatedTaskDraft, setRelatedTaskDraft] = useState<RelatedTaskSummary[]>(
+    [],
+  );
+  const [relatedBugDraft, setRelatedBugDraft] = useState<RelatedTaskSummary[]>(
+    [],
+  );
   const [pending, setPending] = useState<PendingAttachment[]>([]);
   const [savedAttachments, setSavedAttachments] =
     useState<TaskAttachment[]>(initialAttachments);
@@ -206,11 +219,26 @@ export default function TaskForm({
         | 'medium'
         | 'high'
         | 'critical',
+      type,
+      severity:
+        type === 'bug'
+          ? (formData.get('severity') as
+              | 'low'
+              | 'medium'
+              | 'high'
+              | 'critical')
+          : null,
       userId,
       projectId: projectId ?? null,
     };
 
     try {
+      const relations = [...relatedTaskDraft, ...relatedBugDraft].map(
+        (item) => ({
+          targetId: item.id,
+          kind: item.kind,
+        }),
+      );
       const result = isEditing
         ? await updateTask(Number(task!.id), data)
         : await createTask({
@@ -219,7 +247,7 @@ export default function TaskForm({
               'pendingAttachments',
             ) as string,
             uploadSessionId: formData.get('uploadSessionId') as string,
-            relatedTaskIds: relatedDraft.map((task) => task.id),
+            relations,
           });
 
       if (result.success) {
@@ -242,7 +270,7 @@ export default function TaskForm({
 
       return result;
     } catch (err) {
-      toast.error('Failed to update Task');
+      toast.error(`Failed to update ${noun}`);
       return {
         success: false,
         message: (err as Error).message || 'An error occurred',
@@ -257,6 +285,13 @@ export default function TaskForm({
   }));
 
   const priorityOptions = Object.values(TASK_PRIORITY).map(
+    ({ label, value }) => ({
+      label,
+      value,
+    }),
+  );
+
+  const severityOptions = Object.values(TASK_SEVERITY).map(
     ({ label, value }) => ({
       label,
       value,
@@ -281,7 +316,7 @@ export default function TaskForm({
         <FormInput
           id="title"
           name="title"
-          placeholder="Task title"
+          placeholder={`${noun} title`}
           defaultValue={task?.title || ''}
           required
           minLength={3}
@@ -302,7 +337,7 @@ export default function TaskForm({
         <RichTextEditor
           id="description"
           name="description"
-          placeholder="Describe the task..."
+          placeholder={`Describe the ${nounLower}...`}
           value={description}
           onChange={handleDescriptionChange}
           disabled={isPending}
@@ -360,21 +395,69 @@ export default function TaskForm({
             </p>
           )}
         </FormGroup>
+
+        {type === 'bug' && (
+          <FormGroup>
+            <FormLabel htmlFor="severity">Severity</FormLabel>
+            <FormSelect
+              id="severity"
+              name="severity"
+              defaultValue={task?.severity || 'medium'}
+              options={severityOptions}
+              disabled={isPending}
+              required
+              aria-describedby="severity-error"
+              className={state?.errors?.severity ? 'border-red-500' : ''}
+            />
+            {state?.errors?.severity && (
+              <p id="severity-error" className="text-sm text-red-500">
+                {state.errors.severity[0]}
+              </p>
+            )}
+          </FormGroup>
+        )}
       </div>
 
       {isEditing && task ? (
-        <RelatedTasksPicker
-          mode="edit"
-          taskId={task.id}
-          initialRelated={relatedTasks}
-        />
+        <>
+          <RelatedTasksPicker
+            mode="edit"
+            taskId={task.id}
+            initialRelated={relatedTaskLinks}
+            targetType="task"
+            label="Related tasks"
+          />
+          {type === 'task' && (
+            <RelatedTasksPicker
+              mode="edit"
+              taskId={task.id}
+              initialRelated={relatedBugLinks}
+              targetType="bug"
+              label="Related bugs"
+            />
+          )}
+        </>
       ) : (
-        <RelatedTasksPicker
-          mode="create"
-          projectId={projectId ?? null}
-          selected={relatedDraft}
-          onSelectedChange={setRelatedDraft}
-        />
+        <>
+          <RelatedTasksPicker
+            mode="create"
+            projectId={projectId ?? null}
+            selected={relatedTaskDraft}
+            onSelectedChange={setRelatedTaskDraft}
+            targetType="task"
+            label="Related tasks"
+          />
+          {type === 'task' && (
+            <RelatedTasksPicker
+              mode="create"
+              projectId={projectId ?? null}
+              selected={relatedBugDraft}
+              onSelectedChange={setRelatedBugDraft}
+              targetType="bug"
+              label="Related bugs"
+            />
+          )}
+        </>
       )}
 
       <TaskAttachmentsField
@@ -403,7 +486,7 @@ export default function TaskForm({
           Cancel
         </Button>
         <Button type="submit" isLoading={isPending}>
-          {isEditing ? 'Update Task' : 'Create Task'}
+          {isEditing ? `Update ${noun}` : `Create ${noun}`}
         </Button>
       </div>
     </Form>

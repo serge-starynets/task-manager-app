@@ -2,6 +2,9 @@ import { Task, Project } from '@/db/schema';
 export type {
   TaskStatus as Status,
   TaskPriority as Priority,
+  TicketType,
+  TaskSeverity as Severity,
+  RelationKind,
   ProjectStatus,
 } from '@/lib/validations';
 

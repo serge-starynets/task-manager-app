@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import DashboardPage from '../page';
 import {
@@ -8,7 +8,7 @@ import {
   getCurrentUser,
 } from '@/lib/dal';
 import { TASK_STATUS, TASK_PRIORITY } from '@/lib/constants/tasks';
-import { Status, Priority } from '@/lib/types';
+import { Status, Priority, TicketType } from '@/lib/types';
 
 const mockUser = {
   id: 'user1',
@@ -52,11 +52,13 @@ vi.mock('next/link', () => ({
   default: ({
     href,
     children,
+    ...props
   }: {
     href: string;
     children: React.ReactNode;
+    [key: string]: unknown;
   }) => (
-    <a href={href} data-testid="next-link">
+    <a href={href} data-testid="next-link" {...props}>
       {children}
     </a>
   ),
@@ -100,6 +102,8 @@ describe('DashboardPage', () => {
         description: 'Test description',
         status: 'todo' as Status,
         priority: 'medium' as Priority,
+        type: 'task' as TicketType,
+        severity: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         userId: 'user1',
@@ -113,6 +117,8 @@ describe('DashboardPage', () => {
         description: null,
         status: 'in_progress' as Status,
         priority: 'high' as Priority,
+        type: 'bug' as TicketType,
+        severity: 'high' as const,
         createdAt: new Date(),
         updatedAt: new Date(),
         userId: 'user1',
@@ -205,7 +211,7 @@ describe('DashboardPage', () => {
     expect(screen.getByTestId('new-task-button')).toBeInTheDocument();
   });
 
-  it('navigates to new task page with project when clicking New Task', async () => {
+  it('exposes New Task and New Bug links from Create New', async () => {
     vi.mocked(getProjects).mockResolvedValue([mockProject]);
     vi.mocked(getTasksForProject).mockResolvedValue([]);
 
@@ -216,9 +222,16 @@ describe('DashboardPage', () => {
 
     const newTaskButton = screen.getByTestId('new-task-button');
     expect(newTaskButton).toBeInTheDocument();
+    fireEvent.click(newTaskButton);
 
-    const linkElement = newTaskButton.closest('[data-testid="next-link"]');
-    expect(linkElement).toHaveAttribute('href', '/tasks/new?project=1');
+    expect(screen.getByTestId('new-task-link')).toHaveAttribute(
+      'href',
+      '/tasks/new?project=1',
+    );
+    expect(screen.getByTestId('new-bug-link')).toHaveAttribute(
+      'href',
+      '/bugs/new?project=1',
+    );
   });
 
   it('calls notFound when project param is invalid', async () => {
@@ -240,6 +253,8 @@ describe('DashboardPage', () => {
         description: null,
         status: 'todo' as Status,
         priority: 'low' as Priority,
+        type: 'task' as TicketType,
+        severity: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         userId: 'user1',

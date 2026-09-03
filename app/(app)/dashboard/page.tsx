@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import TaskTable from '@/app/components/tasks/TaskTable';
 import TaskBoard from '@/app/components/tasks/TaskBoard';
+import CreateTicketMenu from '@/app/components/tasks/CreateTicketMenu';
 import { PROJECT_STATUS } from '@/lib/constants/projects';
 import { type Project, type User } from '@/db/schema';
 
@@ -198,8 +199,7 @@ export default async function DashboardPage({
             </span>
             {selectedProject.title}
           </h1>
-          <Link
-            href={`/projects/${selectedProject.id}/edit`}
+            <Link href={`/projects/${selectedProject.id}/edit`}
             className="shrink-0"
           >
             <Button variant="outline" size="sm">
@@ -224,12 +224,10 @@ export default async function DashboardPage({
             <h2 className="text-lg font-semibold tracking-tight">
               {isBoardView ? 'Board' : 'Backlog'}
             </h2>
-            <Link href={`/tasks/new?project=${selectedProject.id}`}>
-              <Button data-testid="new-task-button" size="sm">
-                <PlusIcon size={16} />
-                New Task
-              </Button>
-            </Link>
+            <CreateTicketMenu
+              projectId={selectedProject.id}
+              testId="new-task-button"
+            />
           </div>
           {isBoardView ? (
             <TaskBoard tasks={projectTasks} />

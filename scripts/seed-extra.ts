@@ -19,6 +19,8 @@ const STATUSES = [
 ] as const;
 
 const PRIORITIES = ['low', 'medium', 'high', 'critical'] as const;
+const TYPES = ['task', 'bug'] as const;
+const SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
 const TASK_TEMPLATES = [
   {
@@ -137,12 +139,15 @@ function buildTask(
   const template = TASK_TEMPLATES[index % TASK_TEMPLATES.length];
   const now = new Date();
 
+  const type = pick(TYPES);
   return {
     taskId,
     title: `${titlePrefix}: ${template.title} #${index + 1}`,
     description: template.description,
     status: pick(STATUSES),
     priority: pick(PRIORITIES),
+    type,
+    severity: type === 'bug' ? pick(SEVERITIES) : null,
     userId,
     projectId,
     createdAt: now,

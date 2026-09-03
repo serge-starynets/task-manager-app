@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useDraggable } from '@dnd-kit/core';
 import Badge from '@/app/components/ui/Badge';
+import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
 import { TASK_PRIORITY } from '@/lib/constants/tasks';
-import type { Priority, TaskWithUser } from '@/lib/types';
+import type { Priority, TaskWithUser, TicketType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 function BoardCardContent({
@@ -22,8 +23,12 @@ function BoardCardContent({
       )}
     >
       <div className="flex items-start justify-between gap-2 mb-1.5">
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400 truncate">
-          {task.taskId}
+        <span className="flex min-w-0 items-center gap-1.5 text-xs font-mono text-gray-500 dark:text-gray-400">
+          <TicketTypeIcon
+            type={task.type as TicketType}
+            size={12}
+          />
+          <span className="truncate">{task.taskId}</span>
         </span>
         <Badge priority={task.priority as Priority} className="shrink-0">
           {TASK_PRIORITY[task.priority as Priority].label}

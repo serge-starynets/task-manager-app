@@ -10,11 +10,11 @@ import {
   FolderPlusIcon,
   LayoutGridIcon,
   ListIcon,
-  PlusIcon,
 } from 'lucide-react';
 import type { Project } from '@/db/schema';
 import { cn } from '@/lib/utils';
 import NavLink from './NavLink';
+import CreateTicketMenu from '@/app/components/tasks/CreateTicketMenu';
 
 interface ProjectSidebarNavProps {
   projects: Project[];
@@ -161,11 +161,13 @@ export default function ProjectSidebarNav({
 
       <div className="my-2 mx-2 border-t border-gray-200/80 dark:border-dark-border-subtle" />
 
-      <NavLink
-        href="/tasks/new"
-        icon={<PlusIcon size={18} />}
-        label="New Task"
-      />
+      <div className="px-2">
+        <CreateTicketMenu
+          size="md"
+          menuAlign="start"
+          className="w-full [&>button]:w-full"
+        />
+      </div>
     </nav>
   );
 }

@@ -5,15 +5,64 @@ import {
 } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
-import { Priority, Status } from '@/lib/types';
+import { Priority, Status, TicketType } from '@/lib/types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
 import RichText from '@/app/components/tasks/RichText';
 import TaskAttachmentsList from '@/app/components/tasks/TaskAttachmentsList';
+import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
 import { ArrowLeftIcon, Edit2Icon, Link2Icon, UserIcon } from 'lucide-react';
 import DeleteTaskButton from '@/app/components/tasks/DeleteTaskButton';
+import {
+  RELATION_KIND,
+  TASK_PRIORITY,
+  TASK_SEVERITY,
+  TASK_STATUS,
+  TICKET_TYPE,
+} from '@/lib/constants/tasks';
+import type { RelatedTaskSummary } from '@/db/schema';
+
+function RelatedTicketList({
+  items,
+  emptyMessage,
+}: {
+  items: RelatedTaskSummary[];
+  emptyMessage: string;
+}) {
+  if (items.length === 0) {
+    return <p className="text-gray-500 italic">{emptyMessage}</p>;
+  }
+
+  return (
+    <ul className="space-y-2">
+      {items.map((related) => (
+        <li key={`${related.kind}-${related.id}`}>
+          <Link
+            href={`/tasks/${related.id}`}
+            className="flex items-start gap-2 text-sm text-gray-800 hover:underline dark:text-gray-200"
+          >
+            <TicketTypeIcon
+              type={related.type}
+              className="mt-0.5"
+            />
+            <span>
+              <span className="text-gray-500 dark:text-gray-400">
+                {RELATION_KIND[related.kind].label}
+              </span>
+              <span className="mx-2 font-mono text-gray-500 dark:text-gray-400">
+                {related.taskId}
+              </span>
+              <span className="mx-1 text-gray-300 dark:text-gray-600">·</span>
+              <span className="break-words">{related.title}</span>
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default async function TaskPage({
   params,
@@ -28,43 +77,26 @@ export default async function TaskPage({
     notFound();
   }
 
-  const [relatedTasks, attachments] = await Promise.all([
+  const [relatedTickets, attachments] = await Promise.all([
     getRelatedTasks(taskIdNum),
     getTaskAttachments(taskIdNum),
   ]);
 
-  const { title, description, status, priority, createdAt, updatedAt, user, taskId } =
-    task;
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'backlog':
-        return 'Backlog';
-      case 'todo':
-        return 'Todo';
-      case 'in_progress':
-        return 'In Progress';
-      case 'qa':
-        return 'QA';
-      case 'done':
-        return 'Done';
-      default:
-        return status;
-    }
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return 'Low';
-      case 'medium':
-        return 'Medium';
-      case 'high':
-        return 'High';
-      default:
-        return priority;
-    }
-  };
+  const {
+    title,
+    description,
+    status,
+    priority,
+    createdAt,
+    updatedAt,
+    user,
+    taskId,
+    type,
+    severity,
+  } = task;
+  const ticketType = type as TicketType;
+  const relatedTasks = relatedTickets.filter((item) => item.type === 'task');
+  const relatedBugs = relatedTickets.filter((item) => item.type === 'bug');
 
   const backHref = task.projectId
     ? `/dashboard?project=${task.projectId}`
@@ -82,8 +114,12 @@ export default async function TaskPage({
         </Link>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-mono text-gray-500 dark:text-gray-400 mb-1">
-              {taskId}
+            <p className="mb-1 flex items-center gap-2 text-sm font-mono text-gray-500 dark:text-gray-400">
+              <TicketTypeIcon type={ticketType} />
+              <span>{taskId}</span>
+              <span className="font-sans text-gray-400">
+                {TICKET_TYPE[ticketType].label}
+              </span>
             </p>
             <h1 className="text-3xl font-bold break-words">{title}</h1>
           </div>
@@ -103,10 +139,17 @@ export default async function TaskPage({
 
       <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
         <div className="flex flex-wrap gap-3 mb-6">
-          <Badge status={status as Status}>{getStatusLabel(status)}</Badge>
-          <Badge priority={priority as Priority}>
-            {getPriorityLabel(priority)}
+          <Badge status={status as Status}>
+            {TASK_STATUS[status as Status].label}
           </Badge>
+          <Badge priority={priority as Priority}>
+            {TASK_PRIORITY[priority as Priority].label}
+          </Badge>
+          {ticketType === 'bug' && severity && (
+            <Badge priority={severity as Priority}>
+              {TASK_SEVERITY[severity].label}
+            </Badge>
+          )}
         </div>
 
         {!isEmptyHtml(description) ? (
@@ -129,15 +172,34 @@ export default async function TaskPage({
             <p className="break-words">{user?.email}</p>
           </div>
           <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Type</p>
+            <p className="flex items-center gap-1.5">
+              <TicketTypeIcon type={ticketType} />
+              {TICKET_TYPE[ticketType].label}
+            </p>
+          </div>
+          <div>
             <p className="text-sm font-medium text-gray-500 mb-1">Status</p>
-            <Badge status={status as Status}>{getStatusLabel(status)}</Badge>
+            <Badge status={status as Status}>
+              {TASK_STATUS[status as Status].label}
+            </Badge>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500 mb-1">Priority</p>
             <Badge priority={priority as Priority}>
-              {getPriorityLabel(priority)}
+              {TASK_PRIORITY[priority as Priority].label}
             </Badge>
           </div>
+          {ticketType === 'bug' && severity && (
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">
+                Severity
+              </p>
+              <Badge priority={severity as Priority}>
+                {TASK_SEVERITY[severity].label}
+              </Badge>
+            </div>
+          )}
           <div className="flex gap-8">
             <div>
               <p className="text-sm font-medium text-gray-500 mb-1">Created</p>
@@ -158,29 +220,39 @@ export default async function TaskPage({
       <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
         <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
           <Link2Icon size={18} className="text-gray-400" />
-          Related tasks
+          Related tickets
         </h2>
-        {relatedTasks.length > 0 ? (
-          <ul className="space-y-2">
-            {relatedTasks.map((related) => (
-              <li key={related.id}>
-                <Link
-                  href={`/tasks/${related.id}`}
-                  className="text-sm text-gray-800 hover:underline dark:text-gray-200"
-                >
-                  <span className="font-mono text-gray-500 dark:text-gray-400">
-                    {related.taskId}
-                  </span>
-                  <span className="mx-2 text-gray-300 dark:text-gray-600">
-                    ·
-                  </span>
-                  <span className="break-words">{related.title}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        {ticketType === 'task' ? (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Related tasks
+              </h3>
+              <RelatedTicketList
+                items={relatedTasks}
+                emptyMessage="No related tasks."
+              />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Related bugs
+              </h3>
+              <RelatedTicketList
+                items={relatedBugs}
+                emptyMessage="No related bugs."
+              />
+            </div>
+          </div>
         ) : (
-          <p className="text-gray-500 italic">No related tasks.</p>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 mb-2">
+              Related tasks
+            </h3>
+            <RelatedTicketList
+              items={relatedTasks}
+              emptyMessage="No related tasks."
+            />
+          </div>
         )}
       </div>
 
