@@ -48,3 +48,19 @@ export const RELATION_KIND = {
   related: { label: 'Related to', value: 'related' },
   blocked_by: { label: 'Blocked by', value: 'blocked_by' },
 };
+
+/** Lower `boardOrder` renders higher in a Board column. */
+export function compareBoardOrder(
+  a: { boardOrder?: number; createdAt: Date | string; id: number },
+  b: { boardOrder?: number; createdAt: Date | string; id: number },
+): number {
+  const aOrder = a.boardOrder ?? 0;
+  const bOrder = b.boardOrder ?? 0;
+  if (aOrder !== bOrder) return aOrder - bOrder;
+
+  const aTime = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
+  const bTime = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+  if (aTime !== bTime) return bTime - aTime;
+
+  return b.id - a.id;
+}

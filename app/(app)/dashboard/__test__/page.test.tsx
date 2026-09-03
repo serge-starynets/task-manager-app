@@ -108,6 +108,7 @@ describe('DashboardPage', () => {
         updatedAt: new Date(),
         userId: 'user1',
         projectId: 1,
+        boardOrder: 0,
         user: mockTaskUser,
       },
       {
@@ -123,6 +124,7 @@ describe('DashboardPage', () => {
         updatedAt: new Date(),
         userId: 'user1',
         projectId: 1,
+        boardOrder: 0,
         user: mockTaskUser,
       },
     ];
@@ -259,6 +261,7 @@ describe('DashboardPage', () => {
         updatedAt: new Date(),
         userId: 'user1',
         projectId: null,
+        boardOrder: 0,
         user: mockTaskUser,
       },
     ];

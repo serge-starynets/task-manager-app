@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { eq } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { del, head } from '@vercel/blob';
 import { db } from '@/db';
 import { tasks, taskAttachments, type Task, type User } from '@/db/schema';
@@ -10,6 +10,8 @@ import {
   getTask,
   getTaskAttachments,
   isAdmin,
+  listTaskIdsInColumn,
+  nextTopBoardOrder,
 } from '@/lib/dal';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { allocateTaskId } from '@/lib/task-id';
@@ -25,9 +27,11 @@ import {
 import type { ServiceResult, ServiceVoidResult } from '@/lib/services/types';
 import {
   CreateTaskSchema,
+  MoveTaskOnBoardSchema,
   TaskStatusSchema,
   UpdateTaskSchema,
   type CreateTaskServiceInput,
+  type MoveTaskOnBoardInput,
   type TaskData,
   type TicketRelationInput,
 } from '@/lib/validations/task';
@@ -141,6 +145,7 @@ export async function createTaskForUser(
           severity: data.type === 'bug' ? (data.severity ?? null) : null,
           userId: user.id,
           projectId,
+          boardOrder: await nextTopBoardOrder(user.id, projectId, data.status),
         })
         .returning();
       break;
@@ -224,17 +229,28 @@ export async function updateTaskForUser(
 
   const validatedData = validationResult.data;
   const updateData: Record<string, unknown> = {};
+  const needsCurrent =
+    validatedData.severity !== undefined || validatedData.status !== undefined;
+  const current = needsCurrent ? await getTask(taskId) : null;
 
   if (validatedData.title !== undefined) updateData.title = validatedData.title;
   if (validatedData.description !== undefined) {
     updateData.description = sanitizeRichText(validatedData.description);
   }
-  if (validatedData.status !== undefined) updateData.status = validatedData.status;
+  if (validatedData.status !== undefined) {
+    updateData.status = validatedData.status;
+    if (current && current.status !== validatedData.status) {
+      updateData.boardOrder = await nextTopBoardOrder(
+        current.userId,
+        current.projectId,
+        validatedData.status,
+      );
+    }
+  }
   if (validatedData.priority !== undefined) {
     updateData.priority = validatedData.priority;
   }
   if (validatedData.severity !== undefined) {
-    const current = await getTask(taskId);
     updateData.severity =
       current?.type === 'bug' ? validatedData.severity : null;
   }
@@ -279,15 +295,132 @@ export async function updateTaskStatusForUser(
     };
   }
 
+  const current = await getTask(taskId);
+  if (!current) {
+    return { ok: false, status: 404, message: 'Task not found' };
+  }
+
+  const nextStatus = validationResult.data;
+  const statusChanged = current.status !== nextStatus;
   const [updated] = await db
     .update(tasks)
     .set({
-      status: validationResult.data,
+      status: nextStatus,
       updatedAt: new Date(),
+      ...(statusChanged
+        ? {
+            boardOrder: await nextTopBoardOrder(
+              current.userId,
+              current.projectId,
+              nextStatus,
+            ),
+          }
+        : {}),
     })
     .where(eq(tasks.id, taskId))
     .returning();
 
+  if (!updated) {
+    return { ok: false, status: 404, message: 'Task not found' };
+  }
+
+  return { ok: true, data: updated };
+}
+
+function sameIdOrder(left: number[], right: number[]): boolean {
+  return left.length === right.length && left.every((id, index) => id === right[index]);
+}
+
+async function setColumnBoardOrders(orderedTaskIds: number[]): Promise<void> {
+  if (orderedTaskIds.length === 0) return;
+
+  await db
+    .update(tasks)
+    .set({
+      boardOrder: sql`CASE ${tasks.id} ${sql.join(
+        orderedTaskIds.map(
+          (id, index) => sql`WHEN ${id} THEN ${sql.raw(String(index))}`,
+        ),
+        sql` `,
+      )} END`,
+    })
+    .where(inArray(tasks.id, orderedTaskIds));
+}
+
+export async function moveTaskOnBoardForUser(
+  taskId: number,
+  input: MoveTaskOnBoardInput,
+): Promise<ServiceResult<Task>> {
+  const parsed = MoveTaskOnBoardSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      status: 400,
+      message: 'Validation failed',
+      errors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  const { status, orderedTaskIds } = parsed.data;
+  if (
+    new Set(orderedTaskIds).size !== orderedTaskIds.length ||
+    !orderedTaskIds.includes(taskId)
+  ) {
+    return { ok: false, status: 400, message: 'Invalid task list' };
+  }
+
+  const canManage = await canManageTask(taskId);
+  if (!canManage) {
+    return {
+      ok: false,
+      status: 403,
+      message: 'You do not have permission to update this task',
+    };
+  }
+
+  const moved = await getTask(taskId);
+  if (!moved) {
+    return { ok: false, status: 404, message: 'Task not found' };
+  }
+
+  const columnIds = await listTaskIdsInColumn(
+    moved.userId,
+    moved.projectId,
+    status,
+  );
+  const expected = new Set(columnIds);
+  expected.add(taskId);
+
+  if (orderedTaskIds.some((id) => !expected.has(id))) {
+    return {
+      ok: false,
+      status: 400,
+      message: 'Column order must only include tickets in that status',
+    };
+  }
+
+  const nextOrder = [
+    ...orderedTaskIds,
+    ...[...expected].filter((id) => !orderedTaskIds.includes(id)),
+  ];
+  const statusChanged = moved.status !== status;
+  if (!statusChanged && sameIdOrder(nextOrder, columnIds)) {
+    return { ok: true, data: moved };
+  }
+
+  if (statusChanged) {
+    await db
+      .update(tasks)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(eq(tasks.id, taskId));
+  }
+
+  await setColumnBoardOrders(nextOrder);
+
+  const updated = await getTask(taskId);
   if (!updated) {
     return { ok: false, status: 404, message: 'Task not found' };
   }

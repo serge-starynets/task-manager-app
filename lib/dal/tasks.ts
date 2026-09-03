@@ -1,6 +1,6 @@
 import { db } from '@/db';
-import { tasks, type User } from '@/db/schema';
-import { and, eq, isNull } from 'drizzle-orm';
+import { tasks, type Task, type User } from '@/db/schema';
+import { and, asc, desc, eq, isNull, min } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 import { CACHE_REVALIDATE_SECONDS } from '@/lib/dal/constants';
 import {
@@ -113,4 +113,41 @@ export async function canManageTask(taskId: number) {
   if (!task) return false;
 
   return isAdmin(user) || task.userId === user.id;
+}
+
+function projectMatch(projectId: number | null) {
+  return projectId === null ? isNull(tasks.projectId) : eq(tasks.projectId, projectId);
+}
+
+/** Next `boardOrder` so a ticket appears at the top of its Board column. */
+export async function nextTopBoardOrder(
+  userId: string,
+  projectId: number | null,
+  status: Task['status'],
+): Promise<number> {
+  const [row] = await db
+    .select({ top: min(tasks.boardOrder) })
+    .from(tasks)
+    .where(
+      and(eq(tasks.userId, userId), projectMatch(projectId), eq(tasks.status, status)),
+    );
+
+  if (row?.top == null) return 0;
+  return row.top - 1;
+}
+
+export async function listTaskIdsInColumn(
+  userId: string,
+  projectId: number | null,
+  status: Task['status'],
+): Promise<number[]> {
+  const rows = await db
+    .select({ id: tasks.id })
+    .from(tasks)
+    .where(
+      and(eq(tasks.userId, userId), projectMatch(projectId), eq(tasks.status, status)),
+    )
+    .orderBy(asc(tasks.boardOrder), desc(tasks.createdAt), desc(tasks.id));
+
+  return rows.map((row) => row.id);
 }

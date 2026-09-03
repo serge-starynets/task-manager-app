@@ -18,6 +18,7 @@ export type TaskDto = {
   severity: TaskSeverity | null;
   projectId: number | null;
   userId: string;
+  boardOrder: number;
   user?: UserDto;
   createdAt: string;
   updatedAt: string;

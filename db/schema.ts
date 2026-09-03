@@ -84,6 +84,11 @@ export const tasks = pgTable(
     priority: priorityEnum('priority').default('medium').notNull(),
     type: ticketTypeEnum('type').default('task').notNull(),
     severity: severityEnum('severity'),
+    /**
+     * Position within a Board column (same user, project, and status).
+     * Lower values render higher. New tickets get a value below the current min.
+     */
+    boardOrder: integer('board_order').default(0).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
     userId: text('user_id').notNull(),

@@ -12,6 +12,7 @@ import {
 import {
   createTaskForUser,
   deleteTaskForUser,
+  moveTaskOnBoardForUser,
   updateTaskForUser,
   updateTaskStatusForUser,
 } from '@/lib/services/task-service';
@@ -119,6 +120,29 @@ export async function updateTaskStatus(
     return actionError(
       'An error occurred while updating the task status',
       'Failed to update task status',
+    );
+  }
+}
+
+export async function moveTaskOnBoard(
+  id: number,
+  status: TaskData['status'],
+  orderedTaskIds: number[],
+): Promise<ActionResponse> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return unauthorizedResponse();
+
+    const result = await moveTaskOnBoardForUser(id, { status, orderedTaskIds });
+    if (!result.ok) return toActionResponse(result);
+
+    revalidateTaskList();
+    return { success: true, message: 'Board order updated successfully' };
+  } catch (error) {
+    console.error('Error updating board order:', error);
+    return actionError(
+      'An error occurred while updating the board order',
+      'Failed to update board order',
     );
   }
 }

@@ -9,16 +9,18 @@ import BoardCard from '@/app/components/tasks/BoardCard';
 interface BoardColumnProps {
   status: Status;
   tasks: TaskWithUser[];
+  isOver: boolean;
 }
 
-export default function BoardColumn({ status, tasks }: BoardColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({
+export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps) {
+  const { setNodeRef } = useDroppable({
     id: status,
     data: { type: 'column', status },
   });
 
   return (
     <div
+      ref={setNodeRef}
       className={cn(
         'flex w-[268px] shrink-0 flex-col rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-dark-border-default dark:bg-dark-elevated/60',
         isOver &&
@@ -34,10 +36,7 @@ export default function BoardColumn({ status, tasks }: BoardColumnProps) {
         </span>
       </div>
 
-      <div
-        ref={setNodeRef}
-        className="flex flex-1 flex-col gap-2 p-2 min-h-[120px] max-h-[calc(100vh-16rem)] overflow-y-auto scrollbar-thin"
-      >
+      <div className="flex flex-1 flex-col gap-2 p-2 min-h-[120px] max-h-[calc(100vh-16rem)] overflow-y-auto scrollbar-thin">
         {tasks.map((task) => (
           <BoardCard key={task.id} task={task} />
         ))}

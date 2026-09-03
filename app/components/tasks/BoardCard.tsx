@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useDraggable } from '@dnd-kit/core';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import Badge from '@/app/components/ui/Badge';
 import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
 import { TASK_PRIORITY } from '@/lib/constants/tasks';
@@ -52,14 +52,22 @@ export function BoardCardOverlay({ task }: { task: TaskWithUser }) {
 }
 
 export default function BoardCard({ task }: { task: TaskWithUser }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } =
+    useDraggable({
+      id: String(task.id),
+      data: { status: task.status },
+    });
+  const { setNodeRef: setDropRef } = useDroppable({
     id: String(task.id),
-    data: { status: task.status, task },
+    data: { status: task.status },
   });
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setDragRef(node);
+        setDropRef(node);
+      }}
       className={cn(
         'touch-none cursor-grab active:cursor-grabbing',
         isDragging && 'opacity-40',

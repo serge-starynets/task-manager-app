@@ -9,12 +9,13 @@ import {
   useSensors,
   closestCorners,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { updateTaskStatus } from '@/app/actions/tasks';
-import { BOARD_STATUSES } from '@/lib/constants/tasks';
+import { moveTaskOnBoard } from '@/app/actions/tasks';
+import { compareBoardOrder, BOARD_STATUSES } from '@/lib/constants/tasks';
 import type { Status, TaskWithUser } from '@/lib/types';
 import BoardColumn from '@/app/components/tasks/BoardColumn';
 import { BoardCardOverlay } from '@/app/components/tasks/BoardCard';
@@ -28,19 +29,42 @@ interface TaskBoardProps {
 type OptimisticAction = {
   taskId: number;
   status: Status;
+  orderedIds: number[];
 };
+
+function groupTasksByStatus(taskList: TaskWithUser[]): Record<Status, TaskWithUser[]> {
+  const grouped = Object.fromEntries(
+    STATUS_ORDER.map((status) => [status, [] as TaskWithUser[]]),
+  ) as Record<Status, TaskWithUser[]>;
+
+  for (const task of [...taskList].sort(compareBoardOrder)) {
+    const status = task.status as Status;
+    if (grouped[status]) grouped[status].push(task);
+  }
+  return grouped;
+}
+
+function isBoardStatus(value: string): value is Status {
+  return STATUS_ORDER.includes(value as Status);
+}
 
 export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
   const router = useRouter();
   const [activeTask, setActiveTask] = useState<TaskWithUser | null>(null);
+  const [overStatus, setOverStatus] = useState<Status | null>(null);
   const [, startTransition] = useTransition();
 
   const [optimisticTasks, applyOptimistic] = useOptimistic(
     initialTasks,
     (current: TaskWithUser[], action: OptimisticAction) =>
-      current.map((task) =>
-        task.id === action.taskId ? { ...task, status: action.status } : task,
-      ),
+      current.map((task) => {
+        const index = action.orderedIds.indexOf(task.id);
+        if (task.id === action.taskId) {
+          return { ...task, status: action.status, boardOrder: index };
+        }
+        if (index === -1) return task;
+        return { ...task, boardOrder: index };
+      }),
   );
 
   const sensors = useSensors(
@@ -49,59 +73,68 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
     }),
   );
 
-  const tasksByStatus = useMemo(() => {
-    const grouped = Object.fromEntries(
-      STATUS_ORDER.map((status) => [status, [] as TaskWithUser[]]),
-    ) as Record<Status, TaskWithUser[]>;
+  const tasksByStatus = useMemo(
+    () => groupTasksByStatus(optimisticTasks),
+    [optimisticTasks],
+  );
 
-    for (const task of optimisticTasks) {
-      const status = task.status as Status;
-      if (grouped[status]) {
-        grouped[status].push(task);
-      }
+  function resolveDropStatus(overId: string | number, overStatus?: unknown): Status | null {
+    if (typeof overStatus === 'string' && isBoardStatus(overStatus)) {
+      return overStatus;
     }
-    return grouped;
-  }, [optimisticTasks]);
-
-  function resolveDropStatus(overId: string | number): Status | null {
     const id = String(overId);
-    if (STATUS_ORDER.includes(id as Status)) {
-      return id as Status;
-    }
-    const overTask = optimisticTasks.find((t) => String(t.id) === id);
-    return overTask ? (overTask.status as Status) : null;
+    return isBoardStatus(id) ? id : null;
   }
 
   function handleDragStart(event: DragStartEvent) {
-    const task = optimisticTasks.find((t) => String(t.id) === String(event.active.id));
+    const task = optimisticTasks.find((item) => String(item.id) === String(event.active.id));
     setActiveTask(task ?? null);
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    if (!event.over) {
+      setOverStatus(null);
+      return;
+    }
+    setOverStatus(resolveDropStatus(event.over.id, event.over.data.current?.status));
   }
 
   function handleDragEnd(event: DragEndEvent) {
     setActiveTask(null);
+    setOverStatus(null);
     const { active, over } = event;
     if (!over) return;
 
     const taskId = Number(active.id);
-    const task = optimisticTasks.find((t) => t.id === taskId);
+    const task = optimisticTasks.find((item) => item.id === taskId);
     if (!task) return;
+    if (String(over.id) === String(active.id)) return;
 
-    const newStatus = resolveDropStatus(over.id);
-    if (!newStatus || newStatus === task.status) return;
+    const newStatus = resolveDropStatus(over.id, over.data.current?.status);
+    if (!newStatus) return;
+
+    const dest = tasksByStatus[newStatus].filter((item) => item.id !== taskId);
+    const overIndex = dest.findIndex((item) => String(item.id) === String(over.id));
+    const insertAt = overIndex >= 0 ? overIndex : dest.length;
+    const nextColumn = [
+      ...dest.slice(0, insertAt),
+      { ...task, status: newStatus },
+      ...dest.slice(insertAt),
+    ];
+    const orderedIds = nextColumn.map((item) => item.id);
+    const unchanged =
+      task.status === newStatus &&
+      tasksByStatus[newStatus].every((item, index) => item.id === orderedIds[index]);
+    if (unchanged) return;
 
     startTransition(async () => {
-      applyOptimistic({ taskId, status: newStatus });
-      const result = await updateTaskStatus(taskId, newStatus);
+      applyOptimistic({ taskId, status: newStatus, orderedIds });
+      const result = await moveTaskOnBoard(taskId, newStatus, orderedIds);
       if (!result.success) {
-        toast.error(result.message || 'Failed to update task status');
-        // Re-fetch authoritative data so the card returns to its real column.
+        toast.error(result.message || 'Failed to update board order');
         router.refresh();
       }
     });
-  }
-
-  function handleDragCancel() {
-    setActiveTask(null);
   }
 
   return (
@@ -109,8 +142,12 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
-      onDragCancel={handleDragCancel}
+      onDragCancel={() => {
+        setActiveTask(null);
+        setOverStatus(null);
+      }}
     >
       <div className="flex w-max max-w-full gap-3 overflow-x-auto pb-2 scrollbar-thin">
         {STATUS_ORDER.map((status) => (
@@ -118,6 +155,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
             key={status}
             status={status}
             tasks={tasksByStatus[status]}
+            isOver={overStatus === status}
           />
         ))}
       </div>

@@ -3,6 +3,7 @@ export {
   createTaskForUser,
   updateTaskForUser,
   updateTaskStatusForUser,
+  moveTaskOnBoardForUser,
   deleteTaskForUser,
   deleteBlobsForTask,
   type CreateTaskServiceInput,

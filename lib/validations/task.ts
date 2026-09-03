@@ -115,6 +115,13 @@ export type TaskData = z.infer<typeof TaskSchema>;
 
 export const UpdateTaskSchema = TaskSchema.partial();
 
+export const MoveTaskOnBoardSchema = z.object({
+  status: TaskStatusSchema,
+  orderedTaskIds: z.array(z.number().int().positive()).min(1),
+});
+
+export type MoveTaskOnBoardInput = z.infer<typeof MoveTaskOnBoardSchema>;
+
 export type CreateTaskActionInput = TaskData & {
   pendingAttachmentsJson?: string | null;
   uploadSessionId?: string | null;

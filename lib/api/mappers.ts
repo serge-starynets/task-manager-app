@@ -36,6 +36,7 @@ export function taskToDto(task: Task | TaskWithUser): TaskDto {
     severity: task.severity ?? null,
     projectId: task.projectId,
     userId: task.userId,
+    boardOrder: task.boardOrder ?? 0,
     createdAt: toIsoString(task.createdAt),
     updatedAt: toIsoString(task.updatedAt),
   };
