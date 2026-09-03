@@ -4,6 +4,7 @@ import type { AttachmentDto } from '@/lib/dto/attachment';
 import type { ProjectDto } from '@/lib/dto/project';
 import type { RelatedTaskDto, TaskDto } from '@/lib/dto/task';
 import type { UserDto } from '@/lib/dto/user';
+import { resolveTicketType } from '@/lib/constants/tasks';
 import type { TaskWithUser } from '@/lib/types';
 
 function toIsoString(value: Date | string): string {
@@ -31,8 +32,8 @@ export function taskToDto(task: Task | TaskWithUser): TaskDto {
     description: task.description,
     status: task.status,
     priority: task.priority,
-    type: task.type,
-    severity: task.severity,
+    type: resolveTicketType(task.type),
+    severity: task.severity ?? null,
     projectId: task.projectId,
     userId: task.userId,
     createdAt: toIsoString(task.createdAt),
@@ -51,8 +52,8 @@ export function relatedTaskToDto(task: RelatedTaskSummary): RelatedTaskDto {
     id: task.id,
     taskId: task.taskId,
     title: task.title,
-    type: task.type,
-    kind: task.kind,
+    type: resolveTicketType(task.type),
+    kind: task.kind === 'blocked_by' ? 'blocked_by' : 'related',
   };
 }
 

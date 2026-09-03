@@ -30,6 +30,13 @@ export const TICKET_TYPE = {
   bug: { label: 'Bug', value: 'bug' },
 };
 
+/** Older cache rows / pre-migration payloads may omit type. */
+export function resolveTicketType(
+  type: string | null | undefined,
+): keyof typeof TICKET_TYPE {
+  return type === 'bug' ? 'bug' : 'task';
+}
+
 export const TASK_SEVERITY = {
   low: { label: 'Low', value: 'low' },
   medium: { label: 'Medium', value: 'medium' },

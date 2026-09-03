@@ -5,7 +5,7 @@ import {
 } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
-import { Priority, Status, TicketType } from '@/lib/types';
+import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Badge from '@/app/components/ui/Badge';
@@ -21,6 +21,7 @@ import {
   TASK_SEVERITY,
   TASK_STATUS,
   TICKET_TYPE,
+  resolveTicketType,
 } from '@/lib/constants/tasks';
 import type { RelatedTaskSummary } from '@/db/schema';
 
@@ -94,7 +95,7 @@ export default async function TaskPage({
     type,
     severity,
   } = task;
-  const ticketType = type as TicketType;
+  const ticketType = resolveTicketType(type);
   const relatedTasks = relatedTickets.filter((item) => item.type === 'task');
   const relatedBugs = relatedTickets.filter((item) => item.type === 'bug');
 

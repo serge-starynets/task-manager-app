@@ -3,8 +3,13 @@ import { ClipboardListIcon, ListTodoIcon } from 'lucide-react';
 import Badge from '@/app/components/ui/Badge';
 import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
 import { formatRelativeTime } from '@/lib/utils';
-import { Priority, Status, TicketType } from '@/lib/types';
-import { TASK_STATUS, TASK_PRIORITY, TICKET_TYPE } from '@/lib/constants/tasks';
+import { Priority, Status } from '@/lib/types';
+import {
+  TASK_STATUS,
+  TASK_PRIORITY,
+  TICKET_TYPE,
+  resolveTicketType,
+} from '@/lib/constants/tasks';
 import type { TaskWithUser } from '@/lib/types';
 
 interface TaskTableProps {
@@ -49,7 +54,7 @@ export default function TaskTable({
 
       <div className="divide-y divide-gray-100 dark:divide-dark-border-subtle">
         {tasks.map((task) => {
-          const ticketType = task.type as TicketType;
+          const ticketType = resolveTicketType(task.type);
           return (
             <Link
               key={task.id}

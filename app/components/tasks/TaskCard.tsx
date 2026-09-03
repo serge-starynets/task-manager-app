@@ -1,7 +1,7 @@
 import { Task } from '@/db/schema';
 import { formatRelativeTime } from '@/lib/utils';
 import { stripHtml } from '@/lib/rich-text';
-import { Priority, Status, TicketType } from '@/lib/types';
+import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
 import {
   Card,
@@ -32,7 +32,7 @@ export default function TaskCard({ task }: TaskCardProps) {
       <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
         <CardHeader className="pb-2">
           <p className="flex items-center gap-1.5 text-xs font-mono text-gray-500 dark:text-gray-400 mb-1">
-            <TicketTypeIcon type={type as TicketType} size={12} />
+            <TicketTypeIcon type={type} size={12} />
             {taskId}
           </p>
           <CardTitle className="line-clamp-1 text-base">{title}</CardTitle>
