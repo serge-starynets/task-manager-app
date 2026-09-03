@@ -3,7 +3,6 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 export function revalidateTaskList() {
   revalidateTag('tasks', 'max');
   revalidatePath('/dashboard');
-  revalidatePath('/tasks', 'layout');
 }
 
 export function revalidateProjectViews() {

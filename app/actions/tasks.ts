@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { getCurrentUser } from '@/lib/dal';
 import {
   actionError,
@@ -92,6 +93,8 @@ export async function updateTask(
     if (!result.ok) return toActionResponse(result);
 
     revalidateTaskList();
+    revalidatePath(`/tasks/${id}`);
+    revalidatePath(`/tasks/${id}/edit`);
     return { success: true, message: 'Task updated successfully' };
   } catch (error) {
     console.error('Error updating task:', error);
