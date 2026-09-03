@@ -22,7 +22,7 @@ export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps)
     <div
       ref={setNodeRef}
       className={cn(
-        'flex w-[268px] shrink-0 flex-col rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-dark-border-default dark:bg-dark-elevated/60',
+        'flex w-[268px] shrink-0 flex-col self-stretch rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-dark-border-default dark:bg-dark-elevated/60',
         isOver &&
           'ring-2 ring-purple-400/50 border-purple-300 dark:border-purple-700',
       )}

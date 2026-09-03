@@ -5,9 +5,11 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  closestCorners,
+  pointerWithin,
   useSensor,
   useSensors,
-  closestCorners,
+  type CollisionDetection,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
@@ -47,6 +49,15 @@ function groupTasksByStatus(taskList: TaskWithUser[]): Record<Status, TaskWithUs
 function isBoardStatus(value: string): value is Status {
   return STATUS_ORDER.includes(value as Status);
 }
+
+const collisionDetection: CollisionDetection = (args) => {
+  const pointerHits = pointerWithin(args);
+  if (pointerHits.length > 0) {
+    const overCard = pointerHits.find((hit) => !isBoardStatus(String(hit.id)));
+    return overCard ? [overCard] : pointerHits;
+  }
+  return closestCorners(args);
+};
 
 export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
   const router = useRouter();
@@ -140,7 +151,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
