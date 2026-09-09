@@ -179,7 +179,7 @@ export default function Select({
         onClick={() => (open ? close() : openList())}
         onKeyDown={handleTriggerKeyDown}
         className={cn(
-          'flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-sm transition-shadow duration-200',
+          'flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-left text-sm transition-shadow duration-200',
           'focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'dark:border-dark-border-medium dark:bg-dark-elevated dark:text-gray-100 dark:focus:border-purple-500/60',

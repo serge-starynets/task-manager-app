@@ -39,7 +39,7 @@ export function FormLabel({ className, children, ...props }: FormLabelProps) {
   return (
     <label
       className={cn(
-        'text-sm font-medium text-gray-700 dark:text-gray-300',
+        'text-sm font-semibold text-gray-700 dark:text-gray-300',
         className,
       )}
       {...props}

@@ -219,32 +219,36 @@ export default async function DashboardPage({
       </div>
 
       <section className="mb-10">
-        <div className={isBoardView ? 'w-fit max-w-full' : undefined}>
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <h2 className="text-lg font-semibold tracking-tight">
-              {isBoardView ? 'Board' : 'Backlog'}
-            </h2>
-            <CreateTicketMenu
-              projectId={selectedProject.id}
-              testId="new-task-button"
-            />
-          </div>
-          {isBoardView ? (
-            <TaskBoard tasks={projectTasks} />
-          ) : projectTasks.length > 0 ? (
-            <TaskTable tasks={projectTasks} />
-          ) : (
-            <div className="flex flex-col items-center justify-center py-14 text-center surface-panel p-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-dark-elevated dark:text-gray-500">
-                <ListTodoIcon size={24} />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Get started by creating your first task in this project.
-              </p>
-            </div>
-          )}
+        <div
+          className={
+            isBoardView
+              ? 'mx-auto mb-4 flex w-[90%] items-center justify-between gap-4'
+              : 'mb-4 flex items-center justify-between gap-4'
+          }
+        >
+          <h2 className="text-lg font-semibold tracking-tight">
+            {isBoardView ? 'Board' : 'Backlog'}
+          </h2>
+          <CreateTicketMenu
+            projectId={selectedProject.id}
+            testId="new-task-button"
+          />
         </div>
+        {isBoardView ? (
+          <TaskBoard tasks={projectTasks} />
+        ) : projectTasks.length > 0 ? (
+          <TaskTable tasks={projectTasks} />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-14 text-center surface-panel p-8">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-dark-elevated dark:text-gray-500">
+              <ListTodoIcon size={24} />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              Get started by creating your first task in this project.
+            </p>
+          </div>
+        )}
       </section>
 
       {!isBoardView && <OrphanedTasksSection tasks={orphanedTasks} />}

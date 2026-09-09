@@ -198,6 +198,7 @@ export default function RelatedTasksPicker(props: RelatedTasksPickerProps) {
             autoComplete="off"
             aria-autocomplete="list"
             aria-expanded={open}
+            className="h-8 py-1.5"
           />
           {open && (
             <ul

@@ -160,7 +160,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
         setOverStatus(null);
       }}
     >
-      <div className="flex w-max max-w-full gap-3 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="mx-auto flex w-[90%] gap-3 overflow-x-auto pb-2 scrollbar-thin">
         {STATUS_ORDER.map((status) => (
           <BoardColumn
             key={status}

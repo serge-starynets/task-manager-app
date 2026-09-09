@@ -299,7 +299,10 @@ export default function TaskForm({
   );
 
   return (
-    <Form action={formAction}>
+    <Form
+      action={formAction}
+      className="flex min-h-0 flex-1 flex-col space-y-0"
+    >
       {!isEditing && uploadSessionId && (
         <>
           <input type="hidden" name="uploadSessionId" value={uploadSessionId} />
@@ -311,172 +314,176 @@ export default function TaskForm({
         </>
       )}
 
-      <FormGroup>
-        <FormLabel htmlFor="title">Title</FormLabel>
-        <FormInput
-          id="title"
-          name="title"
-          placeholder={`${noun} title`}
-          defaultValue={task?.title || ''}
-          required
-          minLength={3}
-          maxLength={100}
-          disabled={isPending}
-          aria-describedby="title-error"
-          className={state?.errors?.title ? 'border-red-500' : ''}
-        />
-        {state?.errors?.title && (
-          <p id="title-error" className="text-sm text-red-500">
-            {state.errors.title[0]}
-          </p>
-        )}
-      </FormGroup>
-
-      <FormGroup>
-        <FormLabel htmlFor="description">Description</FormLabel>
-        <RichTextEditor
-          id="description"
-          name="description"
-          placeholder={`Describe the ${nounLower}...`}
-          value={description}
-          onChange={handleDescriptionChange}
-          disabled={isPending}
-          uploadContext={uploadContext}
-          onAttachmentUploaded={handleAttachmentUploaded}
-          aria-describedby="description-error"
-          className={
-            state?.errors?.description
-              ? 'rich-text-editor--tall border-red-500'
-              : 'rich-text-editor--tall'
-          }
-        />
-        {state?.errors?.description && (
-          <p id="description-error" className="text-sm text-red-500">
-            {state.errors.description[0]}
-          </p>
-        )}
-      </FormGroup>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-6 md:p-8 scrollbar-thin">
         <FormGroup>
-          <FormLabel htmlFor="status">Status</FormLabel>
-          <FormSelect
-            id="status"
-            name="status"
-            defaultValue={task?.status || 'backlog'}
-            options={statusOptions}
-            disabled={isPending}
+          <FormLabel htmlFor="title">Title</FormLabel>
+          <FormInput
+            id="title"
+            name="title"
+            placeholder={`${noun} title`}
+            defaultValue={task?.title || ''}
             required
-            aria-describedby="status-error"
-            className={state?.errors?.status ? 'border-red-500' : ''}
+            minLength={3}
+            maxLength={100}
+            disabled={isPending}
+            aria-describedby="title-error"
+            className={state?.errors?.title ? 'border-red-500' : ''}
           />
-          {state?.errors?.status && (
-            <p id="status-error" className="text-sm text-red-500">
-              {state.errors.status[0]}
+          {state?.errors?.title && (
+            <p id="title-error" className="text-sm text-red-500">
+              {state.errors.title[0]}
             </p>
           )}
         </FormGroup>
 
         <FormGroup>
-          <FormLabel htmlFor="priority">Priority</FormLabel>
-          <FormSelect
-            id="priority"
-            name="priority"
-            defaultValue={task?.priority || 'medium'}
-            options={priorityOptions}
+          <FormLabel htmlFor="description">Description</FormLabel>
+          <RichTextEditor
+            id="description"
+            name="description"
+            placeholder={`Describe the ${nounLower}...`}
+            value={description}
+            onChange={handleDescriptionChange}
             disabled={isPending}
-            required
-            aria-describedby="priority-error"
-            className={state?.errors?.priority ? 'border-red-500' : ''}
+            uploadContext={uploadContext}
+            onAttachmentUploaded={handleAttachmentUploaded}
+            aria-describedby="description-error"
+            className={
+              state?.errors?.description
+                ? 'rich-text-editor--tall border-red-500'
+                : 'rich-text-editor--tall'
+            }
           />
-          {state?.errors?.priority && (
-            <p id="priority-error" className="text-sm text-red-500">
-              {state.errors.priority[0]}
+          {state?.errors?.description && (
+            <p id="description-error" className="text-sm text-red-500">
+              {state.errors.description[0]}
             </p>
           )}
         </FormGroup>
 
-        {type === 'bug' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormGroup>
-            <FormLabel htmlFor="severity">Severity</FormLabel>
+            <FormLabel htmlFor="status">Status</FormLabel>
             <FormSelect
-              id="severity"
-              name="severity"
-              defaultValue={task?.severity || 'medium'}
-              options={severityOptions}
+              id="status"
+              name="status"
+              defaultValue={task?.status || 'backlog'}
+              options={statusOptions}
               disabled={isPending}
               required
-              aria-describedby="severity-error"
-              className={state?.errors?.severity ? 'border-red-500' : ''}
+              aria-describedby="status-error"
+              className={state?.errors?.status ? 'border-red-500' : ''}
             />
-            {state?.errors?.severity && (
-              <p id="severity-error" className="text-sm text-red-500">
-                {state.errors.severity[0]}
+            {state?.errors?.status && (
+              <p id="status-error" className="text-sm text-red-500">
+                {state.errors.status[0]}
               </p>
             )}
           </FormGroup>
-        )}
-      </div>
 
-      {isEditing && task ? (
-        <>
-          <RelatedTasksPicker
-            mode="edit"
-            taskId={task.id}
-            initialRelated={relatedTaskLinks}
-            targetType="task"
-            label="Related tasks"
-          />
-          {type === 'task' && (
+          <FormGroup>
+            <FormLabel htmlFor="priority">Priority</FormLabel>
+            <FormSelect
+              id="priority"
+              name="priority"
+              defaultValue={task?.priority || 'medium'}
+              options={priorityOptions}
+              disabled={isPending}
+              required
+              aria-describedby="priority-error"
+              className={state?.errors?.priority ? 'border-red-500' : ''}
+            />
+            {state?.errors?.priority && (
+              <p id="priority-error" className="text-sm text-red-500">
+                {state.errors.priority[0]}
+              </p>
+            )}
+          </FormGroup>
+
+          {type === 'bug' && (
+            <FormGroup>
+              <FormLabel htmlFor="severity">Severity</FormLabel>
+              <FormSelect
+                id="severity"
+                name="severity"
+                defaultValue={task?.severity || 'medium'}
+                options={severityOptions}
+                disabled={isPending}
+                required
+                aria-describedby="severity-error"
+                className={state?.errors?.severity ? 'border-red-500' : ''}
+              />
+              {state?.errors?.severity && (
+                <p id="severity-error" className="text-sm text-red-500">
+                  {state.errors.severity[0]}
+                </p>
+              )}
+            </FormGroup>
+          )}
+        </div>
+
+        {isEditing && task ? (
+          <>
             <RelatedTasksPicker
               mode="edit"
               taskId={task.id}
-              initialRelated={relatedBugLinks}
-              targetType="bug"
-              label="Related bugs"
+              initialRelated={relatedTaskLinks}
+              targetType="task"
+              label="Related tasks"
             />
-          )}
-        </>
-      ) : (
-        <>
-          <RelatedTasksPicker
-            mode="create"
-            projectId={projectId ?? null}
-            selected={relatedTaskDraft}
-            onSelectedChange={setRelatedTaskDraft}
-            targetType="task"
-            label="Related tasks"
-          />
-          {type === 'task' && (
+            {type === 'task' && (
+              <RelatedTasksPicker
+                mode="edit"
+                taskId={task.id}
+                initialRelated={relatedBugLinks}
+                targetType="bug"
+                label="Related bugs"
+              />
+            )}
+          </>
+        ) : (
+          <>
             <RelatedTasksPicker
               mode="create"
               projectId={projectId ?? null}
-              selected={relatedBugDraft}
-              onSelectedChange={setRelatedBugDraft}
-              targetType="bug"
-              label="Related bugs"
+              selected={relatedTaskDraft}
+              onSelectedChange={setRelatedTaskDraft}
+              targetType="task"
+              label="Related tasks"
             />
-          )}
-        </>
-      )}
+            {type === 'task' && (
+              <RelatedTasksPicker
+                mode="create"
+                projectId={projectId ?? null}
+                selected={relatedBugDraft}
+                onSelectedChange={setRelatedBugDraft}
+                targetType="bug"
+                label="Related bugs"
+              />
+            )}
+          </>
+        )}
 
-      <TaskAttachmentsField
-        userId={userId}
-        taskId={isEditing ? task?.id : undefined}
-        uploadSessionId={uploadSessionId}
-        saved={savedAttachments}
-        pending={pending}
-        onPendingChange={setPending}
-        onSavedChange={setSavedAttachments}
-        onRemoveUrls={handleRemoveUrls}
-        disabled={isPending}
-      />
+        <TaskAttachmentsField
+          userId={userId}
+          taskId={isEditing ? task?.id : undefined}
+          uploadSessionId={uploadSessionId}
+          saved={savedAttachments}
+          pending={pending}
+          onPendingChange={setPending}
+          onSavedChange={setSavedAttachments}
+          onRemoveUrls={handleRemoveUrls}
+          disabled={isPending}
+        />
 
-      {state?.errors?.projectId && (
-        <p className="text-sm text-red-500 mt-2">{state.errors.projectId[0]}</p>
-      )}
+        {state?.errors?.projectId && (
+          <p className="text-sm text-red-500 mt-2">
+            {state.errors.projectId[0]}
+          </p>
+        )}
+      </div>
 
-      <div className="flex justify-end gap-2 mt-6">
+      <div className="flex shrink-0 justify-end gap-2 border-t border-gray-200/80 bg-white px-6 py-4 dark:border-dark-border-subtle dark:bg-dark-high md:px-8">
         <Button
           type="button"
           variant="ghost"

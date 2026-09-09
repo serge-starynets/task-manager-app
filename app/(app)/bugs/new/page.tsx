@@ -20,26 +20,26 @@ export default async function NewBugPage({
     : '/dashboard';
 
   return (
-    <div className="w-[70%] mx-auto p-4 md:p-8 h-dvh flex flex-col overflow-hidden">
+    <div className="mx-auto flex h-[calc(100dvh-2rem)] w-[91%] flex-col overflow-hidden md:h-[calc(100dvh-4rem)]">
       <Link
         href={backHref}
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mb-6 shrink-0"
+        className="mb-6 inline-flex shrink-0 items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
       >
         <ArrowLeftIcon size={16} className="mr-1" />
         Back to Dashboard
       </Link>
 
-      <h1 className="text-2xl font-bold mb-6 shrink-0">
+      <h1 className="mb-6 shrink-0 text-2xl font-bold">
         {projectId ? 'Create New Bug' : 'Create Bug'}
       </h1>
       {!projectId && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 shrink-0">
+        <p className="mb-6 shrink-0 text-sm text-gray-500 dark:text-gray-400">
           This bug will not be assigned to a project.
         </p>
       )}
 
-      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 md:p-8 flex-1 min-h-0 overflow-y-auto">
-        <Suspense fallback={<div>Loading...</div>}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-soft dark:border-dark-border-default dark:bg-dark-high dark:shadow-none">
+        <Suspense fallback={<div className="p-6 md:p-8">Loading...</div>}>
           <NewTask projectId={projectId} ticketType="bug" />
         </Suspense>
       </div>

@@ -34,8 +34,10 @@ function BoardCardContent({
       <Link
         href={`/tasks/${task.id}`}
         prefetch={false}
-        className="block text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-purple-700 dark:hover:text-purple-300 line-clamp-2"
+        draggable={false}
+        className="block select-none text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-purple-700 dark:hover:text-purple-300 line-clamp-2"
         onPointerDown={(e) => e.stopPropagation()}
+        onDragStart={(e) => e.preventDefault()}
       >
         {task.title}
       </Link>
