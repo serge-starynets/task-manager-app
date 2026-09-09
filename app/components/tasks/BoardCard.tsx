@@ -1,7 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import Badge from '@/app/components/ui/Badge';
 import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
 import { TASK_PRIORITY } from '@/lib/constants/tasks';
@@ -15,6 +17,8 @@ function BoardCardContent({
   task: TaskWithUser;
   className?: string;
 }) {
+  const router = useRouter();
+
   return (
     <div
       className={cn(
@@ -22,8 +26,8 @@ function BoardCardContent({
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-2 mb-1.5">
-        <span className="flex min-w-0 items-center gap-1.5 text-xs font-mono text-gray-500 dark:text-gray-400">
+      <div className="mb-1.5 flex items-start justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1.5 font-mono text-xs text-gray-500 dark:text-gray-400">
           <TicketTypeIcon type={task.type} size={12} />
           <span className="truncate">{task.taskId}</span>
         </span>
@@ -31,16 +35,29 @@ function BoardCardContent({
           {TASK_PRIORITY[task.priority as Priority].label}
         </Badge>
       </div>
-      <Link
-        href={`/tasks/${task.id}`}
-        prefetch={false}
-        draggable={false}
-        className="block select-none text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-purple-700 dark:hover:text-purple-300 line-clamp-2"
-        onPointerDown={(e) => e.stopPropagation()}
-        onDragStart={(e) => e.preventDefault()}
+      {/*
+        Avoid nesting <a> inside useSortable's role="button" (invalid HTML + hydration mismatch).
+        Stop pointerdown so title clicks navigate instead of starting a drag.
+      */}
+      <span
+        role="link"
+        tabIndex={0}
+        className="line-clamp-2 block cursor-pointer select-none text-sm font-medium text-gray-900 hover:text-purple-700 dark:text-gray-100 dark:hover:text-purple-300"
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          router.push(`/tasks/${task.id}`);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.stopPropagation();
+            router.push(`/tasks/${task.id}`);
+          }
+        }}
       >
         {task.title}
-      </Link>
+      </span>
     </div>
   );
 }
@@ -49,36 +66,58 @@ export function BoardCardOverlay({ task }: { task: TaskWithUser }) {
   return (
     <BoardCardContent
       task={task}
-      className="shadow-lg ring-2 ring-purple-400/40 cursor-grabbing"
+      className="cursor-grabbing shadow-lg ring-2 ring-purple-400/40"
     />
   );
 }
 
 export default function BoardCard({ task }: { task: TaskWithUser }) {
-  const { attributes, listeners, setNodeRef: setDragRef, isDragging } =
-    useDraggable({
-      id: String(task.id),
-      data: { status: task.status },
-    });
-  const { setNodeRef: setDropRef } = useDroppable({
+  // dnd-kit aria ids/attrs differ until the client tree is mounted — gate them
+  // so SSR HTML matches the first client render.
+  const [dndReady, setDndReady] = useState(false);
+  useEffect(() => {
+    setDndReady(true);
+  }, []);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: String(task.id),
-    data: { status: task.status },
+    data: { type: 'task', status: task.status },
+    disabled: !dndReady,
   });
 
   return (
     <div
-      ref={(node) => {
-        setDragRef(node);
-        setDropRef(node);
-      }}
+      ref={dndReady ? setNodeRef : undefined}
+      style={
+        dndReady
+          ? {
+              transform: CSS.Transform.toString(transform),
+              transition,
+            }
+          : undefined
+      }
       className={cn(
-        'touch-none cursor-grab active:cursor-grabbing',
-        isDragging && 'opacity-40',
+        'cursor-grab touch-none active:cursor-grabbing',
+        isDragging && 'z-10 opacity-30',
       )}
-      {...listeners}
-      {...attributes}
+      {...(dndReady ? listeners : {})}
+      {...(dndReady ? attributes : {})}
     >
-      <BoardCardContent task={task} />
+      <BoardCardContent
+        task={task}
+        className={
+          isDragging
+            ? 'border-dashed border-purple-300 bg-purple-50/50 shadow-none dark:border-purple-700 dark:bg-purple-950/30'
+            : undefined
+        }
+      />
     </div>
   );
 }

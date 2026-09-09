@@ -1,6 +1,10 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import type { Status, TaskWithUser } from '@/lib/types';
 import { TASK_STATUS } from '@/lib/constants/tasks';
 import { cn } from '@/lib/utils';
@@ -18,9 +22,10 @@ export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps)
     data: { type: 'column', status },
   });
 
+  const itemIds = tasks.map((task) => String(task.id));
+
   return (
     <div
-      ref={setNodeRef}
       className={cn(
         'flex min-w-[11rem] flex-1 basis-0 flex-col self-stretch rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-dark-border-default dark:bg-dark-elevated/60',
         isOver &&
@@ -36,10 +41,15 @@ export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps)
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-2 min-h-[120px] max-h-[calc(100vh-16rem)] overflow-y-auto scrollbar-thin">
-        {tasks.map((task) => (
-          <BoardCard key={task.id} task={task} />
-        ))}
+      <div
+        ref={setNodeRef}
+        className="flex flex-1 flex-col gap-2 p-2 min-h-[120px] max-h-[calc(100vh-16rem)] overflow-y-auto scrollbar-thin"
+      >
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          {tasks.map((task) => (
+            <BoardCard key={task.id} task={task} />
+          ))}
+        </SortableContext>
         {tasks.length === 0 && (
           <p className="text-xs text-center text-gray-400 dark:text-gray-500 py-6">
             Drop a ticket here
