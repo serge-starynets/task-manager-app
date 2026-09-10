@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Badge from '@/app/components/ui/Badge';
@@ -17,8 +17,6 @@ function BoardCardContent({
   task: TaskWithUser;
   className?: string;
 }) {
-  const router = useRouter();
-
   return (
     <div
       className={cn(
@@ -35,29 +33,18 @@ function BoardCardContent({
           {TASK_PRIORITY[task.priority as Priority].label}
         </Badge>
       </div>
-      {/*
-        Avoid nesting <a> inside useSortable's role="button" (invalid HTML + hydration mismatch).
-        Stop pointerdown so title clicks navigate instead of starting a drag.
-      */}
-      <span
-        role="link"
-        tabIndex={0}
-        className="line-clamp-2 block cursor-pointer select-none text-sm font-medium text-gray-900 hover:text-purple-700 dark:text-gray-100 dark:hover:text-purple-300"
+      <Link
+        href={`/tasks/${task.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        prefetch={false}
+        draggable={false}
+        className="line-clamp-2 block select-none text-sm font-medium text-gray-900 hover:text-purple-700 dark:text-gray-100 dark:hover:text-purple-300"
         onPointerDown={(event) => event.stopPropagation()}
-        onClick={(event) => {
-          event.stopPropagation();
-          router.push(`/tasks/${task.id}`);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            event.stopPropagation();
-            router.push(`/tasks/${task.id}`);
-          }
-        }}
+        onDragStart={(event) => event.preventDefault()}
       >
         {task.title}
-      </span>
+      </Link>
     </div>
   );
 }
@@ -92,6 +79,9 @@ export default function BoardCard({ task }: { task: TaskWithUser }) {
     disabled: !dndReady,
   });
 
+  // Omit role="button" so the title <a> is not nested in a button (invalid HTML).
+  const { role: _role, ...dndAttributes } = attributes;
+
   return (
     <div
       ref={dndReady ? setNodeRef : undefined}
@@ -108,7 +98,7 @@ export default function BoardCard({ task }: { task: TaskWithUser }) {
         isDragging && 'z-10 opacity-30',
       )}
       {...(dndReady ? listeners : {})}
-      {...(dndReady ? attributes : {})}
+      {...(dndReady ? dndAttributes : {})}
     >
       <BoardCardContent
         task={task}
