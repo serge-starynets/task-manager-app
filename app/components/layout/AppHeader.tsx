@@ -9,8 +9,8 @@ export default async function AppHeader() {
   const displayName = user?.name?.trim() || user?.email || 'User';
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-gray-200/80 bg-surface-elevated/80 backdrop-blur-md dark:border-dark-border-subtle dark:bg-dark-base/90">
-      <div className="flex h-full items-center justify-between gap-4 px-4 md:px-6">
+    <header className="relative z-50 flex h-16 shrink-0 items-stretch border-b border-gray-200/80 bg-surface-elevated/80 backdrop-blur-md dark:border-dark-border-subtle dark:bg-dark-base/90">
+      <div className="flex w-full items-center justify-between gap-4 px-4 md:px-6">
         <Link
           href="/dashboard"
           className="flex min-w-0 items-center gap-2.5 group"

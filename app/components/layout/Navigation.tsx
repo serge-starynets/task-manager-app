@@ -9,7 +9,7 @@ export default async function Navigation() {
   const projects = user ? await getProjects(user.id) : [];
 
   return (
-    <aside className="fixed bottom-0 left-0 top-16 z-40 flex w-16 flex-col border-r border-gray-200/80 bg-surface-muted/80 px-2 py-4 backdrop-blur-sm dark:border-dark-border-subtle dark:bg-dark-elevated md:w-64 md:px-3">
+    <aside className="absolute inset-y-0 left-0 z-40 flex w-16 flex-col border-r border-gray-200/80 bg-surface-muted/80 px-2 py-4 backdrop-blur-sm dark:border-dark-border-subtle dark:bg-dark-elevated md:w-64 md:px-3">
       <Suspense
         fallback={
           <nav className="flex flex-1 flex-col space-y-1">

@@ -20,22 +20,24 @@ function DashboardShellInner({
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       {header}
-      {hasProject ? navigation : null}
-      <main
-        className={cn(
-          'flex min-h-0 flex-1 flex-col overflow-y-auto pt-16',
-          hasProject && 'pl-16 md:pl-64',
-        )}
-      >
-        <div
+      <div className="relative flex min-h-0 flex-1">
+        {hasProject ? navigation : null}
+        <main
           className={cn(
-            'mx-auto flex min-h-0 w-full flex-1 flex-col dark:text-white',
-            isBoardView ? 'p-4 md:p-6' : 'max-w-[86.4rem] p-4 md:p-8',
+            'flex min-h-0 flex-1 flex-col overflow-y-auto',
+            hasProject && 'pl-16 md:pl-64',
           )}
         >
-          {children}
-        </div>
-      </main>
+          <div
+            className={cn(
+              'mx-auto flex min-h-0 w-full flex-1 flex-col dark:text-white',
+              isBoardView ? 'p-4 md:p-6' : 'max-w-[86.4rem] p-4 md:p-8',
+            )}
+          >
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
@@ -54,11 +56,13 @@ export default function DashboardShell({
       fallback={
         <div className="flex h-dvh flex-col overflow-hidden bg-background">
           {header}
-          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-16">
-            <div className="mx-auto flex min-h-0 w-full max-w-[86.4rem] flex-1 flex-col p-4 md:p-8 dark:text-white">
-              {children}
-            </div>
-          </main>
+          <div className="relative flex min-h-0 flex-1">
+            <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+              <div className="mx-auto flex min-h-0 w-full max-w-[86.4rem] flex-1 flex-col p-4 md:p-8 dark:text-white">
+                {children}
+              </div>
+            </main>
+          </div>
         </div>
       }
     >
