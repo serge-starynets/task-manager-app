@@ -9,8 +9,6 @@ import { stripHtml } from '@/lib/rich-text';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import Button from '@/app/components/ui/Button';
-import ThemeToggle from '@/app/components/ThemeToggler';
-import SignOutButton from '@/app/components/auth/SignOutButton';
 import {
   Edit2Icon,
   FolderIcon,
@@ -61,14 +59,11 @@ function DashboardHome({
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300">
-            <LayoutDashboardIcon size={20} />
-          </span>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        </div>
-        <ThemeToggle />
+      <div className="mb-8 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300">
+          <LayoutDashboardIcon size={20} />
+        </span>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
       </div>
 
       <section className="mb-10">
@@ -149,7 +144,6 @@ function DashboardHome({
             <span>Settings</span>
             <span className="ml-2 text-xs">(coming soon)</span>
           </span>
-          <SignOutButton />
         </div>
       </section>
     </div>
