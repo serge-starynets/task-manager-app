@@ -2,38 +2,39 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 function DashboardShellInner({
   children,
+  header,
   navigation,
 }: {
   children: React.ReactNode;
+  header: React.ReactNode;
   navigation: React.ReactNode;
 }) {
   const searchParams = useSearchParams();
   const hasProject = Boolean(searchParams.get('project'));
   const isBoardView = searchParams.get('view') === 'board';
-  const contentClass = isBoardView
-    ? 'dark:text-white w-full mx-auto p-4 md:p-6'
-    : 'dark:text-white max-w-[86.4rem] mx-auto p-4 md:p-8';
-
-  if (!hasProject) {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="min-h-screen">
-          <div className="dark:text-white max-w-[86.4rem] mx-auto p-4 md:p-8">
-            {children}
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-background">
-      {navigation}
-      <main className="pl-16 md:pl-64 pt-0 min-h-screen">
-        <div className={contentClass}>{children}</div>
+    <div className="flex h-dvh flex-col overflow-hidden bg-background">
+      {header}
+      {hasProject ? navigation : null}
+      <main
+        className={cn(
+          'flex min-h-0 flex-1 flex-col overflow-y-auto pt-16',
+          hasProject && 'pl-16 md:pl-64',
+        )}
+      >
+        <div
+          className={cn(
+            'mx-auto flex min-h-0 w-full flex-1 flex-col dark:text-white',
+            isBoardView ? 'p-4 md:p-6' : 'max-w-[86.4rem] p-4 md:p-8',
+          )}
+        >
+          {children}
+        </div>
       </main>
     </div>
   );
@@ -41,24 +42,27 @@ function DashboardShellInner({
 
 export default function DashboardShell({
   children,
+  header,
   navigation,
 }: {
   children: React.ReactNode;
+  header: React.ReactNode;
   navigation: React.ReactNode;
 }) {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-background">
-          <main className="min-h-screen">
-            <div className="dark:text-white max-w-[86.4rem] mx-auto p-4 md:p-8">
+        <div className="flex h-dvh flex-col overflow-hidden bg-background">
+          {header}
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-16">
+            <div className="mx-auto flex min-h-0 w-full max-w-[86.4rem] flex-1 flex-col p-4 md:p-8 dark:text-white">
               {children}
             </div>
           </main>
         </div>
       }
     >
-      <DashboardShellInner navigation={navigation}>
+      <DashboardShellInner header={header} navigation={navigation}>
         {children}
       </DashboardShellInner>
     </Suspense>

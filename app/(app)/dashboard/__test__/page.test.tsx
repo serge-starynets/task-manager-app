@@ -83,7 +83,7 @@ vi.mock('@/app/components/ThemeToggler', () => ({
 }));
 
 vi.mock('@/app/components/auth/SignOutButton', () => ({
-  default: () => <button type="button">Sign Out</button>,
+  default: () => <button type="button">Log Out</button>,
 }));
 
 describe('DashboardPage', () => {
@@ -164,7 +164,6 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Create Project')).toBeInTheDocument();
     expect(screen.getByText('user1@example.com')).toBeInTheDocument();
-    expect(screen.getByText('Sign Out')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 

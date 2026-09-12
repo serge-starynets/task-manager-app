@@ -87,12 +87,14 @@ body {
 
 /* Quill (react-quill-new) */
 .rich-text-editor .ql-toolbar.ql-snow {
+  position: relative;
+  z-index: 2;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
-  overflow-x: auto;
-  white-space: nowrap;
+  /* visible so header/size pickers are not clipped by the editor below */
+  overflow: visible;
   border: none;
   border-bottom: 1px solid #d4d4d8;
   border-top-left-radius: 0.5rem;
@@ -103,7 +105,7 @@ body {
 
 .rich-text-editor .ql-toolbar.ql-snow .ql-formats {
   display: inline-flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   margin-right: 0;
   flex-shrink: 0;
@@ -111,6 +113,18 @@ body {
 
 .rich-text-editor .ql-toolbar.ql-snow .ql-picker {
   float: none;
+}
+
+.rich-text-editor .ql-toolbar.ql-snow .ql-picker.ql-expanded {
+  z-index: 3;
+}
+
+.rich-text-editor .ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  z-index: 4;
+  border-radius: 0.375rem;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .rich-text-editor .ql-toolbar.ql-snow button,
@@ -125,9 +139,16 @@ body {
   background: #252528;
 }
 
+.dark .rich-text-editor .ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  background-color: #252528;
+  border-color: #45454a;
+}
+
 .rich-text-editor .ql-container.ql-snow {
+  position: relative;
+  z-index: 1;
   border: none;
-  font-size: 0.875rem;
+  font-size: 1rem;
   min-height: 160px;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;

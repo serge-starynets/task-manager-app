@@ -20,7 +20,7 @@ export default async function NewBugPage({
     : '/dashboard';
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-2rem)] w-[91%] flex-col overflow-hidden md:h-[calc(100dvh-4rem)]">
+    <div className="mx-auto flex min-h-0 w-[91%] flex-1 flex-col overflow-hidden">
       <Link
         href={backHref}
         className="mb-6 inline-flex shrink-0 items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
