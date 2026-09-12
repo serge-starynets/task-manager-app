@@ -15,9 +15,9 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-xl border border-gray-200/80 bg-white shadow-soft dark:border-dark-border-default dark:bg-dark-high dark:shadow-none',
+        'rounded-2xl border border-black/[0.06] bg-white/90 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none',
         hoverable &&
-          'transition-all duration-200 ease-smooth hover:shadow-lift hover:border-gray-300 dark:hover:border-dark-border-medium dark:hover:bg-dark-high',
+          'transition-all duration-200 ease-smooth hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/[0.14] dark:hover:bg-dark-high',
         className
       )}
       {...props}

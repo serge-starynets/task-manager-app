@@ -18,7 +18,7 @@ function DashboardShellInner({
   const isBoardView = searchParams.get('view') === 'board';
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background">
+    <div className="atmosphere flex h-dvh flex-col overflow-hidden">
       {header}
       <div className="relative flex min-h-0 flex-1">
         {hasProject ? navigation : null}
@@ -54,7 +54,7 @@ export default function DashboardShell({
   return (
     <Suspense
       fallback={
-        <div className="flex h-dvh flex-col overflow-hidden bg-background">
+        <div className="atmosphere flex h-dvh flex-col overflow-hidden">
           {header}
           <div className="relative flex min-h-0 flex-1">
             <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">

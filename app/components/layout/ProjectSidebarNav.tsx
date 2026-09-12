@@ -58,7 +58,7 @@ export default function ProjectSidebarNav({
   return (
     <nav className="flex-1 flex flex-col space-y-0.5 overflow-y-auto scrollbar-thin">
       <div className="px-2.5 mb-2 hidden md:block">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
           Projects
         </p>
       </div>
@@ -84,8 +84,8 @@ export default function ProjectSidebarNav({
                 }
                 className={cn(
                   'shrink-0 p-1.5 rounded-lg transition-colors',
-                  'text-gray-500 hover:bg-gray-200/60 hover:text-gray-700',
-                  'dark:text-gray-400 dark:hover:bg-dark-high dark:hover:text-gray-200',
+                  'text-gray-500 hover:bg-black/[0.05] hover:text-gray-700',
+                  'dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-200',
                 )}
               >
                 {isExpanded ? (
@@ -97,17 +97,20 @@ export default function ProjectSidebarNav({
               <Link
                 href={backlogHref}
                 className={cn(
-                  'flex min-w-0 flex-1 items-center px-2 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-smooth group',
+                  'relative flex min-w-0 flex-1 items-center px-2 py-2 text-sm font-medium rounded-xl transition-all duration-200 ease-smooth group',
                   isSelected
-                    ? 'bg-purple-100/80 text-purple-700 shadow-sm dark:bg-purple-950/60 dark:text-purple-200 dark:shadow-none'
-                    : 'text-gray-700 hover:bg-gray-200/60 dark:text-gray-300 dark:hover:bg-dark-high',
+                    ? 'bg-violet-100/80 text-violet-800 dark:bg-violet-950/50 dark:text-violet-200'
+                    : 'text-gray-700 hover:bg-black/[0.04] dark:text-gray-300 dark:hover:bg-white/[0.05]',
                 )}
               >
+                {isSelected ? (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-violet-500" />
+                ) : null}
                 <span
                   className={cn(
                     'mr-2.5 shrink-0 transition-colors',
                     isSelected
-                      ? 'text-purple-600 dark:text-purple-300'
+                      ? 'text-violet-600 dark:text-violet-300'
                       : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200',
                   )}
                 >
@@ -126,8 +129,8 @@ export default function ProjectSidebarNav({
                   className={cn(
                     'flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-lg transition-colors',
                     isSelected && !isBoardView
-                      ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-200'
-                      : 'text-gray-600 hover:bg-gray-200/60 dark:text-gray-400 dark:hover:bg-dark-high',
+                      ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200'
+                      : 'text-gray-600 hover:bg-black/[0.04] dark:text-gray-400 dark:hover:bg-white/[0.05]',
                   )}
                 >
                   <ListIcon size={15} className="shrink-0 opacity-70" />
@@ -138,8 +141,8 @@ export default function ProjectSidebarNav({
                   className={cn(
                     'flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-lg transition-colors',
                     isSelected && isBoardView
-                      ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-200'
-                      : 'text-gray-600 hover:bg-gray-200/60 dark:text-gray-400 dark:hover:bg-dark-high',
+                      ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200'
+                      : 'text-gray-600 hover:bg-black/[0.04] dark:text-gray-400 dark:hover:bg-white/[0.05]',
                   )}
                 >
                   <LayoutGridIcon size={15} className="shrink-0 opacity-70" />
@@ -159,7 +162,7 @@ export default function ProjectSidebarNav({
         />
       )}
 
-      <div className="my-2 mx-2 border-t border-gray-200/80 dark:border-dark-border-subtle" />
+      <div className="my-2 mx-2 border-t border-black/[0.06] dark:border-white/[0.08]" />
 
       <div className="px-2">
         <CreateTicketMenu

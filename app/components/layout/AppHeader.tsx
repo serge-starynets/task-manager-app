@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { CheckSquareIcon, UserIcon } from 'lucide-react';
+import { UserIcon } from 'lucide-react';
 import { getCurrentUser } from '@/lib/dal';
+import BrandMark from '@/app/components/BrandMark';
 import ThemeToggle from '@/app/components/ThemeToggler';
 import SignOutButton from '@/app/components/auth/SignOutButton';
 
@@ -9,25 +10,17 @@ export default async function AppHeader() {
   const displayName = user?.name?.trim() || user?.email || 'User';
 
   return (
-    <header className="relative z-50 flex h-16 shrink-0 items-stretch border-b border-gray-200/80 bg-surface-elevated/80 backdrop-blur-md dark:border-dark-border-subtle dark:bg-dark-base/90">
+    <header className="relative z-50 flex h-14 shrink-0 items-stretch border-b border-black/[0.06] bg-surface-elevated/75 backdrop-blur-xl dark:border-white/[0.06] dark:bg-dark-base/80">
       <div className="flex w-full items-center justify-between gap-4 px-4 md:px-6">
-        <Link
-          href="/dashboard"
-          className="flex min-w-0 items-center gap-2.5 group"
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-600 text-white shadow-sm">
-            <CheckSquareIcon size={16} strokeWidth={2.5} />
-          </span>
-          <span className="truncate text-base font-semibold tracking-tight text-gray-900 transition-colors group-hover:text-purple-700 dark:text-white dark:group-hover:text-purple-300">
-            Task Manager
-          </span>
+        <Link href="/dashboard" className="group min-w-0">
+          <BrandMark className="transition-opacity group-hover:opacity-80" />
         </Link>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <ThemeToggle />
 
           <div
-            className="flex items-center gap-2 rounded-lg px-1.5 py-1 sm:px-2"
+            className="flex items-center gap-2 rounded-xl px-1.5 py-1 sm:px-2"
             title="Profile coming soon"
           >
             {user?.image ? (
@@ -36,10 +29,10 @@ export default async function AppHeader() {
               <img
                 src={user.image}
                 alt=""
-                className="h-8 w-8 rounded-lg object-cover"
+                className="h-8 w-8 rounded-xl object-cover ring-1 ring-black/[0.06] dark:ring-white/[0.1]"
               />
             ) : (
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-200/70 text-gray-500 dark:bg-dark-high dark:text-gray-400">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-950/60 dark:text-violet-300">
                 <UserIcon size={16} />
               </span>
             )}

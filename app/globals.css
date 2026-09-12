@@ -3,31 +3,42 @@
 @tailwind utilities;
 
 :root {
-  /* Slightly off-white canvas for softer light mode */
-  --background: #f4f4f5;
-  --foreground: #18181b;
-  --surface-muted: #eaeaeb;
+  color-scheme: light;
+  --background: #f4f3f8;
+  --foreground: #14131a;
+  --surface-muted: #ebe9f2;
   --surface-elevated: #ffffff;
-  --border-subtle: #e4e4e7;
-  --border-default: #d4d4d8;
+  --border-subtle: #e4e1ec;
+  --border-default: #d4d0de;
 }
 
 .dark {
-  /* Very dark grey — not pure black */
-  --background: #1c1c1e;
+  color-scheme: dark;
+  --background: #111114;
   --foreground: #f4f4f5;
-  --surface-muted: #252528;
-  --surface-elevated: #2c2c30;
-  --border-subtle: #3a3a3e;
-  --border-default: #45454a;
+  --surface-muted: #18181c;
+  --surface-elevated: #1f1f24;
+  --border-subtle: #2a2a32;
+  --border-default: #35353e;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
     sans-serif;
+  font-feature-settings: 'ss01' on, 'cv11' on;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(139 92 246 / 0.24);
+  color: inherit;
 }
 
 /* custom utilities */
@@ -53,10 +64,57 @@ body {
     overflow: hidden;
   }
 
-  /* Shared raised panel look */
   .surface-panel {
-    @apply rounded-xl border border-gray-200/80 bg-white shadow-soft
-      dark:border-dark-border-default dark:bg-dark-high dark:shadow-none;
+    @apply rounded-2xl border border-black/[0.06] bg-white/90 shadow-soft
+      dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight text-gray-900 dark:text-white;
+  }
+
+  .back-link {
+    @apply inline-flex items-center text-sm text-gray-500 transition-colors duration-200
+      hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100;
+  }
+
+  .atmosphere {
+    background-color: var(--background);
+    background-image:
+      radial-gradient(
+        ellipse 80% 55% at 50% -18%,
+        rgb(139 92 246 / 0.18),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 45% 40% at 100% 0%,
+        rgb(99 102 241 / 0.1),
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 40% 35% at 0% 100%,
+        rgb(167 139 250 / 0.08),
+        transparent 50%
+      );
+  }
+
+  .dark .atmosphere {
+    background-image:
+      radial-gradient(
+        ellipse 90% 55% at 50% -8%,
+        rgb(139 92 246 / 0.28),
+        transparent 58%
+      ),
+      radial-gradient(
+        ellipse 45% 40% at 100% 8%,
+        rgb(99 102 241 / 0.16),
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 40% 35% at 0% 100%,
+        rgb(124 58 237 / 0.12),
+        transparent 50%
+      );
   }
 }
 
@@ -83,6 +141,20 @@ body {
   .dark .scrollbar-thin::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.15);
   }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-fade-up {
+    animation: none !important;
+  }
 }
 
 /* Quill (react-quill-new) */
@@ -96,10 +168,10 @@ body {
   /* visible so header/size pickers are not clipped by the editor below */
   overflow: visible;
   border: none;
-  border-bottom: 1px solid #d4d4d8;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-  background: #f4f4f5;
+  border-bottom: 1px solid var(--border-default);
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  background: var(--surface-muted);
   padding: 8px 10px;
 }
 
@@ -121,7 +193,7 @@ body {
 
 .rich-text-editor .ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {
   z-index: 4;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 0.1),
     0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -134,14 +206,9 @@ body {
   justify-content: center;
 }
 
-.dark .rich-text-editor .ql-toolbar.ql-snow {
-  border-bottom-color: #45454a;
-  background: #252528;
-}
-
 .dark .rich-text-editor .ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {
-  background-color: #252528;
-  border-color: #45454a;
+  background-color: var(--surface-muted);
+  border-color: var(--border-default);
 }
 
 .rich-text-editor .ql-container.ql-snow {
@@ -150,8 +217,8 @@ body {
   border: none;
   font-size: 1rem;
   min-height: 160px;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
 }
 
 .rich-text-editor .ql-editor {
@@ -219,7 +286,7 @@ body {
   pointer-events: none;
   z-index: 30;
   box-sizing: border-box;
-  border: 2px solid rgb(168 85 247 / 0.8);
+  border: 2px solid rgb(139 92 246 / 0.8);
   border-radius: 0.375rem;
 }
 
@@ -230,7 +297,7 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 9999px;
-  background: #9333ea;
+  background: #7c3aed;
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
   cursor: nesw-resize !important;
@@ -239,7 +306,7 @@ body {
 }
 
 .dark .rich-text-editor .ql-image-resize-handle {
-  border-color: #2c2c30;
+  border-color: #1f1f24;
 }
 
 /* Custom Quill toolbar: insert file / PDF as a link */

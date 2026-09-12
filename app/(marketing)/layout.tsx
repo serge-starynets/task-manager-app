@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Timestamp } from '../components/Timestamp';
 import ThemeToggle from '../components/ThemeToggler';
 import DashboardButton from '../components/layout/DashboardButton';
+import BrandMark from '../components/BrandMark';
 
 export default async function MarketingLayout({
   children,
@@ -9,41 +10,30 @@ export default async function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-gray-200/80 dark:border-dark-border-subtle bg-surface-elevated/80 backdrop-blur-md dark:bg-dark-base/90 sticky top-0 z-40">
+    <div className="atmosphere flex min-h-screen flex-col">
+      <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-surface-elevated/70 backdrop-blur-xl dark:border-white/[0.06] dark:bg-dark-base/75">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-8">
-            <Link
-              href="/"
-              className="text-xl font-bold tracking-tight flex items-center gap-2"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-purple-600 text-white text-xs font-bold">
-                P
-              </span>
-              <span className="hidden sm:inline">Projenda</span>
+            <Link href="/" className="transition-opacity hover:opacity-80">
+              <BrandMark showWordmark={false} className="sm:hidden" />
+              <BrandMark className="hidden sm:inline-flex" />
             </Link>
-            <nav className="hidden md:flex gap-6">
+            <nav className="hidden md:flex gap-1">
               <Link
                 href="/features"
-                className="text-sm font-medium hover:text-purple-600"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-black/[0.04] hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
               >
                 Features
               </Link>
-              {/* <Link
-                href="/pricing"
-                className="text-sm font-medium hover:text-purple-600"
-              >
-                Pricing
-              </Link> */}
               <Link
                 href="/faq"
-                className="text-sm font-medium hover:text-purple-600"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-black/[0.04] hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
               >
                 FAQ
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             <DashboardButton />
           </div>
@@ -51,38 +41,32 @@ export default async function MarketingLayout({
       </header>
 
       <main className="flex-1">{children}</main>
-      <footer className="border-t border-gray-200/80 dark:border-dark-border-subtle bg-surface-muted/50 dark:bg-dark-elevated">
-        <div className="container mx-auto px-4 py-8">
+      <footer className="border-t border-black/[0.06] bg-white/40 dark:border-white/[0.06] dark:bg-dark-elevated/40">
+        <div className="container mx-auto px-4 py-10">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Projenda</h3>
-              <p className="text-sm text-gray-600">
+              <BrandMark className="mb-3" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 A modern project management tool built with Next.js.
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold mb-4">Product</h3>
+              <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">
+                Product
+              </h3>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="/features"
-                    className="text-sm text-gray-600 hover:text-purple-600"
+                    className="text-sm text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-300"
                   >
                     Features
                   </Link>
                 </li>
-                {/* <li>
-                  <Link
-                    href="/pricing"
-                    className="text-sm text-gray-600 hover:text-purple-600"
-                  >
-                    Pricing
-                  </Link>
-                </li> */}
                 <li>
                   <Link
                     href="/faq"
-                    className="text-sm text-gray-600 hover:text-purple-600"
+                    className="text-sm text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-300"
                   >
                     FAQ
                   </Link>
@@ -90,22 +74,16 @@ export default async function MarketingLayout({
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-semibold mb-4">Resources</h3>
+              <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">
+                Resources
+              </h3>
               <ul className="space-y-2">
-                {/* <li>
-                  <Link
-                    href="/docs"
-                    className="text-sm text-gray-600 hover:text-purple-600"
-                  >
-                    Documentation
-                  </Link>
-                </li> */}
                 <li>
                   <a
                     href="https://github.com/serge-starynets/task-manager-app"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-gray-600 hover:text-purple-600"
+                    className="text-sm text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-300"
                   >
                     GitHub
                   </a>
@@ -113,12 +91,14 @@ export default async function MarketingLayout({
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-semibold mb-4">Legal</h3>
+              <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">
+                Legal
+              </h3>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="/privacy"
-                    className="text-sm text-gray-600 hover:text-purple-600"
+                    className="text-sm text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-300"
                   >
                     Privacy Policy
                   </Link>
@@ -126,7 +106,7 @@ export default async function MarketingLayout({
                 <li>
                   <Link
                     href="/terms"
-                    className="text-sm text-gray-600 hover:text-purple-600"
+                    className="text-sm text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-300"
                   >
                     Terms of Service
                   </Link>
@@ -134,8 +114,8 @@ export default async function MarketingLayout({
               </ul>
             </div>
           </div>
-          <div className="mt-8 border-t pt-8 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="mt-10 border-t border-black/[0.06] pt-8 text-center dark:border-white/[0.06]">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               &copy; <Timestamp /> Serhii Starynets. All rights reserved.
             </p>
           </div>

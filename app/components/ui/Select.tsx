@@ -179,12 +179,12 @@ export default function Select({
         onClick={() => (open ? close() : openList())}
         onKeyDown={handleTriggerKeyDown}
         className={cn(
-          'flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-left text-sm transition-shadow duration-200',
-          'focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400',
+          'flex h-8 w-full items-center justify-between gap-2 rounded-xl border border-black/[0.1] bg-white px-3 py-1.5 text-left text-sm transition-shadow duration-200',
+          'focus:outline-none focus:ring-2 focus:ring-violet-500/25 focus:border-violet-400',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          'dark:border-dark-border-medium dark:bg-dark-elevated dark:text-gray-100 dark:focus:border-purple-500/60',
+          'dark:border-white/[0.12] dark:bg-dark-elevated dark:text-gray-100 dark:focus:border-violet-500/60',
           open &&
-            'ring-2 ring-purple-500/30 border-purple-400 dark:border-purple-500/60',
+            'ring-2 ring-violet-500/25 border-violet-400 dark:border-violet-500/60',
           className,
         )}
       >
@@ -200,7 +200,7 @@ export default function Select({
           size={16}
           className={cn(
             'shrink-0 text-gray-400 transition-transform duration-200 dark:text-gray-500',
-            open && 'rotate-180 text-purple-500 dark:text-purple-400',
+            open && 'rotate-180 text-violet-500 dark:text-violet-400',
           )}
           aria-hidden
         />
@@ -213,7 +213,7 @@ export default function Select({
           role="listbox"
           aria-labelledby={triggerId}
           tabIndex={-1}
-          className="absolute z-20 mt-1.5 max-h-60 w-full overflow-auto rounded-xl border border-gray-200/80 bg-white py-1 shadow-lift dark:border-dark-border-default dark:bg-dark-high dark:shadow-none scrollbar-thin"
+          className="absolute z-20 mt-1.5 max-h-60 w-full overflow-auto rounded-xl border border-black/[0.06] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none scrollbar-thin"
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -233,9 +233,9 @@ export default function Select({
                 className={cn(
                   'flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm transition-colors',
                   isHighlighted &&
-                    'bg-gray-100 dark:bg-dark-elevated',
+                    'bg-violet-50 dark:bg-white/[0.06]',
                   isSelected &&
-                    'font-medium text-purple-700 dark:text-purple-300',
+                    'font-medium text-violet-700 dark:text-violet-300',
                   !isSelected && 'text-gray-800 dark:text-gray-200',
                 )}
               >
@@ -243,7 +243,7 @@ export default function Select({
                 {isSelected && (
                   <CheckIcon
                     size={16}
-                    className="shrink-0 text-purple-600 dark:text-purple-400"
+                    className="shrink-0 text-violet-600 dark:text-violet-400"
                     aria-hidden
                   />
                 )}

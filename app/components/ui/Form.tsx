@@ -39,7 +39,7 @@ export function FormLabel({ className, children, ...props }: FormLabelProps) {
   return (
     <label
       className={cn(
-        'text-sm font-semibold text-gray-700 dark:text-gray-300',
+        'text-[13px] font-semibold tracking-tight text-gray-700 dark:text-gray-300',
         className,
       )}
       {...props}
@@ -50,7 +50,7 @@ export function FormLabel({ className, children, ...props }: FormLabelProps) {
 }
 
 const inputBase =
-  'flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border-medium dark:bg-dark-elevated dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-purple-500/60';
+  'flex h-10 w-full rounded-xl border border-black/[0.1] bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/25 focus:border-violet-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/[0.12] dark:bg-dark-elevated dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-violet-500/60';
 
 // Form Input
 type FormInputProps = React.InputHTMLAttributes<HTMLInputElement>;
@@ -77,7 +77,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       <textarea
         ref={ref}
         className={cn(
-          'flex min-h-[80px] w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border-medium dark:bg-dark-elevated dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-purple-500/60',
+          'flex min-h-[80px] w-full rounded-xl border border-black/[0.1] bg-white px-3 py-2 text-sm placeholder:text-gray-400 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/25 focus:border-violet-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/[0.12] dark:bg-dark-elevated dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-violet-500/60',
           className,
         )}
         {...props}

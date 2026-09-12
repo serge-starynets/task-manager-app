@@ -2,11 +2,16 @@ import React from 'react';
 
 export default function FAQPage() {
   return (
-    <div className="container mx-auto px-4 py-12 text-white">
-      <h2 className="text-2xl font-bold mb-8 text-center text-gray-900 dark:text-white">
-        Frequently Asked Questions
-      </h2>
-      <div className="space-y-6">
+    <div className="container mx-auto max-w-3xl px-4 py-16">
+      <div className="mb-12 text-center">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-violet-600 dark:text-violet-400">
+          Support
+        </p>
+        <h2 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+          Frequently Asked Questions
+        </h2>
+      </div>
+      <div className="space-y-3">
         <FAQItem
           question="What is Projenda?"
           answer="Projenda is a simple task and project tracker designed for individuals. It helps you organize ideas, plan small personal projects, and follow tasks from backlog to completion."
@@ -53,11 +58,13 @@ interface FAQItemProps {
 
 function FAQItem({ question, answer }: FAQItemProps) {
   return (
-    <div>
-      <h4 className="text-lg font-semibold mb-2 text-gray-500 dark:text-grey-200">
+    <div className="rounded-2xl border border-black/[0.06] bg-white/80 p-5 shadow-soft dark:border-white/[0.08] dark:bg-dark-high/80 dark:shadow-none">
+      <h4 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
         {question}
       </h4>
-      <p className="text-gray-400 dark:text-gray-300">{answer}</p>
+      <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+        {answer}
+      </p>
     </div>
   );
 }

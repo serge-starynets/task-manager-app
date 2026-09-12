@@ -61,7 +61,7 @@ export default function CreateTicketMenu({
         <div
           role="menu"
           className={cn(
-            'absolute z-20 mt-1.5 min-w-44 overflow-hidden rounded-xl border border-gray-200/80 bg-white py-1 shadow-lift dark:border-dark-border-default dark:bg-dark-high dark:shadow-none',
+            'absolute z-20 mt-1.5 min-w-44 overflow-hidden rounded-xl border border-black/[0.06] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none',
             menuAlign === 'end' ? 'right-0' : 'left-0',
           )}
 
@@ -70,7 +70,7 @@ export default function CreateTicketMenu({
             href={taskHref}
             role="menuitem"
             data-testid="new-task-link"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-dark-elevated"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-violet-50 dark:text-gray-200 dark:hover:bg-white/[0.06]"
             onClick={() => setOpen(false)}
           >
             <ListTodoIcon size={16} className="text-blue-500 dark:text-blue-400" />
@@ -80,7 +80,7 @@ export default function CreateTicketMenu({
             href={bugHref}
             role="menuitem"
             data-testid="new-bug-link"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-dark-elevated"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-violet-50 dark:text-gray-200 dark:hover:bg-white/[0.06]"
             onClick={() => setOpen(false)}
           >
             <BugIcon size={16} className="text-red-500 dark:text-red-400" />

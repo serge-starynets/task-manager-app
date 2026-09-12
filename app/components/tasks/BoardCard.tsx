@@ -20,7 +20,7 @@ function BoardCardContent({
   return (
     <div
       className={cn(
-        'rounded-lg border border-gray-200/80 bg-white p-3 shadow-soft dark:border-dark-border-default dark:bg-dark-high dark:shadow-none',
+        'rounded-xl border border-black/[0.06] bg-white p-3 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none',
         className,
       )}
     >
@@ -39,7 +39,7 @@ function BoardCardContent({
         rel="noopener noreferrer"
         prefetch={false}
         draggable={false}
-        className="line-clamp-2 block select-none text-sm font-medium text-gray-900 hover:text-purple-700 dark:text-gray-100 dark:hover:text-purple-300"
+        className="line-clamp-2 block select-none text-sm font-medium text-gray-900 hover:text-violet-700 dark:text-gray-100 dark:hover:text-violet-300"
         onPointerDown={(event) => event.stopPropagation()}
         onDragStart={(event) => event.preventDefault()}
       >
@@ -53,7 +53,7 @@ export function BoardCardOverlay({ task }: { task: TaskWithUser }) {
   return (
     <BoardCardContent
       task={task}
-      className="cursor-grabbing shadow-lg ring-2 ring-purple-400/40"
+      className="cursor-grabbing shadow-lift ring-2 ring-violet-400/40"
     />
   );
 }
@@ -104,7 +104,7 @@ export default function BoardCard({ task }: { task: TaskWithUser }) {
         task={task}
         className={
           isDragging
-            ? 'border-dashed border-purple-300 bg-purple-50/50 shadow-none dark:border-purple-700 dark:bg-purple-950/30'
+            ? 'border-dashed border-violet-300 bg-violet-50/50 shadow-none dark:border-violet-700 dark:bg-violet-950/30'
             : undefined
         }
       />

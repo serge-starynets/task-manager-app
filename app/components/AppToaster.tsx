@@ -26,7 +26,7 @@ function ToastIcon({ type }: { type: string }) {
       );
     case 'loading':
       return (
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-300">
           <Loader2Icon size={18} strokeWidth={2} className="animate-spin" />
         </span>
       );
@@ -66,13 +66,13 @@ export default function AppToaster() {
               className={cn(
                 'pointer-events-auto flex w-full min-w-[280px] max-w-[380px] items-start gap-3 rounded-xl border p-3.5',
                 'bg-white/95 backdrop-blur-md shadow-lift',
-                'border-gray-200/80 dark:border-dark-border-default dark:bg-dark-high/95 dark:shadow-none',
+                'border-black/[0.06] dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none',
                 t.type === 'success' &&
                   'border-l-[3px] border-l-emerald-500 dark:border-l-emerald-400',
                 t.type === 'error' &&
                   'border-l-[3px] border-l-red-500 dark:border-l-red-400',
                 t.type === 'loading' &&
-                  'border-l-[3px] border-l-purple-500 dark:border-l-purple-400',
+                  'border-l-[3px] border-l-violet-500 dark:border-l-violet-400',
                 t.type === 'blank' &&
                   'border-l-[3px] border-l-gray-400 dark:border-l-gray-500',
               )}

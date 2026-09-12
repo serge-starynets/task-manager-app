@@ -23,7 +23,7 @@ import 'react-quill-new/dist/quill.snow.css';
 const ReactQuill = dynamic(() => import('react-quill-new'), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[180px] rounded-md border border-gray-300 bg-gray-50 dark:border-dark-border-medium dark:bg-dark-high animate-pulse" />
+    <div className="min-h-[180px] rounded-xl border border-black/[0.1] bg-gray-50 dark:border-white/[0.12] dark:bg-dark-high animate-pulse" />
   ),
 });
 
@@ -334,7 +334,7 @@ export default function RichTextEditor({
     <div
       ref={editorWrapRef}
       className={cn(
-        'rich-text-editor rounded-lg border border-gray-300 bg-white dark:border-dark-border-medium dark:bg-dark-elevated focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:border-purple-400',
+        'rich-text-editor rounded-xl border border-black/[0.1] bg-white dark:border-white/[0.12] dark:bg-dark-elevated focus-within:ring-2 focus-within:ring-violet-500/25 focus-within:border-violet-400',
         disabled && 'opacity-50 pointer-events-none',
         className,
       )}

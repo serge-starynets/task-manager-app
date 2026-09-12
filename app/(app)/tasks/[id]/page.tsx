@@ -42,7 +42,7 @@ function RelatedTicketList({
         <li key={`${related.kind}-${related.id}`}>
           <Link
             href={`/tasks/${related.id}`}
-            className="flex items-start gap-2 text-sm text-gray-800 hover:underline dark:text-gray-200"
+            className="flex items-start gap-2 rounded-xl px-2 py-1.5 text-sm text-gray-800 transition-colors hover:bg-violet-50 dark:text-gray-200 dark:hover:bg-white/[0.05]"
           >
             <TicketTypeIcon
               type={related.type}
@@ -104,11 +104,11 @@ export default async function TaskPage({
     : '/dashboard';
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
+    <div className="mx-auto w-full max-w-6xl">
       <div className="mb-8">
         <Link
           href={backHref}
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 mb-4"
+          className="back-link mb-4"
         >
           <ArrowLeftIcon size={16} className="mr-1" />
           Back to Tasks
@@ -122,7 +122,7 @@ export default async function TaskPage({
                 {TICKET_TYPE[ticketType].label}
               </span>
             </p>
-            <h1 className="text-3xl font-bold break-words">{title}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight break-words">{title}</h1>
           </div>
           <div className="flex items-center space-x-2 shrink-0">
             <Link href={`/tasks/${id}/edit`}>
@@ -138,7 +138,7 @@ export default async function TaskPage({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+      <div className="surface-panel mb-8 overflow-hidden p-6">
         <div className="flex flex-wrap gap-3 mb-6">
           <Badge status={status as Status}>
             {TASK_STATUS[status as Status].label}
@@ -160,7 +160,7 @@ export default async function TaskPage({
         )}
       </div>
 
-      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+      <div className="surface-panel mb-8 overflow-hidden p-6">
         <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
           <UserIcon size={18} className="text-gray-400" />
           Details
@@ -218,7 +218,7 @@ export default async function TaskPage({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-high border border-gray-200/80 dark:border-dark-border-default rounded-xl shadow-soft dark:shadow-none p-6 mb-8 overflow-hidden">
+      <div className="surface-panel mb-8 overflow-hidden p-6">
         <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
           <Link2Icon size={18} className="text-gray-400" />
           Related tickets

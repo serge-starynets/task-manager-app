@@ -16,6 +16,16 @@ interface BoardColumnProps {
   isOver: boolean;
 }
 
+const statusAccent: Record<Status, string> = {
+  backlog: 'bg-gray-400',
+  todo: 'bg-zinc-500',
+  in_progress: 'bg-blue-500',
+  qa: 'bg-amber-500',
+  done: 'bg-emerald-500',
+  rejected: 'bg-red-500',
+  closed: 'bg-gray-500',
+};
+
 export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps) {
   const { setNodeRef } = useDroppable({
     id: status,
@@ -27,23 +37,27 @@ export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps)
   return (
     <div
       className={cn(
-        'flex min-w-[11rem] flex-1 basis-0 flex-col self-stretch rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-dark-border-default dark:bg-dark-elevated/60',
+        'flex min-w-[11rem] flex-1 basis-0 flex-col self-stretch overflow-hidden rounded-2xl border border-black/[0.06] bg-gray-50/70 dark:border-white/[0.08] dark:bg-dark-elevated/50',
         isOver &&
-          'ring-2 ring-purple-400/50 border-purple-300 dark:border-purple-700',
+          'border-violet-300 ring-2 ring-violet-400/40 dark:border-violet-700',
       )}
     >
-      <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-gray-200/80 dark:border-dark-border-subtle">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+      <div className="flex items-center justify-between gap-2 border-b border-black/[0.05] px-3 py-2.5 dark:border-white/[0.06]">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+          <span
+            className={cn('h-1.5 w-1.5 rounded-full', statusAccent[status])}
+            aria-hidden
+          />
           {TASK_STATUS[status].label}
         </h3>
-        <span className="text-xs font-medium tabular-nums text-gray-500 dark:text-gray-400 bg-white/80 dark:bg-dark-high px-1.5 py-0.5 rounded-md">
+        <span className="rounded-md bg-white/80 px-1.5 py-0.5 text-xs font-medium tabular-nums text-gray-500 dark:bg-dark-high dark:text-gray-400">
           {tasks.length}
         </span>
       </div>
 
       <div
         ref={setNodeRef}
-        className="flex flex-1 flex-col gap-2 p-2 min-h-[120px] max-h-[calc(100vh-16rem)] overflow-y-auto scrollbar-thin"
+        className="flex min-h-[120px] max-h-[calc(100vh-16rem)] flex-1 flex-col gap-2 overflow-y-auto p-2 scrollbar-thin"
       >
         <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
@@ -51,7 +65,7 @@ export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps)
           ))}
         </SortableContext>
         {tasks.length === 0 && (
-          <p className="text-xs text-center text-gray-400 dark:text-gray-500 py-6">
+          <p className="py-6 text-center text-xs text-gray-400 dark:text-gray-500">
             Drop a ticket here
           </p>
         )}

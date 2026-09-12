@@ -203,7 +203,7 @@ export default function RelatedTasksPicker(props: RelatedTasksPickerProps) {
           {open && (
             <ul
               role="listbox"
-              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200/80 bg-white py-1 shadow-lift dark:border-dark-border-medium dark:bg-dark-high dark:shadow-none"
+              className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-black/[0.06] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none"
             >
               {isSearching && results.length === 0 ? (
                 <li className="px-3 py-2 text-sm text-gray-500">Searching…</li>

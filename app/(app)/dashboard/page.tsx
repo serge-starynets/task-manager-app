@@ -9,11 +9,14 @@ import { stripHtml } from '@/lib/rich-text';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import Button from '@/app/components/ui/Button';
+import Badge from '@/app/components/ui/Badge';
 import {
   Edit2Icon,
   FolderIcon,
   FolderOpenIcon,
   LayoutDashboardIcon,
+  LayoutGridIcon,
+  ListIcon,
   ListTodoIcon,
   PlusIcon,
   SettingsIcon,
@@ -24,6 +27,31 @@ import TaskBoard from '@/app/components/tasks/TaskBoard';
 import CreateTicketMenu from '@/app/components/tasks/CreateTicketMenu';
 import { PROJECT_STATUS } from '@/lib/constants/projects';
 import { type Project, type User } from '@/db/schema';
+import { cn } from '@/lib/utils';
+
+const PROJECT_TILE_TONES = [
+  'bg-violet-100 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300',
+  'bg-sky-100 text-sky-700 dark:bg-sky-950/70 dark:text-sky-300',
+  'bg-teal-100 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300',
+  'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300',
+  'bg-rose-100 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300',
+  'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300',
+];
+
+function projectStatusVariant(
+  status: string,
+): 'secondary' | 'default' | 'success' | 'warning' {
+  switch (status) {
+    case 'completed':
+      return 'success';
+    case 'paused':
+      return 'warning';
+    case 'ongoing':
+      return 'default';
+    default:
+      return 'secondary';
+  }
+}
 
 function OrphanedTasksSection({
   tasks,
@@ -33,13 +61,13 @@ function OrphanedTasksSection({
   if (tasks.length === 0) return null;
 
   return (
-    <section className="mt-12 pt-10 border-t border-gray-200/80 dark:border-dark-border-default">
+    <section className="mt-12 border-t border-black/[0.06] pt-10 dark:border-white/[0.08]">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
           <ListTodoIcon size={18} className="text-gray-400" />
           Tasks without a project
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           These tasks are not assigned to any project.
         </p>
       </div>
@@ -60,14 +88,19 @@ function DashboardHome({
   return (
     <div>
       <div className="mb-8 flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-300">
+        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-950/60 dark:text-violet-300">
           <LayoutDashboardIcon size={20} />
         </span>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <div>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Your projects and profile
+          </p>
+        </div>
       </div>
 
       <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight">Projects</h2>
           {canCreateMore && projects.length > 0 && (
             <Link href="/projects/new">
@@ -80,12 +113,12 @@ function DashboardHome({
         </div>
 
         {projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-14 text-center surface-panel p-8">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-500 dark:bg-purple-950/50 dark:text-purple-300">
+          <div className="surface-panel flex flex-col items-center justify-center p-8 py-14 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-500 dark:bg-violet-950/50 dark:text-violet-300">
               <FolderOpenIcon size={24} />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
+            <h3 className="mb-2 text-lg font-semibold">No projects yet</h3>
+            <p className="mb-6 max-w-sm text-gray-500 dark:text-gray-400">
               Create a project to organize your tasks.
             </p>
             <Link href="/projects/new">
@@ -96,24 +129,39 @@ function DashboardHome({
             </Link>
           </div>
         ) : (
-          <ul className="rounded-xl border border-gray-200/80 dark:border-dark-border-default overflow-hidden divide-y divide-gray-100 dark:divide-dark-border-subtle bg-white dark:bg-dark-high shadow-soft dark:shadow-none">
+          <ul className="grid gap-3 sm:grid-cols-2">
             {projects.map((project) => (
               <li key={project.id}>
                 <Link
                   href={`/dashboard?project=${project.id}`}
-                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50/80 dark:hover:bg-dark-elevated/80 transition-colors duration-150"
+                  className="group flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white/80 px-4 py-4 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none dark:hover:border-white/[0.14]"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-dark-elevated dark:text-gray-400">
-                    <FolderIcon size={18} />
+                  <span
+                    className={cn(
+                      'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold',
+                      PROJECT_TILE_TONES[project.id % PROJECT_TILE_TONES.length],
+                    )}
+                  >
+                    {project.abbreviation}
                   </span>
-                  <span className="min-w-0">
-                    <span className="font-mono text-sm text-gray-500 dark:text-gray-400 mr-2">
-                      {project.abbreviation}
-                    </span>
-                    <span className="font-medium break-words">
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-medium break-words text-gray-900 group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
                       {project.title}
                     </span>
+                    <span className="mt-1 inline-flex">
+                      <Badge
+                        variant={projectStatusVariant(project.status)}
+                      >
+                        {PROJECT_STATUS[
+                          project.status as keyof typeof PROJECT_STATUS
+                        ]?.label ?? project.status}
+                      </Badge>
+                    </span>
                   </span>
+                  <FolderIcon
+                    size={16}
+                    className="shrink-0 text-gray-300 transition-colors group-hover:text-violet-400 dark:text-gray-600"
+                  />
                 </Link>
               </li>
             ))}
@@ -122,23 +170,23 @@ function DashboardHome({
       </section>
 
       <section className="surface-panel p-6">
-        <h2 className="text-lg font-semibold tracking-tight mb-4">Profile</h2>
-        <div className="flex items-start gap-3 mb-4">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-dark-elevated dark:text-gray-400">
+        <h2 className="mb-4 text-lg font-semibold tracking-tight">Profile</h2>
+        <div className="mb-4 flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 dark:bg-dark-elevated dark:text-gray-400">
             <UserIcon size={18} />
           </span>
           <div className="min-w-0">
-            <p className="text-sm font-medium break-words">{user.email}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize mt-0.5">
+            <p className="break-words text-sm font-medium">{user.email}</p>
+            <p className="mt-0.5 text-xs capitalize text-gray-500 dark:text-gray-400">
               {isAdmin(user) ? 'Admin' : 'Standard user'}
             </p>
           </div>
         </div>
 
-        <div className="space-y-1 border-t border-gray-100 dark:border-dark-border-subtle pt-4">
+        <div className="space-y-1 border-t border-black/[0.05] pt-4 dark:border-white/[0.06]">
           <span
             aria-disabled="true"
-            className="flex items-center w-full px-2.5 py-2 text-sm text-gray-400 dark:text-gray-500 cursor-not-allowed pointer-events-none select-none rounded-lg"
+            className="pointer-events-none flex w-full cursor-not-allowed select-none items-center rounded-lg px-2.5 py-2 text-sm text-gray-400 dark:text-gray-500"
           >
             <SettingsIcon size={18} className="mr-2" />
             <span>Settings</span>
@@ -183,17 +231,24 @@ export default async function DashboardPage({
     PROJECT_STATUS[selectedProject.status as keyof typeof PROJECT_STATUS]
       ?.label ?? selectedProject.status;
 
+  const backlogHref = `/dashboard?project=${selectedProject.id}`;
+  const boardHref = `/dashboard?project=${selectedProject.id}&view=board`;
+
   return (
     <div>
       <div className="mb-8">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-2xl font-bold tracking-tight min-w-0">
-            <span className="text-gray-500 dark:text-gray-400 font-semibold mr-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="page-title min-w-0">
+            <span className="mr-2 font-mono text-base font-semibold text-gray-400 dark:text-gray-500">
               {selectedProject.abbreviation}
             </span>
             {selectedProject.title}
           </h1>
-            <Link href={`/projects/${selectedProject.id}/edit`}
+          <Badge variant={projectStatusVariant(selectedProject.status)}>
+            {statusLabel}
+          </Badge>
+          <Link
+            href={`/projects/${selectedProject.id}/edit`}
             className="shrink-0"
           >
             <Button variant="outline" size="sm">
@@ -202,10 +257,7 @@ export default async function DashboardPage({
             </Button>
           </Link>
         </div>
-        <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mt-1">
-          {statusLabel}
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+        <p className="mt-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
           {selectedProject.description
             ? stripHtml(selectedProject.description)
             : ''}
@@ -216,13 +268,41 @@ export default async function DashboardPage({
         <div
           className={
             isBoardView
-              ? 'mx-auto mb-4 flex w-[90%] items-center justify-between gap-4'
-              : 'mb-4 flex items-center justify-between gap-4'
+              ? 'mx-auto mb-4 flex w-[90%] flex-wrap items-center justify-between gap-4'
+              : 'mb-4 flex flex-wrap items-center justify-between gap-4'
           }
         >
-          <h2 className="text-lg font-semibold tracking-tight">
-            {isBoardView ? 'Board' : 'Backlog'}
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold tracking-tight">
+              {isBoardView ? 'Board' : 'Backlog'}
+            </h2>
+            <div className="inline-flex rounded-xl border border-black/[0.06] bg-white/70 p-0.5 dark:border-white/[0.08] dark:bg-dark-high/70">
+              <Link
+                href={backlogHref}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-[0.65rem] px-2.5 py-1 text-xs font-medium transition-colors',
+                  !isBoardView
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200',
+                )}
+              >
+                <ListIcon size={13} />
+                List
+              </Link>
+              <Link
+                href={boardHref}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-[0.65rem] px-2.5 py-1 text-xs font-medium transition-colors',
+                  isBoardView
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200',
+                )}
+              >
+                <LayoutGridIcon size={13} />
+                Board
+              </Link>
+            </div>
+          </div>
           <CreateTicketMenu
             projectId={selectedProject.id}
             testId="new-task-button"
@@ -233,11 +313,11 @@ export default async function DashboardPage({
         ) : projectTasks.length > 0 ? (
           <TaskTable tasks={projectTasks} />
         ) : (
-          <div className="flex flex-col items-center justify-center py-14 text-center surface-panel p-8">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-400 dark:bg-dark-elevated dark:text-gray-500">
+          <div className="surface-panel flex flex-col items-center justify-center p-8 py-14 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-dark-elevated dark:text-gray-500">
               <ListTodoIcon size={24} />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
+            <h3 className="mb-2 text-lg font-semibold">No tasks found</h3>
             <p className="text-gray-500 dark:text-gray-400">
               Get started by creating your first task in this project.
             </p>
