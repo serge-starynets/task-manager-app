@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import TaskTable from '@/app/components/tasks/TaskTable';
 import TaskBoard from '@/app/components/tasks/TaskBoard';
+import TaskSearch from '@/app/components/tasks/TaskSearch';
 import CreateTicketMenu from '@/app/components/tasks/CreateTicketMenu';
 import { PROJECT_STATUS } from '@/lib/constants/projects';
 import { type Project, type User } from '@/db/schema';
@@ -139,7 +140,9 @@ function DashboardHome({
                   <span
                     className={cn(
                       'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold',
-                      PROJECT_TILE_TONES[project.id % PROJECT_TILE_TONES.length],
+                      PROJECT_TILE_TONES[
+                        project.id % PROJECT_TILE_TONES.length
+                      ],
                     )}
                   >
                     {project.abbreviation}
@@ -149,9 +152,7 @@ function DashboardHome({
                       {project.title}
                     </span>
                     <span className="mt-1 inline-flex">
-                      <Badge
-                        variant={projectStatusVariant(project.status)}
-                      >
+                      <Badge variant={projectStatusVariant(project.status)}>
                         {PROJECT_STATUS[
                           project.status as keyof typeof PROJECT_STATUS
                         ]?.label ?? project.status}
@@ -222,9 +223,7 @@ export default async function DashboardPage({
   }
 
   const isBoardView = viewParam === 'board';
-  const orphanedTasks = isBoardView
-    ? []
-    : await getOrphanedTasks(user.id);
+  const orphanedTasks = isBoardView ? [] : await getOrphanedTasks(user.id);
   const projectTasks = await getTasksForProject(user.id, selectedProject.id);
 
   const statusLabel =
@@ -308,6 +307,10 @@ export default async function DashboardPage({
             testId="new-task-button"
           />
         </div>
+        <TaskSearch
+          tasks={[...projectTasks, ...orphanedTasks]}
+          className={isBoardView ? 'mx-auto w-[90%]' : undefined}
+        />
         {isBoardView ? (
           <TaskBoard tasks={projectTasks} />
         ) : projectTasks.length > 0 ? (
