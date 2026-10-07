@@ -29,6 +29,12 @@ import CreateTicketMenu from '@/app/components/tasks/CreateTicketMenu';
 import { PROJECT_STATUS } from '@/lib/constants/projects';
 import { type Project, type User } from '@/db/schema';
 import { cn } from '@/lib/utils';
+import {
+  buildDashboardBacklogSortHref,
+  parseTaskListSort,
+  type TaskListSort,
+  type TaskListSortColumn,
+} from '@/lib/task-list-sort';
 
 const PROJECT_TILE_TONES = [
   'bg-violet-100 text-violet-700 dark:bg-violet-950/70 dark:text-violet-300',
@@ -56,8 +62,12 @@ function projectStatusVariant(
 
 function OrphanedTasksSection({
   tasks,
+  sort,
+  getSortHref,
 }: {
   tasks: Awaited<ReturnType<typeof getOrphanedTasks>>;
+  sort: TaskListSort;
+  getSortHref: (column: TaskListSortColumn) => string;
 }) {
   if (tasks.length === 0) return null;
 
@@ -72,7 +82,7 @@ function OrphanedTasksSection({
           These tasks are not assigned to any project.
         </p>
       </div>
-      <TaskTable tasks={tasks} />
+      <TaskTable tasks={tasks} sort={sort} getSortHref={getSortHref} />
     </section>
   );
 }
@@ -202,13 +212,23 @@ function DashboardHome({
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ project?: string; view?: string }>;
+  searchParams: Promise<{
+    project?: string;
+    view?: string;
+    sort?: string;
+    dir?: string;
+  }>;
 }) {
   const user = await getCurrentUser();
   if (!user) {
     redirect('/signin');
   }
-  const { project: projectParam, view: viewParam } = await searchParams;
+  const {
+    project: projectParam,
+    view: viewParam,
+    sort: sortParam,
+    dir: dirParam,
+  } = await searchParams;
   const projects = await getProjects(user.id);
 
   if (!projectParam) {
@@ -223,8 +243,17 @@ export default async function DashboardPage({
   }
 
   const isBoardView = viewParam === 'board';
-  const orphanedTasks = isBoardView ? [] : await getOrphanedTasks(user.id);
-  const projectTasks = await getTasksForProject(user.id, selectedProject.id);
+  const listSort = parseTaskListSort(sortParam, dirParam);
+  const getSortHref = (column: TaskListSortColumn) =>
+    buildDashboardBacklogSortHref(selectedProject.id, listSort, column);
+  const orphanedTasks = isBoardView
+    ? []
+    : await getOrphanedTasks(user.id, listSort);
+  const projectTasks = await getTasksForProject(
+    user.id,
+    selectedProject.id,
+    listSort,
+  );
 
   const statusLabel =
     PROJECT_STATUS[selectedProject.status as keyof typeof PROJECT_STATUS]
@@ -314,7 +343,11 @@ export default async function DashboardPage({
         {isBoardView ? (
           <TaskBoard tasks={projectTasks} />
         ) : projectTasks.length > 0 ? (
-          <TaskTable tasks={projectTasks} />
+          <TaskTable
+            tasks={projectTasks}
+            sort={listSort}
+            getSortHref={getSortHref}
+          />
         ) : (
           <div className="surface-panel flex flex-col items-center justify-center p-8 py-14 text-center">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-dark-elevated dark:text-gray-500">
@@ -328,7 +361,13 @@ export default async function DashboardPage({
         )}
       </section>
 
-      {!isBoardView && <OrphanedTasksSection tasks={orphanedTasks} />}
+      {!isBoardView && (
+        <OrphanedTasksSection
+          tasks={orphanedTasks}
+          sort={listSort}
+          getSortHref={getSortHref}
+        />
+      )}
     </div>
   );
 }

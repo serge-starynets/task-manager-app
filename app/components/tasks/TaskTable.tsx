@@ -1,8 +1,13 @@
 import Link from 'next/link';
-import { ClipboardListIcon, ListTodoIcon } from 'lucide-react';
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ClipboardListIcon,
+  ListTodoIcon,
+} from 'lucide-react';
 import Badge from '@/app/components/ui/Badge';
 import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime, cn } from '@/lib/utils';
 import { Priority, Status } from '@/lib/types';
 import {
   TASK_STATUS,
@@ -10,19 +15,82 @@ import {
   TICKET_TYPE,
   resolveTicketType,
 } from '@/lib/constants/tasks';
+import {
+  taskListSortColumnLabel,
+  type TaskListSort,
+  type TaskListSortColumn,
+} from '@/lib/task-list-sort';
 import type { TaskWithUser } from '@/lib/types';
 
 interface TaskTableProps {
   tasks: TaskWithUser[];
   emptyMessage?: string;
+  sort?: TaskListSort;
+  getSortHref?: (column: TaskListSortColumn) => string;
 }
 
 const gridClass =
   'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1.3fr)_minmax(0,4fr)_minmax(0,1.8fr)_minmax(0,1.1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-4 px-5';
 
+const SORTABLE_COLUMNS: TaskListSortColumn[] = [
+  'type',
+  'title',
+  'status',
+  'priority',
+  'createdAt',
+  'updatedAt',
+];
+
+function SortableHeader({
+  column,
+  sort,
+  getSortHref,
+}: {
+  column: TaskListSortColumn;
+  sort?: TaskListSort;
+  getSortHref?: (column: TaskListSortColumn) => string;
+}) {
+  const label = taskListSortColumnLabel(column);
+  const isActive = sort?.by === column;
+  const dir = isActive ? sort.dir : null;
+
+  if (!getSortHref) {
+    return <div>{label}</div>;
+  }
+
+  return (
+    <Link
+      href={getSortHref(column)}
+      className={cn(
+        'group inline-flex items-center gap-1 rounded-md -mx-1 px-1 py-0.5 transition-colors hover:text-violet-600 dark:hover:text-violet-300',
+        isActive
+          ? 'text-violet-700 dark:text-violet-300'
+          : 'text-inherit',
+      )}
+      aria-sort={
+        isActive ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'
+      }
+    >
+      <span>{label}</span>
+      {isActive && dir === 'asc' ? (
+        <ArrowUpIcon size={12} className="shrink-0 opacity-90" aria-hidden />
+      ) : isActive && dir === 'desc' ? (
+        <ArrowDownIcon size={12} className="shrink-0 opacity-90" aria-hidden />
+      ) : (
+        <span
+          className="inline-flex h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-40"
+          aria-hidden
+        />
+      )}
+    </Link>
+  );
+}
+
 export default function TaskTable({
   tasks,
   emptyMessage = 'No tasks found',
+  sort,
+  getSortHref,
 }: TaskTableProps) {
   if (tasks.length === 0) {
     return (
@@ -35,6 +103,10 @@ export default function TaskTable({
     );
   }
 
+  const headerCell = (column: TaskListSortColumn) => (
+    <SortableHeader column={column} sort={sort} getSortHref={getSortHref} />
+  );
+
   return (
     <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/90 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none">
       <div
@@ -44,12 +116,9 @@ export default function TaskTable({
           <ListTodoIcon size={12} className="opacity-60" />
           ID
         </div>
-        <div>Type</div>
-        <div>Title</div>
-        <div>Status</div>
-        <div>Priority</div>
-        <div>Created</div>
-        <div>Updated</div>
+        {SORTABLE_COLUMNS.map((column) => (
+          <div key={column}>{headerCell(column)}</div>
+        ))}
       </div>
 
       <div className="divide-y divide-black/[0.04] dark:divide-white/[0.05]">

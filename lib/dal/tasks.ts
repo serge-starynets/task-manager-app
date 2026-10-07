@@ -1,8 +1,12 @@
 import { db } from '@/db';
 import { tasks, type Task, type User } from '@/db/schema';
-import { and, asc, desc, eq, isNull, min } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, min, type SQL } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 import { CACHE_REVALIDATE_SECONDS } from '@/lib/dal/constants';
+import {
+  DEFAULT_TASK_LIST_SORT,
+  type TaskListSort,
+} from '@/lib/task-list-sort';
 import {
   PUBLIC_USER_COLUMNS,
   getCurrentUser,
@@ -33,14 +37,32 @@ export async function getTasks(user: Pick<User, 'id' | 'role'>) {
   )();
 }
 
-async function fetchTasksForProject(userId: string, projectId: number) {
+function taskListOrderBy(sort: TaskListSort): SQL[] {
+  const column = {
+    type: tasks.type,
+    title: tasks.title,
+    status: tasks.status,
+    priority: tasks.priority,
+    createdAt: tasks.createdAt,
+    updatedAt: tasks.updatedAt,
+  }[sort.by];
+
+  const primary = sort.dir === 'asc' ? asc(column) : desc(column);
+  return [primary, desc(tasks.id)];
+}
+
+async function fetchTasksForProject(
+  userId: string,
+  projectId: number,
+  sort: TaskListSort,
+) {
   try {
     return await db.query.tasks.findMany({
       where: and(eq(tasks.userId, userId), eq(tasks.projectId, projectId)),
       with: {
         user: { columns: PUBLIC_USER_COLUMNS },
       },
-      orderBy: (tasksTable, { desc }) => [desc(tasksTable.updatedAt)],
+      orderBy: taskListOrderBy(sort),
     });
   } catch (error) {
     console.error('Error fetching tasks for project:', error);
@@ -48,22 +70,33 @@ async function fetchTasksForProject(userId: string, projectId: number) {
   }
 }
 
-export async function getTasksForProject(userId: string, projectId: number) {
+export async function getTasksForProject(
+  userId: string,
+  projectId: number,
+  sort: TaskListSort = DEFAULT_TASK_LIST_SORT,
+) {
   return unstable_cache(
-    () => fetchTasksForProject(userId, projectId),
-    ['tasks', 'project', userId, String(projectId)],
+    () => fetchTasksForProject(userId, projectId, sort),
+    [
+      'tasks',
+      'project',
+      userId,
+      String(projectId),
+      sort.by,
+      sort.dir,
+    ],
     { tags: ['tasks'], revalidate: CACHE_REVALIDATE_SECONDS },
   )();
 }
 
-async function fetchOrphanedTasks(userId: string) {
+async function fetchOrphanedTasks(userId: string, sort: TaskListSort) {
   try {
     return await db.query.tasks.findMany({
       where: and(eq(tasks.userId, userId), isNull(tasks.projectId)),
       with: {
         user: { columns: PUBLIC_USER_COLUMNS },
       },
-      orderBy: (tasksTable, { desc }) => [desc(tasksTable.updatedAt)],
+      orderBy: taskListOrderBy(sort),
     });
   } catch (error) {
     console.error('Error fetching orphaned tasks:', error);
@@ -71,10 +104,13 @@ async function fetchOrphanedTasks(userId: string) {
   }
 }
 
-export async function getOrphanedTasks(userId: string) {
+export async function getOrphanedTasks(
+  userId: string,
+  sort: TaskListSort = DEFAULT_TASK_LIST_SORT,
+) {
   return unstable_cache(
-    () => fetchOrphanedTasks(userId),
-    ['tasks', 'orphaned', userId],
+    () => fetchOrphanedTasks(userId, sort),
+    ['tasks', 'orphaned', userId, sort.by, sort.dir],
     { tags: ['tasks'], revalidate: CACHE_REVALIDATE_SECONDS },
   )();
 }
