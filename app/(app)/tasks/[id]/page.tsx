@@ -1,17 +1,21 @@
 import {
   getAccessibleTask,
+  getCurrentUser,
   getRelatedTasks,
   getTaskAttachments,
+  getTaskComments,
+  isAdmin,
 } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
 import RichText from '@/app/components/tasks/RichText';
 import TaskAttachmentsList from '@/app/components/tasks/TaskAttachmentsList';
+import TaskActivityPanel from '@/app/components/tasks/TaskActivityPanel';
 import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
 import { ArrowLeftIcon, Edit2Icon, Link2Icon, UserIcon } from 'lucide-react';
 import DeleteTaskButton from '@/app/components/tasks/DeleteTaskButton';
@@ -72,15 +76,21 @@ export default async function TaskPage({
 }) {
   const { id } = await params;
   const taskIdNum = parseInt(id);
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    redirect('/signin');
+  }
+
   const task = await getAccessibleTask(taskIdNum);
 
   if (!task) {
     notFound();
   }
 
-  const [relatedTickets, attachments] = await Promise.all([
+  const [relatedTickets, attachments, comments] = await Promise.all([
     getRelatedTasks(taskIdNum),
     getTaskAttachments(taskIdNum),
+    getTaskComments(taskIdNum),
   ]);
 
   const {
@@ -258,6 +268,16 @@ export default async function TaskPage({
       </div>
 
       <TaskAttachmentsList attachments={attachments} />
+
+      <div className="mt-8">
+        <TaskActivityPanel
+          taskId={taskIdNum}
+          userId={currentUser.id}
+          currentUserId={currentUser.id}
+          isAdmin={isAdmin(currentUser)}
+          comments={comments}
+        />
+      </div>
     </div>
   );
 }

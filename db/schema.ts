@@ -161,6 +161,21 @@ export const users = pgTable(
   ],
 );
 
+/** Rich-text comments on a task. */
+export const taskComments = pgTable('task_comments', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id')
+    .notNull()
+    .references(() => tasks.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** Quill HTML (sanitized on write). */
+  body: text('body').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 /** OAuth provider accounts linked to users (Auth.js). */
 export const accounts = pgTable(
   'accounts',
@@ -205,6 +220,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   relationsAsA: many(taskRelations, { relationName: 'taskA' }),
   relationsAsB: many(taskRelations, { relationName: 'taskB' }),
   attachments: many(taskAttachments),
+  comments: many(taskComments),
 }));
 
 export const taskRelationsRelations = relations(taskRelations, ({ one }) => ({
@@ -230,10 +246,22 @@ export const taskAttachmentsRelations = relations(
   }),
 );
 
+export const taskCommentsRelations = relations(taskComments, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskComments.taskId],
+    references: [tasks.id],
+  }),
+  user: one(users, {
+    fields: [taskComments.userId],
+    references: [users.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
   tasks: many(tasks),
   projects: many(projects),
   accounts: many(accounts),
+  comments: many(taskComments),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -249,6 +277,7 @@ export type Project = InferSelectModel<typeof projects>;
 export type User = InferSelectModel<typeof users>;
 export type TaskRelation = InferSelectModel<typeof taskRelations>;
 export type TaskAttachment = InferSelectModel<typeof taskAttachments>;
+export type TaskComment = InferSelectModel<typeof taskComments>;
 export type RelatableTaskSummary = Pick<Task, 'id' | 'taskId' | 'title' | 'type'>;
 export type RelatedTaskSummary = RelatableTaskSummary & {
   kind: TaskRelation['kind'];

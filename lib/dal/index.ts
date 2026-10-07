@@ -2,4 +2,5 @@ export * from './users';
 export * from './projects';
 export * from './tasks';
 export * from './attachments';
+export * from './comments';
 export * from './relations';
