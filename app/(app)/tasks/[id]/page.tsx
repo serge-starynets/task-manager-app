@@ -48,10 +48,7 @@ function RelatedTicketList({
             href={`/tasks/${related.id}`}
             className="flex items-start gap-2 rounded-xl px-2 py-1.5 text-sm text-gray-800 transition-colors hover:bg-violet-50 dark:text-gray-200 dark:hover:bg-white/[0.05]"
           >
-            <TicketTypeIcon
-              type={related.type}
-              className="mt-0.5"
-            />
+            <TicketTypeIcon type={related.type} className="mt-0.5" />
             <span>
               <span className="text-gray-500 dark:text-gray-400">
                 {RELATION_KIND[related.kind].label}
@@ -116,12 +113,9 @@ export default async function TaskPage({
   return (
     <div className="mx-auto w-full max-w-6xl">
       <div className="mb-8">
-        <Link
-          href={backHref}
-          className="back-link mb-4"
-        >
+        <Link href={backHref} className="back-link mb-4">
           <ArrowLeftIcon size={16} className="mr-1" />
-          Back to Tasks
+          To Backlog
         </Link>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="min-w-0">
@@ -132,7 +126,9 @@ export default async function TaskPage({
                 {TICKET_TYPE[ticketType].label}
               </span>
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight break-words">{title}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight break-words">
+              {title}
+            </h1>
           </div>
           <div className="flex items-center space-x-2 shrink-0">
             <Link href={`/tasks/${id}/edit`}>
@@ -203,9 +199,7 @@ export default async function TaskPage({
           </div>
           {ticketType === 'bug' && severity && (
             <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">
-                Severity
-              </p>
+              <p className="text-sm font-medium text-gray-500 mb-1">Severity</p>
               <Badge priority={severity as Priority}>
                 {TASK_SEVERITY[severity].label}
               </Badge>

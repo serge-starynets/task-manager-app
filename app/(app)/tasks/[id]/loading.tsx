@@ -1,5 +1,7 @@
+import TaskSkeleton from '@/app/components/layout/TaskSkeleton';
+
 const TaskLoading = () => {
-  return <div>Loading...</div>;
+  return <TaskSkeleton />;
 };
 
 export default TaskLoading;
