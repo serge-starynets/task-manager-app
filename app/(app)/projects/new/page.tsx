@@ -16,7 +16,7 @@ export default async function NewProjectPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4 md:p-8">
+    <div className="mx-auto w-[91%]">
       <Link
         href="/dashboard"
         className="back-link mb-6"
