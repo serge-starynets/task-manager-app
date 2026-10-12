@@ -14,6 +14,10 @@ import {
   TASK_SEVERITY,
   getTaskStatusOptionsForProjectType,
 } from '@/lib/constants/tasks';
+import {
+  MAX_ESTIMATION_HOURS,
+  MIN_ESTIMATION_HOURS,
+} from '@/lib/validations/task';
 import type { ProjectType, TicketType } from '@/lib/types';
 import Button from '@/app/components/ui/Button';
 import {
@@ -235,6 +239,11 @@ export default function TaskForm({
               | 'high'
               | 'critical')
           : null,
+      estimation: (() => {
+        const raw = formData.get('estimation');
+        if (raw === null || raw === '') return null;
+        return Number(raw);
+      })(),
       userId,
       projectId: projectId ?? null,
     };
@@ -370,7 +379,7 @@ export default function TaskForm({
           )}
         </FormGroup>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormGroup>
             <FormLabel htmlFor="status">Status</FormLabel>
             <FormSelect
@@ -409,27 +418,59 @@ export default function TaskForm({
             )}
           </FormGroup>
 
-          {type === 'bug' && (
-            <FormGroup>
-              <FormLabel htmlFor="severity">Severity</FormLabel>
-              <FormSelect
-                id="severity"
-                name="severity"
-                defaultValue={task?.severity || 'medium'}
-                options={severityOptions}
-                disabled={isPending}
-                required
-                aria-describedby="severity-error"
-                className={state?.errors?.severity ? 'border-red-500' : ''}
-              />
-              {state?.errors?.severity && (
-                <p id="severity-error" className="text-sm text-red-500">
-                  {state.errors.severity[0]}
-                </p>
-              )}
-            </FormGroup>
-          )}
+          <FormGroup>
+            <FormLabel htmlFor="estimation">Estimation</FormLabel>
+            <FormInput
+              id="estimation"
+              name="estimation"
+              type="number"
+              inputMode="decimal"
+              min={MIN_ESTIMATION_HOURS}
+              max={MAX_ESTIMATION_HOURS}
+              step={0.5}
+              placeholder="Hours"
+              defaultValue={
+                task?.estimation != null ? String(task.estimation) : ''
+              }
+              disabled={isPending}
+              aria-describedby="estimation-help estimation-error"
+              className={state?.errors?.estimation ? 'border-red-500' : ''}
+            />
+            <p
+              id="estimation-help"
+              className="text-xs text-gray-500 dark:text-gray-400"
+            >
+              Optional. {MIN_ESTIMATION_HOURS}–{MAX_ESTIMATION_HOURS} hours in
+              0.5 steps.
+            </p>
+            {state?.errors?.estimation && (
+              <p id="estimation-error" className="text-sm text-red-500">
+                {state.errors.estimation[0]}
+              </p>
+            )}
+          </FormGroup>
         </div>
+
+        {type === 'bug' && (
+          <FormGroup>
+            <FormLabel htmlFor="severity">Severity</FormLabel>
+            <FormSelect
+              id="severity"
+              name="severity"
+              defaultValue={task?.severity || 'medium'}
+              options={severityOptions}
+              disabled={isPending}
+              required
+              aria-describedby="severity-error"
+              className={state?.errors?.severity ? 'border-red-500' : ''}
+            />
+            {state?.errors?.severity && (
+              <p id="severity-error" className="text-sm text-red-500">
+                {state.errors.severity[0]}
+              </p>
+            )}
+          </FormGroup>
+        )}
 
         {isEditing && task ? (
           <>

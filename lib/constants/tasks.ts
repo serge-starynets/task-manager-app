@@ -84,6 +84,20 @@ export function resolveTicketType(
   return type === 'bug' ? 'bug' : 'task';
 }
 
+/** Formats hours as "1h", "2h 30 min", or "30 min". */
+export function formatEstimationHours(
+  hours: number | null | undefined,
+): string | null {
+  if (hours == null || Number.isNaN(hours)) return null;
+  const totalMinutes = Math.round(hours * 60);
+  if (totalMinutes <= 0) return null;
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m} min`;
+}
+
 export const TASK_SEVERITY = {
   low: { label: 'Low', value: 'low' },
   medium: { label: 'Medium', value: 'medium' },

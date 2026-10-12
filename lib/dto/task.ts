@@ -16,6 +16,7 @@ export type TaskDto = {
   priority: TaskPriority;
   type: TicketType;
   severity: TaskSeverity | null;
+  estimation: number | null;
   projectId: number | null;
   userId: string;
   boardOrder: number;

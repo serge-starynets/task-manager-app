@@ -48,6 +48,7 @@ export async function createTask(
       priority: data.priority,
       type: data.type,
       severity: data.severity,
+      estimation: data.estimation,
       projectId: data.projectId ?? null,
       pendingAttachmentsJson: data.pendingAttachmentsJson,
       uploadSessionId: data.uploadSessionId,

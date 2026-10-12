@@ -34,6 +34,7 @@ export function taskToDto(task: Task | TaskWithUser): TaskDto {
     priority: task.priority,
     type: resolveTicketType(task.type),
     severity: task.severity ?? null,
+    estimation: task.estimation ?? null,
     projectId: task.projectId,
     userId: task.userId,
     boardOrder: task.boardOrder ?? 0,

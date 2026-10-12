@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   getAccessibleTask,
   getCurrentUser,
@@ -25,6 +26,7 @@ import {
   TASK_SEVERITY,
   TASK_STATUS,
   TICKET_TYPE,
+  formatEstimationHours,
   resolveTicketType,
 } from '@/lib/constants/tasks';
 import type { RelatedTaskSummary } from '@/db/schema';
@@ -66,6 +68,27 @@ function RelatedTicketList({
   );
 }
 
+function DetailField({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        {label}
+      </dt>
+      <dd className="mt-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-gray-100">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
 export default async function TaskPage({
   params,
 }: {
@@ -101,8 +124,10 @@ export default async function TaskPage({
     taskId,
     type,
     severity,
+    estimation,
   } = task;
   const ticketType = resolveTicketType(type);
+  const estimationLabel = formatEstimationHours(estimation);
   const relatedTasks = relatedTickets.filter((item) => item.type === 'task');
   const relatedBugs = relatedTickets.filter((item) => item.type === 'bug');
 
@@ -166,60 +191,52 @@ export default async function TaskPage({
         )}
       </div>
 
-      <div className="surface-panel mb-8 overflow-hidden p-6">
-        <h2 className="text-lg font-semibold tracking-tight mb-4 flex items-center gap-2">
+      <div className="surface-panel mb-8 overflow-hidden">
+        <div className="flex items-center gap-2 border-b border-black/[0.06] px-6 py-4 dark:border-white/[0.08]">
           <UserIcon size={18} className="text-gray-400" />
-          Details
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-500 mb-1">
-              Assigned to
-            </p>
-            <p className="break-words">{user?.email}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Type</p>
-            <p className="flex items-center gap-1.5">
+          <h2 className="text-lg font-semibold tracking-tight">Details</h2>
+        </div>
+        <dl className="grid grid-cols-1 gap-x-8 gap-y-5 px-6 py-5 sm:grid-cols-2 lg:grid-cols-3">
+          <DetailField label="Assigned to" className="min-w-0 sm:col-span-2 lg:col-span-2">
+            <span className="break-all">{user?.email}</span>
+          </DetailField>
+          <DetailField label="Type">
+            <span className="inline-flex items-center gap-1.5">
               <TicketTypeIcon type={ticketType} />
               {TICKET_TYPE[ticketType].label}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Status</p>
+            </span>
+          </DetailField>
+          <DetailField label="Status">
             <Badge status={status as Status}>
               {TASK_STATUS[status as Status].label}
             </Badge>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">Priority</p>
+          </DetailField>
+          <DetailField label="Priority">
             <Badge priority={priority as Priority}>
               {TASK_PRIORITY[priority as Priority].label}
             </Badge>
-          </div>
+          </DetailField>
+          <DetailField label="Estimation">
+            <span className="tabular-nums">{estimationLabel ?? '—'}</span>
+          </DetailField>
           {ticketType === 'bug' && severity && (
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">Severity</p>
+            <DetailField label="Severity">
               <Badge priority={severity as Priority}>
                 {TASK_SEVERITY[severity].label}
               </Badge>
-            </div>
+            </DetailField>
           )}
-          <div className="flex gap-8">
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">Created</p>
-              <p className="text-xs text-gray-400">
-                {formatRelativeTime(new Date(createdAt))}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">Updated</p>
-              <p className="text-xs text-gray-400">
-                {formatRelativeTime(new Date(updatedAt))}
-              </p>
-            </div>
-          </div>
-        </div>
+          <DetailField label="Created">
+            <span className="font-normal text-gray-500 dark:text-gray-400">
+              {formatRelativeTime(new Date(createdAt))}
+            </span>
+          </DetailField>
+          <DetailField label="Updated">
+            <span className="font-normal text-gray-500 dark:text-gray-400">
+              {formatRelativeTime(new Date(updatedAt))}
+            </span>
+          </DetailField>
+        </dl>
       </div>
 
       <div className="surface-panel mb-8 overflow-hidden p-6">

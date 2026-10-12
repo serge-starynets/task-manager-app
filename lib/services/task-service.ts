@@ -200,6 +200,7 @@ export async function createTaskForUser(
           priority: data.priority,
           type: data.type,
           severity: data.type === 'bug' ? (data.severity ?? null) : null,
+          estimation: data.estimation ?? null,
           userId: user.id,
           projectId,
           boardOrder: await nextTopBoardOrder(user.id, projectId, data.status),
@@ -318,6 +319,9 @@ export async function updateTaskForUser(
   if (validatedData.severity !== undefined) {
     updateData.severity =
       current?.type === 'bug' ? validatedData.severity : null;
+  }
+  if (validatedData.estimation !== undefined) {
+    updateData.estimation = validatedData.estimation;
   }
   if (validatedData.userId !== undefined && isAdmin(user)) {
     updateData.userId = validatedData.userId;

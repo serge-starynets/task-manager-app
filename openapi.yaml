@@ -116,6 +116,13 @@ components:
           type: string
           enum: [low, medium, high, critical]
           nullable: true
+        estimation:
+          type: number
+          nullable: true
+          minimum: 0.5
+          maximum: 80
+          multipleOf: 0.5
+          description: Optional effort estimate in hours (0.5–80, half-hour steps)
         projectId:
           type: integer
           nullable: true
@@ -327,6 +334,12 @@ paths:
                   type: string
                   enum: [low, medium, high, critical]
                   nullable: true
+                estimation:
+                  type: number
+                  nullable: true
+                  minimum: 0.5
+                  maximum: 80
+                  multipleOf: 0.5
                 projectId:
                   type: integer
                   nullable: true
@@ -396,6 +409,12 @@ paths:
                   type: string
                   enum: [low, medium, high, critical]
                   nullable: true
+                estimation:
+                  type: number
+                  nullable: true
+                  minimum: 0.5
+                  maximum: 80
+                  multipleOf: 0.5
       responses:
         '200':
           description: Updated task

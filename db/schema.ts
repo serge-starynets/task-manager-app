@@ -2,6 +2,7 @@ import { InferSelectModel, relations, sql } from 'drizzle-orm';
 import {
   integer,
   pgTable,
+  real,
   serial,
   text,
   timestamp,
@@ -88,6 +89,8 @@ export const tasks = pgTable(
     priority: priorityEnum('priority').default('medium').notNull(),
     type: ticketTypeEnum('type').default('task').notNull(),
     severity: severityEnum('severity'),
+    /** Optional effort estimate in hours (0.5–80, half-hour steps). */
+    estimation: real('estimation'),
     /**
      * Position within a Board column (same user, project, and status).
      * Lower values render higher. New tickets get a value below the current min.

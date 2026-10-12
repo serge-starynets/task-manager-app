@@ -50,6 +50,13 @@
       "when": 1791840685827,
       "tag": "0006_whole_scorpion",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791841716352,
+      "tag": "0007_quiet_chamber",
+      "breakpoints": true
     }
   ]
 }
