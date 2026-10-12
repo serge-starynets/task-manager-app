@@ -20,6 +20,7 @@ const statusAccent: Record<Status, string> = {
   backlog: 'bg-gray-400',
   todo: 'bg-zinc-500',
   in_progress: 'bg-blue-500',
+  on_pause: 'bg-orange-500',
   qa: 'bg-amber-500',
   done: 'bg-emerald-500',
   rejected: 'bg-red-500',

@@ -14,7 +14,6 @@ import {
 import type { Project } from '@/db/schema';
 import { cn } from '@/lib/utils';
 import NavLink from './NavLink';
-import CreateTicketMenu from '@/app/components/tasks/CreateTicketMenu';
 
 interface ProjectSidebarNavProps {
   projects: Project[];
@@ -161,16 +160,6 @@ export default function ProjectSidebarNav({
           label="Create Project"
         />
       )}
-
-      <div className="my-2 mx-2 border-t border-black/[0.06] dark:border-white/[0.08]" />
-
-      <div className="px-2">
-        <CreateTicketMenu
-          size="md"
-          menuAlign="start"
-          className="w-full [&>button]:w-full"
-        />
-      </div>
     </nav>
   );
 }

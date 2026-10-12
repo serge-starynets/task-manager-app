@@ -34,6 +34,7 @@ const mockProject = {
   abbreviation: 'TEST',
   description: 'A test project',
   status: 'ongoing' as const,
+  type: 'software' as const,
   userId: 'user1',
   createdAt: new Date(),
   updatedAt: new Date(),

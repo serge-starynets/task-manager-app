@@ -6,6 +6,7 @@ export type {
   TaskSeverity as Severity,
   RelationKind,
   ProjectStatus,
+  ProjectType,
 } from '@/lib/validations';
 
 export type TaskWithUser = Task & {

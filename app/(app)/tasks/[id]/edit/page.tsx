@@ -1,4 +1,5 @@
 import {
+  getAccessibleProject,
   getAccessibleTask,
   getRelatedTasks,
   getTaskAttachments,
@@ -22,9 +23,12 @@ export default async function EditTaskPage({
     notFound();
   }
 
-  const [relatedTasks, attachments] = await Promise.all([
+  const [relatedTasks, attachments, project] = await Promise.all([
     getRelatedTasks(taskId),
     getTaskAttachments(taskId),
+    task.projectId != null
+      ? getAccessibleProject(task.projectId)
+      : Promise.resolve(null),
   ]);
 
   return (
@@ -45,6 +49,7 @@ export default async function EditTaskPage({
         <TaskForm
           userId={task.userId}
           task={task}
+          projectType={project?.type}
           isEditing
           relatedTasks={relatedTasks}
           initialAttachments={attachments}

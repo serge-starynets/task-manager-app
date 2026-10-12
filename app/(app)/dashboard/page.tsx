@@ -333,6 +333,7 @@ export default async function DashboardPage({
           </div>
           <CreateTicketMenu
             projectId={selectedProject.id}
+            allowBugs={selectedProject.type !== 'other'}
             testId="new-task-button"
           />
         </div>
@@ -341,7 +342,10 @@ export default async function DashboardPage({
           className={isBoardView ? 'mx-auto w-[90%]' : undefined}
         />
         {isBoardView ? (
-          <TaskBoard tasks={projectTasks} />
+          <TaskBoard
+            tasks={projectTasks}
+            projectType={selectedProject.type}
+          />
         ) : projectTasks.length > 0 ? (
           <TaskTable
             tasks={projectTasks}

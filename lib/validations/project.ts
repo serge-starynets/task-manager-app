@@ -15,6 +15,14 @@ export const ProjectStatusSchema = z.enum(PROJECT_STATUSES, {
 
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
 
+export const PROJECT_TYPES = ['software', 'other'] as const;
+
+export const ProjectTypeSchema = z.enum(PROJECT_TYPES, {
+  errorMap: () => ({ message: 'Please select a valid type' }),
+});
+
+export type ProjectType = z.infer<typeof ProjectTypeSchema>;
+
 export const ProjectSchema = z.object({
   title: z
     .string()
@@ -28,10 +36,12 @@ export const ProjectSchema = z.object({
     .regex(/^[A-Za-z]+$/, 'Abbreviation may only contain latin letters'),
   description: z.string().optional().nullable(),
   status: ProjectStatusSchema,
+  type: ProjectTypeSchema,
 });
 
 export type ProjectData = z.infer<typeof ProjectSchema>;
 
 export const UpdateProjectSchema = ProjectSchema.omit({
   abbreviation: true,
+  type: true,
 }).partial();

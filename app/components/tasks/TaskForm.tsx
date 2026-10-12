@@ -9,8 +9,12 @@ import {
   type RelatedTaskSummary,
   type TaskAttachment,
 } from '@/db/schema';
-import { TASK_STATUS, TASK_PRIORITY, TASK_SEVERITY } from '@/lib/constants/tasks';
-import type { TicketType } from '@/lib/types';
+import {
+  TASK_PRIORITY,
+  TASK_SEVERITY,
+  getTaskStatusOptionsForProjectType,
+} from '@/lib/constants/tasks';
+import type { ProjectType, TicketType } from '@/lib/types';
 import Button from '@/app/components/ui/Button';
 import {
   Form,
@@ -46,6 +50,7 @@ interface TaskFormProps {
   task?: Task;
   userId: string;
   projectId?: number;
+  projectType?: ProjectType;
   isEditing?: boolean;
   ticketType?: TicketType;
   relatedTasks?: RelatedTaskSummary[];
@@ -62,6 +67,7 @@ export default function TaskForm({
   task,
   userId,
   projectId,
+  projectType,
   isEditing = false,
   ticketType,
   relatedTasks = [],
@@ -210,6 +216,7 @@ export default function TaskForm({
         | 'backlog'
         | 'todo'
         | 'in_progress'
+        | 'on_pause'
         | 'qa'
         | 'done'
         | 'rejected'
@@ -279,10 +286,12 @@ export default function TaskForm({
     }
   }, initialState);
 
-  const statusOptions = Object.values(TASK_STATUS).map(({ label, value }) => ({
-    label,
-    value,
-  }));
+  const statusOptions = getTaskStatusOptionsForProjectType(projectType).map(
+    ({ label, value }) => ({
+      label,
+      value,
+    }),
+  );
 
   const priorityOptions = Object.values(TASK_PRIORITY).map(
     ({ label, value }) => ({

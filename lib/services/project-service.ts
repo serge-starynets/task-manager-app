@@ -75,6 +75,7 @@ export async function createProjectForUser(
         abbreviation,
         description: sanitizeRichText(validatedData.description),
         status: validatedData.status,
+        type: validatedData.type,
         userId: user.id,
         createdAt: now,
         updatedAt: now,

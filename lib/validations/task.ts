@@ -4,6 +4,7 @@ export const TASK_STATUSES = [
   'backlog',
   'todo',
   'in_progress',
+  'on_pause',
   'qa',
   'done',
   'rejected',

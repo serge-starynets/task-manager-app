@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Project } from '@/db/schema';
-import { PROJECT_STATUS } from '@/lib/constants/projects';
+import { PROJECT_STATUS, PROJECT_TYPE } from '@/lib/constants/projects';
 import Button from '@/app/components/ui/Button';
 import {
   Form,
@@ -20,6 +20,7 @@ import {
   updateProject,
   type ActionResponse,
 } from '@/app/actions/projects';
+import type { ProjectType } from '@/lib/types';
 
 interface ProjectFormProps {
   project?: Project;
@@ -62,6 +63,7 @@ export default function ProjectForm({
               | 'ongoing'
               | 'completed'
               | 'paused',
+            type: formData.get('type') as ProjectType,
           });
 
       if (result.success) {
@@ -94,6 +96,11 @@ export default function ProjectForm({
     }),
   );
 
+  const typeOptions = Object.values(PROJECT_TYPE).map(({ label, value }) => ({
+    label,
+    value,
+  }));
+
   return (
     <Form action={formAction}>
       <FormGroup>
@@ -113,6 +120,30 @@ export default function ProjectForm({
         {state?.errors?.title && (
           <p id="title-error" className="text-sm text-red-500">
             {state.errors.title[0]}
+          </p>
+        )}
+      </FormGroup>
+
+      <FormGroup>
+        <FormLabel htmlFor="type">Type</FormLabel>
+        <FormSelect
+          id="type"
+          name={isEditing ? undefined : 'type'}
+          defaultValue={project?.type || 'software'}
+          options={typeOptions}
+          disabled={isPending || isEditing}
+          required={!isEditing}
+          aria-describedby="type-help type-error"
+          className={state?.errors?.type ? 'border-red-500' : ''}
+        />
+        <FormDescription id="type-help">
+          {isEditing
+            ? 'Type cannot be changed after the project is created.'
+            : 'Software projects support Bugs and QA/Closed statuses. Other projects do not.'}
+        </FormDescription>
+        {state?.errors?.type && (
+          <p id="type-error" className="text-sm text-red-500">
+            {state.errors.type[0]}
           </p>
         )}
       </FormGroup>

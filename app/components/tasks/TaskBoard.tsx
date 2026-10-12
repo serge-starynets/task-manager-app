@@ -18,22 +18,27 @@ import { arrayMove } from '@dnd-kit/sortable';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { moveTaskOnBoard } from '@/app/actions/tasks';
-import { compareBoardOrder, BOARD_STATUSES } from '@/lib/constants/tasks';
-import type { Status, TaskWithUser } from '@/lib/types';
+import {
+  compareBoardOrder,
+  getBoardStatusesForProjectType,
+} from '@/lib/constants/tasks';
+import type { ProjectType, Status, TaskWithUser } from '@/lib/types';
 import BoardColumn from '@/app/components/tasks/BoardColumn';
 import { BoardCardOverlay } from '@/app/components/tasks/BoardCard';
 
-const STATUS_ORDER = BOARD_STATUSES as readonly Status[];
-
 interface TaskBoardProps {
   tasks: TaskWithUser[];
+  projectType?: ProjectType;
 }
 
 type Columns = Record<Status, TaskWithUser[]>;
 
-function groupTasksByStatus(taskList: TaskWithUser[]): Columns {
+function groupTasksByStatus(
+  taskList: TaskWithUser[],
+  statusOrder: readonly Status[],
+): Columns {
   const grouped = Object.fromEntries(
-    STATUS_ORDER.map((status) => [status, [] as TaskWithUser[]]),
+    statusOrder.map((status) => [status, [] as TaskWithUser[]]),
   ) as Columns;
 
   for (const task of [...taskList].sort(compareBoardOrder)) {
@@ -43,12 +48,19 @@ function groupTasksByStatus(taskList: TaskWithUser[]): Columns {
   return grouped;
 }
 
-function isBoardStatus(value: string): value is Status {
-  return STATUS_ORDER.includes(value as Status);
+function isBoardStatus(
+  value: string,
+  statusOrder: readonly Status[],
+): value is Status {
+  return statusOrder.includes(value as Status);
 }
 
-function findTaskColumn(columns: Columns, taskId: string): Status | null {
-  for (const status of STATUS_ORDER) {
+function findTaskColumn(
+  columns: Columns,
+  taskId: string,
+  statusOrder: readonly Status[],
+): Status | null {
+  for (const status of statusOrder) {
     if (columns[status].some((task) => String(task.id) === taskId)) {
       return status;
     }
@@ -64,20 +76,23 @@ function withBoardOrder(tasks: TaskWithUser[], status: Status): TaskWithUser[] {
   }));
 }
 
-const collisionDetection: CollisionDetection = (args) => {
-  const pointerHits = pointerWithin(args);
-  if (pointerHits.length > 0) {
-    const overCard = pointerHits.find((hit) => !isBoardStatus(String(hit.id)));
-    return overCard ? [overCard] : pointerHits;
-  }
-  return closestCorners(args);
-};
-
-export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
+export default function TaskBoard({
+  tasks: initialTasks,
+  projectType,
+}: TaskBoardProps) {
   const router = useRouter();
+  const statusOrder = useMemo(
+    () => getBoardStatusesForProjectType(projectType) as readonly Status[],
+    [projectType],
+  );
+  const statusOrderRef = useRef(statusOrder);
+  statusOrderRef.current = statusOrder;
+
   const [activeTask, setActiveTask] = useState<TaskWithUser | null>(null);
   const [overStatus, setOverStatus] = useState<Status | null>(null);
-  const [columns, setColumns] = useState(() => groupTasksByStatus(initialTasks));
+  const [columns, setColumns] = useState(() =>
+    groupTasksByStatus(initialTasks, statusOrder),
+  );
   const columnsRef = useRef(columns);
   const isDraggingRef = useRef(false);
   const [, startTransition] = useTransition();
@@ -88,8 +103,8 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
   // flashes back to its old column before local drop state / refresh apply.
   useEffect(() => {
     if (isDraggingRef.current) return;
-    setColumns(groupTasksByStatus(initialTasks));
-  }, [initialTasks]);
+    setColumns(groupTasksByStatus(initialTasks, statusOrder));
+  }, [initialTasks, statusOrder]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -97,15 +112,27 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
     }),
   );
 
+  const collisionDetection: CollisionDetection = (args) => {
+    const order = statusOrderRef.current;
+    const pointerHits = pointerWithin(args);
+    if (pointerHits.length > 0) {
+      const overCard = pointerHits.find(
+        (hit) => !isBoardStatus(String(hit.id), order),
+      );
+      return overCard ? [overCard] : pointerHits;
+    }
+    return closestCorners(args);
+  };
+
   const tasksById = useMemo(() => {
     const map = new Map<string, TaskWithUser>();
-    for (const status of STATUS_ORDER) {
-      for (const task of columns[status]) {
+    for (const status of statusOrder) {
+      for (const task of columns[status] ?? []) {
         map.set(String(task.id), task);
       }
     }
     return map;
-  }, [columns]);
+  }, [columns, statusOrder]);
 
   function persistColumn(
     status: Status,
@@ -113,7 +140,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
     taskId: number,
   ) {
     const orderedIds = ordered.map((task) => task.id);
-    const baseline = groupTasksByStatus(initialTasks)[status];
+    const baseline = groupTasksByStatus(initialTasks, statusOrder)[status] ?? [];
     const unchanged =
       baseline.length === ordered.length &&
       baseline.every((task, index) => task.id === orderedIds[index]) &&
@@ -125,7 +152,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       const result = await moveTaskOnBoard(taskId, status, orderedIds);
       if (!result.success) {
         toast.error(result.message || 'Failed to update board order');
-        setColumns(groupTasksByStatus(initialTasks));
+        setColumns(groupTasksByStatus(initialTasks, statusOrder));
         router.refresh();
       } else {
         router.refresh();
@@ -148,18 +175,19 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
 
     const activeId = String(active.id);
     const overId = String(over.id);
-    const resolvedOverStatus = isBoardStatus(overId)
+    const order = statusOrderRef.current;
+    const resolvedOverStatus = isBoardStatus(overId, order)
       ? overId
-      : findTaskColumn(columnsRef.current, overId);
+      : findTaskColumn(columnsRef.current, overId, order);
     setOverStatus(resolvedOverStatus);
 
     // Same column: sortable transforms open the gap live.
     // Cross column: move the card into the target list so siblings shift.
     setColumns((prev) => {
-      const activeContainer = findTaskColumn(prev, activeId);
-      const overContainer = isBoardStatus(overId)
+      const activeContainer = findTaskColumn(prev, activeId, order);
+      const overContainer = isBoardStatus(overId, order)
         ? overId
-        : findTaskColumn(prev, overId);
+        : findTaskColumn(prev, overId, order);
 
       if (!activeContainer || !overContainer) return prev;
       if (activeContainer === overContainer) return prev;
@@ -177,7 +205,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       };
 
       let insertAt: number;
-      if (isBoardStatus(overId)) {
+      if (isBoardStatus(overId, order)) {
         insertAt = overItems.length;
       } else {
         const overIndex = overItems.findIndex(
@@ -210,6 +238,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     const dragged = activeTask;
+    const order = statusOrderRef.current;
 
     if (!over || !dragged) {
       isDraggingRef.current = false;
@@ -221,10 +250,10 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
     const activeId = String(active.id);
     const overId = String(over.id);
     const current = columnsRef.current;
-    const activeContainer = findTaskColumn(current, activeId);
-    const overContainer = isBoardStatus(overId)
+    const activeContainer = findTaskColumn(current, activeId, order);
+    const overContainer = isBoardStatus(overId, order)
       ? overId
-      : findTaskColumn(current, overId);
+      : findTaskColumn(current, overId, order);
 
     if (!activeContainer || !overContainer) {
       isDraggingRef.current = false;
@@ -238,7 +267,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       const oldIndex = columnTasks.findIndex(
         (task) => String(task.id) === activeId,
       );
-      const newIndex = isBoardStatus(overId)
+      const newIndex = isBoardStatus(overId, order)
         ? columnTasks.length - 1
         : columnTasks.findIndex((task) => String(task.id) === overId);
 
@@ -286,7 +315,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       status: overContainer,
     };
     const overItems = current[overContainer];
-    const insertAt = isBoardStatus(overId)
+    const insertAt = isBoardStatus(overId, order)
       ? overItems.length
       : Math.max(
           0,
@@ -311,7 +340,7 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
     isDraggingRef.current = false;
     setActiveTask(null);
     setOverStatus(null);
-    setColumns(groupTasksByStatus(initialTasks));
+    setColumns(groupTasksByStatus(initialTasks, statusOrder));
   }
 
   return (
@@ -324,11 +353,11 @@ export default function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
       onDragCancel={handleDragCancel}
     >
       <div className="mx-auto flex w-[90%] gap-3 overflow-x-auto pb-2 scrollbar-thin">
-        {STATUS_ORDER.map((status) => (
+        {statusOrder.map((status) => (
           <BoardColumn
             key={status}
             status={status}
-            tasks={columns[status]}
+            tasks={columns[status] ?? []}
             isOver={overStatus === status}
           />
         ))}

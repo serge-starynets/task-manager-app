@@ -1,7 +1,10 @@
+import type { ProjectType } from '@/lib/validations/project';
+
 export const TASK_STATUS = {
   backlog: { label: 'Backlog', value: 'backlog' },
   todo: { label: 'Todo', value: 'todo' },
   in_progress: { label: 'In Progress', value: 'in_progress' },
+  on_pause: { label: 'On Pause', value: 'on_pause' },
   qa: { label: 'QA', value: 'qa' },
   done: { label: 'Done', value: 'done' },
   rejected: { label: 'Rejected', value: 'rejected' },
@@ -12,11 +15,55 @@ export const TASK_STATUS = {
 export const BOARD_STATUSES = [
   'todo',
   'in_progress',
+  'on_pause',
   'qa',
   'done',
   'rejected',
   'closed',
 ] as const;
+
+/** Task statuses unavailable on "Other" projects. */
+export const OTHER_PROJECT_EXCLUDED_STATUSES = ['qa', 'closed'] as const;
+
+/** Task statuses only available on "Other" projects. */
+export const OTHER_PROJECT_ONLY_STATUSES = ['on_pause'] as const;
+
+export function projectAllowsBugs(
+  projectType: ProjectType | null | undefined,
+): boolean {
+  return projectType !== 'other';
+}
+
+export function isTaskStatusAllowedForProjectType(
+  status: string,
+  projectType: ProjectType | null | undefined,
+): boolean {
+  if ((OTHER_PROJECT_ONLY_STATUSES as readonly string[]).includes(status)) {
+    return projectType === 'other';
+  }
+  if (projectType === 'other') {
+    return !(OTHER_PROJECT_EXCLUDED_STATUSES as readonly string[]).includes(
+      status,
+    );
+  }
+  return true;
+}
+
+export function getTaskStatusOptionsForProjectType(
+  projectType: ProjectType | null | undefined,
+) {
+  return Object.values(TASK_STATUS).filter(({ value }) =>
+    isTaskStatusAllowedForProjectType(value, projectType),
+  );
+}
+
+export function getBoardStatusesForProjectType(
+  projectType: ProjectType | null | undefined,
+): readonly (typeof BOARD_STATUSES)[number][] {
+  return BOARD_STATUSES.filter((status) =>
+    isTaskStatusAllowedForProjectType(status, projectType),
+  );
+}
 
 export const TASK_PRIORITY = {
   low: { label: 'Low', value: 'low' },

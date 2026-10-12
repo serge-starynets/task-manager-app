@@ -8,12 +8,15 @@ import { cn } from '@/lib/utils';
 
 export default function CreateTicketMenu({
   projectId,
+  allowBugs = true,
   size = 'sm',
   testId,
   className,
   menuAlign = 'end',
 }: {
   projectId?: number;
+  /** When false (e.g. Other projects), hide New Bug. Defaults to true. */
+  allowBugs?: boolean;
   size?: 'sm' | 'md';
   testId?: string;
   className?: string;
@@ -76,16 +79,18 @@ export default function CreateTicketMenu({
             <ListTodoIcon size={16} className="text-blue-500 dark:text-blue-400" />
             New Task
           </Link>
-          <Link
-            href={bugHref}
-            role="menuitem"
-            data-testid="new-bug-link"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-violet-50 dark:text-gray-200 dark:hover:bg-white/[0.06]"
-            onClick={() => setOpen(false)}
-          >
-            <BugIcon size={16} className="text-red-500 dark:text-red-400" />
-            New Bug
-          </Link>
+          {allowBugs && (
+            <Link
+              href={bugHref}
+              role="menuitem"
+              data-testid="new-bug-link"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 hover:bg-violet-50 dark:text-gray-200 dark:hover:bg-white/[0.06]"
+              onClick={() => setOpen(false)}
+            >
+              <BugIcon size={16} className="text-red-500 dark:text-red-400" />
+              New Bug
+            </Link>
+          )}
         </div>
       )}
     </div>

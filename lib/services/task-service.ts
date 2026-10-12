@@ -13,6 +13,10 @@ import {
   listTaskIdsInColumn,
   nextTopBoardOrder,
 } from '@/lib/dal';
+import {
+  isTaskStatusAllowedForProjectType,
+  projectAllowsBugs,
+} from '@/lib/constants/tasks';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { allocateTaskId } from '@/lib/task-id';
 import { linkTicketRelations } from '@/lib/services/relation-service';
@@ -25,6 +29,7 @@ import {
   type PendingAttachment,
 } from '@/lib/attachments';
 import type { ServiceResult, ServiceVoidResult } from '@/lib/services/types';
+import type { ProjectType } from '@/lib/validations/project';
 import {
   CreateTaskSchema,
   MoveTaskOnBoardSchema,
@@ -35,6 +40,50 @@ import {
   type TaskData,
   type TicketRelationInput,
 } from '@/lib/validations/task';
+
+async function getProjectTypeForTask(
+  projectId: number | null | undefined,
+): Promise<ProjectType | null> {
+  if (projectId == null) return null;
+  const project = await getProject(projectId);
+  return project?.type ?? null;
+}
+
+function rejectForProjectTypeRules(
+  projectType: ProjectType | null | undefined,
+  options: { type?: TaskData['type']; status?: TaskData['status'] },
+): ServiceResult<never> | null {
+  if (
+    options.type === 'bug' &&
+    projectType != null &&
+    !projectAllowsBugs(projectType)
+  ) {
+    return {
+      ok: false,
+      status: 400,
+      message: 'Validation failed',
+      errors: {
+        type: ['Bug tickets are not available for this project type'],
+      },
+    };
+  }
+
+  if (
+    options.status != null &&
+    !isTaskStatusAllowedForProjectType(options.status, projectType)
+  ) {
+    return {
+      ok: false,
+      status: 400,
+      message: 'Validation failed',
+      errors: {
+        status: ['This status is not available for this project type'],
+      },
+    };
+  }
+
+  return null;
+}
 
 function mergeCreateRelations(
   relations: TicketRelationInput[] | undefined,
@@ -99,6 +148,7 @@ export async function createTaskForUser(
 
   const data = validationResult.data;
   const projectId: number | null = data.projectId ?? null;
+  let projectType: ProjectType | null = null;
 
   if (projectId !== null) {
     const project = await getProject(projectId);
@@ -110,7 +160,14 @@ export async function createTaskForUser(
         errors: { projectId: ['Please select a valid project'] },
       };
     }
+    projectType = project.type;
   }
+
+  const typeRuleError = rejectForProjectTypeRules(projectType, {
+    type: data.type,
+    status: data.status,
+  });
+  if (typeRuleError) return typeRuleError;
 
   let attachmentsToLink: PendingAttachment[] = [];
   if (input.uploadSessionId && input.pendingAttachmentsJson) {
@@ -233,6 +290,14 @@ export async function updateTaskForUser(
     validatedData.severity !== undefined || validatedData.status !== undefined;
   const current = needsCurrent ? await getTask(taskId) : null;
 
+  if (validatedData.status !== undefined) {
+    const projectType = await getProjectTypeForTask(current?.projectId);
+    const typeRuleError = rejectForProjectTypeRules(projectType, {
+      status: validatedData.status,
+    });
+    if (typeRuleError) return typeRuleError;
+  }
+
   if (validatedData.title !== undefined) updateData.title = validatedData.title;
   if (validatedData.description !== undefined) {
     updateData.description = sanitizeRichText(validatedData.description);
@@ -301,6 +366,12 @@ export async function updateTaskStatusForUser(
   }
 
   const nextStatus = validationResult.data;
+  const projectType = await getProjectTypeForTask(current.projectId);
+  const typeRuleError = rejectForProjectTypeRules(projectType, {
+    status: nextStatus,
+  });
+  if (typeRuleError) return typeRuleError;
+
   const statusChanged = current.status !== nextStatus;
   const [updated] = await db
     .update(tasks)
@@ -382,6 +453,10 @@ export async function moveTaskOnBoardForUser(
   if (!moved) {
     return { ok: false, status: 404, message: 'Task not found' };
   }
+
+  const projectType = await getProjectTypeForTask(moved.projectId);
+  const typeRuleError = rejectForProjectTypeRules(projectType, { status });
+  if (typeRuleError) return typeRuleError;
 
   const columnIds = await listTaskIdsInColumn(
     moved.userId,

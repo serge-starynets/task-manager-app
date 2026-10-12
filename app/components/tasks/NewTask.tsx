@@ -1,6 +1,7 @@
 import { getAccessibleProject, getCurrentUser } from '@/lib/dal';
 import { redirect } from 'next/navigation';
 import TaskForm from '@/app/components/tasks/TaskForm';
+import { projectAllowsBugs } from '@/lib/constants/tasks';
 import type { TicketType } from '@/lib/types';
 
 const NewTask = async ({
@@ -20,10 +21,14 @@ const NewTask = async ({
     if (!project) {
       redirect('/dashboard');
     }
+    if (ticketType === 'bug' && !projectAllowsBugs(project.type)) {
+      redirect(`/dashboard?project=${project.id}`);
+    }
     return (
       <TaskForm
         userId={user.id}
         projectId={project.id}
+        projectType={project.type}
         ticketType={ticketType}
       />
     );

@@ -4,3 +4,8 @@ export const PROJECT_STATUS = {
   completed: { label: 'Completed', value: 'completed' },
   paused: { label: 'Paused', value: 'paused' },
 };
+
+export const PROJECT_TYPE = {
+  software: { label: 'Software', value: 'software' },
+  other: { label: 'Other', value: 'other' },
+} as const;

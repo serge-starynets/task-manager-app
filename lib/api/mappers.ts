@@ -65,6 +65,7 @@ export function projectToDto(project: Project): ProjectDto {
     abbreviation: project.abbreviation,
     description: project.description,
     status: project.status,
+    type: project.type,
     userId: project.userId,
     createdAt: toIsoString(project.createdAt),
     updatedAt: toIsoString(project.updatedAt),

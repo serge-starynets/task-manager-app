@@ -195,6 +195,7 @@ async function main() {
         | 'backlog'
         | 'todo'
         | 'in_progress'
+        | 'on_pause'
         | 'qa'
         | 'done'
         | 'rejected'

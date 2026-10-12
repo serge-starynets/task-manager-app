@@ -1,4 +1,4 @@
-import type { ProjectStatus } from '@/lib/validations/project';
+import type { ProjectStatus, ProjectType } from '@/lib/validations/project';
 
 export type ProjectDto = {
   id: number;
@@ -6,6 +6,7 @@ export type ProjectDto = {
   abbreviation: string;
   description: string | null;
   status: ProjectStatus;
+  type: ProjectType;
   userId: string;
   createdAt: string;
   updatedAt: string;

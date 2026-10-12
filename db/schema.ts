@@ -17,6 +17,7 @@ export const statusEnum = pgEnum('status', [
   'backlog',
   'todo',
   'in_progress',
+  'on_pause',
   'qa',
   'done',
   'rejected',
@@ -45,6 +46,8 @@ export const projectStatusEnum = pgEnum('project_status', [
   'completed',
   'paused',
 ]);
+/** Set once at creation; Software supports QA/Closed and Bugs, Other does not. */
+export const projectTypeEnum = pgEnum('project_type', ['software', 'other']);
 export const roleEnum = pgEnum('role', ['admin', 'user']);
 
 // Projects table
@@ -58,6 +61,7 @@ export const projects = pgTable(
     /** Quill HTML (sanitized on write). Plain text still works for older rows. */
     description: text('description'),
     status: projectStatusEnum('status').default('not_started').notNull(),
+    type: projectTypeEnum('type').default('software').notNull(),
     userId: text('user_id').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
