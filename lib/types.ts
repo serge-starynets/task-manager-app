@@ -11,6 +11,11 @@ export type {
 
 export type TaskWithUser = Task & {
   user: {
+    name: string | null;
+    image: string | null;
+    username: string | null;
+    customImage: string | null;
+    preferCustomProfile: boolean;
     id: string;
     email: string;
     role?: 'admin' | 'user';

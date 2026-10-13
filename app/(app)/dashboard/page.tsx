@@ -20,15 +20,16 @@ import {
   ListTodoIcon,
   PlusIcon,
   SettingsIcon,
-  UserIcon,
 } from 'lucide-react';
 import TaskTable from '@/app/components/tasks/TaskTable';
 import TaskBoard from '@/app/components/tasks/TaskBoard';
 import TaskSearch from '@/app/components/tasks/TaskSearch';
 import CreateTicketMenu from '@/app/components/tasks/CreateTicketMenu';
+import UserAvatar from '@/app/components/UserAvatar';
 import { PROJECT_STATUS } from '@/lib/constants/projects';
 import { type Project, type User } from '@/db/schema';
 import { cn } from '@/lib/utils';
+import { resolveUserDisplay } from '@/lib/user-display';
 import {
   buildDashboardBacklogSortHref,
   parseTaskListSort,
@@ -95,6 +96,7 @@ function DashboardHome({
   projects: Project[];
 }) {
   const canCreateMore = projects.length < 10;
+  const display = resolveUserDisplay(user);
 
   return (
     <div>
@@ -183,11 +185,12 @@ function DashboardHome({
       <section className="surface-panel p-6">
         <h2 className="mb-4 text-lg font-semibold tracking-tight">Profile</h2>
         <div className="mb-4 flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 dark:bg-dark-elevated dark:text-gray-400">
-            <UserIcon size={18} />
-          </span>
+          <UserAvatar name={display.name} image={display.image} size="md" />
           <div className="min-w-0">
-            <p className="break-words text-sm font-medium">{user.email}</p>
+            <p className="break-words text-sm font-medium">{display.name}</p>
+            <p className="mt-0.5 break-words text-xs text-gray-500 dark:text-gray-400">
+              {user.email}
+            </p>
             <p className="mt-0.5 text-xs capitalize text-gray-500 dark:text-gray-400">
               {isAdmin(user) ? 'Admin' : 'Standard user'}
             </p>
@@ -195,14 +198,13 @@ function DashboardHome({
         </div>
 
         <div className="space-y-1 border-t border-black/[0.05] pt-4 dark:border-white/[0.06]">
-          <span
-            aria-disabled="true"
-            className="pointer-events-none flex w-full cursor-not-allowed select-none items-center rounded-lg px-2.5 py-2 text-sm text-gray-400 dark:text-gray-500"
+          <Link
+            href="/profile"
+            className="flex w-full items-center rounded-lg px-2.5 py-2 text-sm text-gray-700 transition-colors hover:bg-black/[0.04] dark:text-gray-300 dark:hover:bg-white/[0.05]"
           >
             <SettingsIcon size={18} className="mr-2" />
-            <span>Settings</span>
-            <span className="ml-2 text-xs">(coming soon)</span>
-          </span>
+            <span>Edit profile</span>
+          </Link>
         </div>
       </section>
     </div>

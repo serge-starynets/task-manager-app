@@ -8,6 +8,11 @@ export type TaskCommentWithUser = TaskComment & {
     id: string;
     email: string;
     role: 'admin' | 'user';
+    name: string | null;
+    image: string | null;
+    username: string | null;
+    customImage: string | null;
+    preferCustomProfile: boolean;
   };
 };
 

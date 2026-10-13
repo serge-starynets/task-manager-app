@@ -1,5 +1,6 @@
 import { InferSelectModel, relations, sql } from 'drizzle-orm';
 import {
+  boolean,
   integer,
   pgTable,
   real,
@@ -161,11 +162,26 @@ export const users = pgTable(
   'users',
   {
     id: text('id').primaryKey(),
+    /** OAuth / Google display name (kept in sync by Auth.js). */
     name: text('name'),
     /** Stored lowercase; always normalize before lookup/write (see lib/users.ts). */
     email: text('email').notNull().unique(),
     emailVerified: timestamp('email_verified', { mode: 'date' }),
+    /** OAuth / Google avatar URL (kept in sync by Auth.js). */
     image: text('image'),
+    /** App username when preferCustomProfile is true. Max 20 chars. */
+    username: varchar('username', { length: 20 }),
+    /** Custom avatar public Blob URL (jpg/png). */
+    customImage: text('custom_image'),
+    /** Blob pathname for deleting a previous custom avatar. */
+    customImagePathname: text('custom_image_pathname'),
+    /**
+     * When true, show username + custom avatar in the app.
+     * When false, show Google/OAuth name + image.
+     */
+    preferCustomProfile: boolean('prefer_custom_profile')
+      .default(false)
+      .notNull(),
     /** Null for OAuth-only accounts. */
     password: text('password'),
     role: roleEnum('role').default('user').notNull(),

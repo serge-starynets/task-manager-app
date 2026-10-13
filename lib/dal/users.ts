@@ -13,6 +13,11 @@ export const PUBLIC_USER_COLUMNS = {
   id: true,
   email: true,
   role: true,
+  name: true,
+  image: true,
+  username: true,
+  customImage: true,
+  preferCustomProfile: true,
 } as const;
 
 export function isAdmin(user: Pick<User, 'role'>) {

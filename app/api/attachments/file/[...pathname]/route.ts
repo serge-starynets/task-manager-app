@@ -25,6 +25,12 @@ async function canAccessPathname(
     return draftMatch[1] === userId;
   }
 
+  // Profile avatars are visible to any signed-in user (header, comments, etc.).
+  const avatarMatch = pathname.match(/^avatars\/([^/]+)\//);
+  if (avatarMatch) {
+    return Boolean(avatarMatch[1]) && !pathname.includes('..');
+  }
+
   return false;
 }
 

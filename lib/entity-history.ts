@@ -10,6 +10,7 @@ import {
   formatEstimationHours,
 } from '@/lib/constants/tasks';
 import { stripHtml } from '@/lib/rich-text';
+import { displayUserName, type DisplayUser } from '@/lib/user-display';
 
 export type HistoryEntityType = 'task' | 'project';
 
@@ -42,12 +43,8 @@ export function formatHistoryTimestamp(date: Date | string): string {
   return format(parsed, 'dd.MM.yyyy:HH:mm');
 }
 
-export function historyActorName(user: {
-  name?: string | null;
-  email: string;
-}): string {
-  const name = user.name?.trim();
-  return name || user.email;
+export function historyActorName(user: DisplayUser): string {
+  return displayUserName(user);
 }
 
 export function formatHistoryDescriptionValue(
@@ -174,7 +171,7 @@ export type HistoryEntryLike = {
   oldValue: string | null;
   newValue: string | null;
   userId: string;
-  user: { name?: string | null; email: string };
+  user: DisplayUser;
 };
 
 export type HistoryGroup = {
@@ -183,7 +180,7 @@ export type HistoryGroup = {
   action: 'created' | 'updated';
   entityName: string;
   entityType: HistoryEntityType;
-  user: { name?: string | null; email: string };
+  user: DisplayUser;
   changes: {
     fieldName: string | null;
     oldValue: string | null;

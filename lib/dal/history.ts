@@ -10,6 +10,10 @@ export type EntityHistoryWithUser = EntityHistory & {
     id: string;
     email: string;
     name: string | null;
+    image: string | null;
+    username: string | null;
+    customImage: string | null;
+    preferCustomProfile: boolean;
     role: 'admin' | 'user';
   };
 };
@@ -18,6 +22,10 @@ const HISTORY_USER_COLUMNS = {
   id: true,
   email: true,
   name: true,
+  image: true,
+  username: true,
+  customImage: true,
+  preferCustomProfile: true,
   role: true,
 } as const;
 

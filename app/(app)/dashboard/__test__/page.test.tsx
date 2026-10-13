@@ -16,6 +16,10 @@ const mockUser = {
   email: 'user1@example.com',
   emailVerified: null,
   image: null,
+  username: null,
+  customImage: null,
+  customImagePathname: null,
+  preferCustomProfile: false,
   password: 'hashed-password',
   role: 'user' as const,
   createdAt: new Date(),
@@ -26,6 +30,11 @@ const mockTaskUser = {
   id: 'user1',
   email: 'user1@example.com',
   role: 'user' as const,
+  name: null,
+  image: null,
+  username: null,
+  customImage: null,
+  preferCustomProfile: false,
 };
 
 const mockProject = {
@@ -167,7 +176,7 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Create Project')).toBeInTheDocument();
     expect(screen.getByText('user1@example.com')).toBeInTheDocument();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
+    expect(screen.getByText('Edit profile')).toBeInTheDocument();
   });
 
   it('renders project list on home without redirecting', async () => {

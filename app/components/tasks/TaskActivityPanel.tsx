@@ -24,6 +24,7 @@ import type { TaskCommentWithUser } from '@/lib/dal/comments';
 import type { EntityHistoryWithUser } from '@/lib/dal/history';
 import type { PendingAttachment } from '@/lib/attachments';
 import { countHistoryOperations } from '@/lib/entity-history';
+import { displayUserName } from '@/lib/user-display';
 import { formatRelativeTime, cn } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 
@@ -123,7 +124,7 @@ function CommentItem({
       <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-            {comment.user.email}
+            {displayUserName(comment.user)}
           </p>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
             <ClockIcon size={12} />
