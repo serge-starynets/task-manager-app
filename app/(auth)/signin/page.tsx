@@ -71,7 +71,7 @@ export default function SignInPage() {
         </h2>
 
         <div className="mt-8">
-          <div className="rounded-2xl border border-black/[0.06] bg-white/90 px-4 py-8 shadow-lift dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none sm:px-10">
+          <div className="rounded-2xl border border-black/[0.1] bg-white px-4 py-8 shadow-lift dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none sm:px-10">
             <GoogleSignInButton />
             <AuthDivider />
 

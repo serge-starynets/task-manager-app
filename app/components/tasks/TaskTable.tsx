@@ -108,9 +108,9 @@ export default function TaskTable({
   );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/90 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none">
+    <div className="overflow-hidden rounded-2xl border border-black/[0.1] bg-white shadow-soft dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none">
       <div
-        className={`${gridClass} border-b border-black/[0.05] bg-gray-50/70 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-gray-500`}
+        className={`${gridClass} border-b border-black/[0.09] bg-gray-50/90 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-600 dark:border-white/[0.14] dark:bg-white/[0.04] dark:text-gray-300`}
       >
         <div className="flex items-center gap-1.5">
           <ListTodoIcon size={12} className="opacity-60" />

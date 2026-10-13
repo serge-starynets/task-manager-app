@@ -13,7 +13,7 @@ export default async function AppHeader() {
     : { name: 'User', image: null as string | null };
 
   return (
-    <header className="relative z-50 flex h-14 shrink-0 items-stretch border-b border-black/[0.06] bg-surface-elevated/75 backdrop-blur-xl dark:border-white/[0.06] dark:bg-dark-base/80">
+    <header className="relative z-50 flex h-14 shrink-0 items-stretch border-b border-black/[0.1] bg-surface-elevated/90 backdrop-blur-xl dark:border-white/[0.14] dark:bg-dark-base/90">
       <div className="flex w-full items-center justify-between gap-4 px-4 md:px-6">
         <Link href="/dashboard" className="group min-w-0">
           <BrandMark className="transition-opacity group-hover:opacity-80" />

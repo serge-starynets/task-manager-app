@@ -17,7 +17,7 @@ export default function ThemeToggle() {
       <button
         type="button"
         aria-label="Toggle color theme"
-        className="flex items-center justify-center w-9 h-9 rounded-xl border border-black/[0.06] bg-white/80 text-gray-500 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:text-gray-400 dark:shadow-none transition-colors"
+        className="flex items-center justify-center w-9 h-9 rounded-xl border border-black/[0.1] bg-white text-gray-500 shadow-soft dark:border-white/[0.12] dark:bg-dark-high dark:text-gray-400 dark:shadow-none transition-colors"
       >
         <div className="w-4 h-4 bg-gray-200 dark:bg-dark-border-medium rounded animate-pulse" />
       </button>
@@ -27,7 +27,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="flex items-center justify-center w-9 h-9 rounded-xl border border-black/[0.06] bg-white/80 text-gray-600 shadow-soft hover:bg-white hover:border-black/[0.12] dark:border-white/[0.08] dark:bg-dark-high dark:text-gray-300 dark:shadow-none dark:hover:bg-dark-elevated dark:hover:border-white/[0.14] transition-all duration-200 ease-smooth"
+      className="flex items-center justify-center w-9 h-9 rounded-xl border border-black/[0.1] bg-white text-gray-600 shadow-soft hover:bg-white hover:border-black/[0.18] dark:border-white/[0.12] dark:bg-dark-high dark:text-gray-300 dark:shadow-none dark:hover:bg-dark-elevated dark:hover:border-white/[0.2] transition-all duration-200 ease-smooth"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       {theme === 'dark' ? (

@@ -120,7 +120,7 @@ function CommentItem({
   };
 
   return (
-    <li className="rounded-xl border border-black/[0.05] bg-white/60 p-4 dark:border-white/[0.06] dark:bg-dark-elevated/40">
+    <li className="rounded-xl border border-black/[0.09] bg-white/60 p-4 dark:border-white/[0.14] dark:bg-dark-elevated/40">
       <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -292,7 +292,7 @@ export default function TaskActivityPanel({
     <div className="surface-panel overflow-hidden p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div
-          className="inline-flex rounded-xl border border-black/[0.06] bg-white/70 p-0.5 dark:border-white/[0.08] dark:bg-dark-high/70"
+          className="inline-flex rounded-xl border border-black/[0.1] bg-white p-0.5 dark:border-white/[0.12] dark:bg-dark-high"
           role="tablist"
           aria-label="Activity"
         >

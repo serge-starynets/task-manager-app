@@ -14,27 +14,32 @@ export default function FAQPage() {
       <div className="space-y-3">
         <FAQItem
           question="What is Projenda?"
-          answer="Projenda is a simple task and project tracker designed for individuals. It helps you organize ideas, plan small personal projects, and follow tasks from backlog to completion."
+          answer="Projenda is a personal issue tracker for solo projects. You plan work with tasks and bugs, organize them in projects, move them on a backlog or board, and keep short sticky notes alongside your tickets."
         />
 
         <FAQItem
           question="Who is Projenda for?"
-          answer="Projenda is built for solo use and small personal projects. It focuses on the essentials instead of team management, complex permissions, or collaboration features."
+          answer="It is built for individuals and small personal projects. You manage your own workspace—there are no team invites, shared boards, or complex permission models."
         />
 
         <FAQItem
           question="How do I create an account?"
-          answer="Click 'Sign Up' in the top navigation and register with your email and a password. You can also sign in with Google."
+          answer="Click Sign Up in the top navigation and register with your email and a password, or sign in with Google."
         />
 
         <FAQItem
           question="How can I organize my work?"
-          answer="Create projects for larger goals and add tasks with priorities and statuses. You can review tasks in a list or move active work across a visual board. Standalone tasks are available for items that do not need a project."
+          answer="Create up to ten projects, each with an abbreviation used in ticket keys (for example WEB-3). Choose Software projects when you need bugs and QA/closed statuses, or Other projects for a simpler workflow without bugs. Review everything in a sortable backlog list or drag active tickets on the board. Tickets can also live without a project."
         />
 
         <FAQItem
-          question="What can I add to a task?"
-          answer="Each task can include a formatted description, priority, status, file attachments, and links to related tasks in the same project."
+          question="What is the difference between a task and a bug?"
+          answer="Tasks are general work items with priority, status, and an optional estimate. Bugs add severity and are available on Software projects. Both can have rich descriptions, attachments, comments, change history, and links to related or blocking tickets."
+        />
+
+        <FAQItem
+          question="What are paper notes?"
+          answer="Notes are short sticky notes (up to 140 characters) on a personal whiteboard. Keep them in a stack or drag them onto the board so ideas stay visible next to your project work."
         />
 
         <FAQItem
@@ -58,11 +63,11 @@ interface FAQItemProps {
 
 function FAQItem({ question, answer }: FAQItemProps) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white/80 p-5 shadow-soft dark:border-white/[0.08] dark:bg-dark-high/80 dark:shadow-none">
+    <div className="rounded-2xl border border-black/[0.1] bg-white p-5 shadow-soft dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none">
       <h4 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
         {question}
       </h4>
-      <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+      <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
         {answer}
       </p>
     </div>

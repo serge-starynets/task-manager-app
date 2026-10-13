@@ -73,7 +73,7 @@ function OrphanedTasksSection({
   if (tasks.length === 0) return null;
 
   return (
-    <section className="mt-12 border-t border-black/[0.06] pt-10 dark:border-white/[0.08]">
+    <section className="mt-12 border-t border-black/[0.1] pt-10 dark:border-white/[0.12]">
       <div className="mb-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
           <ListTodoIcon size={18} className="text-gray-400" />
@@ -147,7 +147,7 @@ function DashboardHome({
               <li key={project.id}>
                 <Link
                   href={`/dashboard?project=${project.id}`}
-                  className="group flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white/80 px-4 py-4 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none dark:hover:border-white/[0.14]"
+                  className="group flex items-center gap-3 rounded-2xl border border-black/[0.1] bg-white px-4 py-4 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none dark:hover:border-white/[0.2]"
                 >
                   <span
                     className={cn(
@@ -197,7 +197,7 @@ function DashboardHome({
           </div>
         </div>
 
-        <div className="space-y-1 border-t border-black/[0.05] pt-4 dark:border-white/[0.06]">
+        <div className="space-y-1 border-t border-black/[0.09] pt-4 dark:border-white/[0.14]">
           <Link
             href="/profile"
             className="flex w-full items-center rounded-lg px-2.5 py-2 text-sm text-gray-700 transition-colors hover:bg-black/[0.04] dark:text-gray-300 dark:hover:bg-white/[0.05]"
@@ -306,7 +306,7 @@ export default async function DashboardPage({
             <h2 className="text-lg font-semibold tracking-tight">
               {isBoardView ? 'Board' : 'Backlog'}
             </h2>
-            <div className="inline-flex rounded-xl border border-black/[0.06] bg-white/70 p-0.5 dark:border-white/[0.08] dark:bg-dark-high/70">
+            <div className="inline-flex rounded-xl border border-black/[0.1] bg-white p-0.5 dark:border-white/[0.12] dark:bg-dark-high">
               <Link
                 href={backlogHref}
                 className={cn(

@@ -60,7 +60,7 @@ export default function ProjectSidebarNav({
   return (
     <nav className="flex-1 flex flex-col space-y-0.5 overflow-y-auto scrollbar-thin">
       <div className="px-2.5 mb-2 hidden md:block">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
           Projects
         </p>
       </div>

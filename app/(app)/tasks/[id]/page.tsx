@@ -80,7 +80,7 @@ function DetailField({
 }) {
   return (
     <div className={className}>
-      <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+      <dt className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
         {label}
       </dt>
       <dd className="mt-1.5 min-w-0 text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -172,20 +172,9 @@ export default async function TaskPage({
       </div>
 
       <div className="surface-panel mb-8 overflow-hidden p-6">
-        <div className="flex flex-wrap gap-3 mb-6">
-          <Badge status={status as Status}>
-            {TASK_STATUS[status as Status].label}
-          </Badge>
-          <Badge priority={priority as Priority}>
-            {TASK_PRIORITY[priority as Priority].label}
-          </Badge>
-          {ticketType === 'bug' && severity && (
-            <Badge priority={severity as Priority}>
-              {TASK_SEVERITY[severity].label}
-            </Badge>
-          )}
-        </div>
-
+        <h2 className="mb-4 text-lg font-semibold tracking-tight">
+          Description
+        </h2>
         {!isEmptyHtml(description) ? (
           <RichText html={description} />
         ) : (
@@ -194,7 +183,7 @@ export default async function TaskPage({
       </div>
 
       <div className="surface-panel mb-8 overflow-hidden">
-        <div className="flex items-center gap-2 border-b border-black/[0.06] px-6 py-4 dark:border-white/[0.08]">
+        <div className="flex items-center gap-2 border-b border-black/[0.1] px-6 py-4 dark:border-white/[0.12]">
           <UserIcon size={18} className="text-gray-400" />
           <h2 className="text-lg font-semibold tracking-tight">Details</h2>
         </div>

@@ -533,7 +533,7 @@ export default function TaskForm({
         )}
       </div>
 
-      <div className="flex shrink-0 justify-end gap-2 border-t border-black/[0.06] bg-white/80 px-6 py-4 dark:border-white/[0.06] dark:bg-dark-high md:px-8">
+      <div className="flex shrink-0 justify-end gap-2 border-t border-black/[0.1] bg-white px-6 py-4 dark:border-white/[0.14] dark:bg-dark-high md:px-8">
         <Button
           type="button"
           variant="ghost"

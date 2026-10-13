@@ -25,9 +25,9 @@ export default function Button({
     secondary:
       'bg-gray-200/80 text-gray-900 hover:bg-gray-300 dark:bg-dark-high dark:text-gray-100 dark:hover:bg-dark-border-medium dark:border dark:border-dark-border-default',
     outline:
-      'border border-black/[0.08] bg-white/70 backdrop-blur-sm hover:bg-white hover:border-black/[0.14] dark:border-white/[0.1] dark:bg-dark-high/50 dark:hover:bg-dark-high dark:hover:border-white/[0.16] dark:text-gray-100',
+      'border border-black/[0.14] bg-white backdrop-blur-sm hover:bg-white hover:border-black/[0.22] dark:border-white/[0.16] dark:bg-dark-high/60 dark:hover:bg-dark-high dark:hover:border-white/[0.24] dark:text-gray-100',
     ghost:
-      'bg-transparent hover:bg-black/[0.05] dark:hover:bg-white/[0.06] dark:text-gray-100',
+      'bg-transparent hover:bg-black/[0.07] dark:hover:bg-white/[0.1] dark:text-gray-100',
     danger:
       'bg-gradient-to-b from-red-500 to-red-600 text-white shadow-[0_1px_2px_rgba(185,28,28,0.3)] hover:from-red-600 hover:to-red-700',
   }

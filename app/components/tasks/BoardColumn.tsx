@@ -38,12 +38,12 @@ export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps)
   return (
     <div
       className={cn(
-        'flex min-w-[11rem] flex-1 basis-0 flex-col self-stretch overflow-hidden rounded-2xl border border-black/[0.06] bg-gray-50/70 dark:border-white/[0.08] dark:bg-dark-elevated/50',
+        'flex min-w-[11rem] flex-1 basis-0 flex-col self-stretch overflow-hidden rounded-2xl border border-black/[0.1] bg-gray-100/80 dark:border-white/[0.12] dark:bg-dark-elevated/70',
         isOver &&
           'border-violet-300 ring-2 ring-violet-400/40 dark:border-violet-700',
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-black/[0.05] px-3 py-2.5 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between gap-2 border-b border-black/[0.09] px-3 py-2.5 dark:border-white/[0.14]">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
           <span
             className={cn('h-1.5 w-1.5 rounded-full', statusAccent[status])}
@@ -51,7 +51,7 @@ export default function BoardColumn({ status, tasks, isOver }: BoardColumnProps)
           />
           {TASK_STATUS[status].label}
         </h3>
-        <span className="rounded-md bg-white/80 px-1.5 py-0.5 text-xs font-medium tabular-nums text-gray-500 dark:bg-dark-high dark:text-gray-400">
+        <span className="rounded-md bg-white px-1.5 py-0.5 text-xs font-medium tabular-nums text-gray-600 dark:bg-dark-high dark:text-gray-300">
           {tasks.length}
         </span>
       </div>

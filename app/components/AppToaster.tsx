@@ -66,7 +66,7 @@ export default function AppToaster() {
               className={cn(
                 'pointer-events-auto flex w-full min-w-[280px] max-w-[380px] items-start gap-3 rounded-xl border p-3.5',
                 'bg-white/95 backdrop-blur-md shadow-lift',
-                'border-black/[0.06] dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none',
+                'border-black/[0.1] dark:border-white/[0.12] dark:bg-dark-high/95 dark:shadow-none',
                 t.type === 'success' &&
                   'border-l-[3px] border-l-emerald-500 dark:border-l-emerald-400',
                 t.type === 'error' &&

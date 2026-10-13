@@ -11,7 +11,7 @@ export default async function MarketingLayout({
 }) {
   return (
     <div className="atmosphere flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-surface-elevated/70 backdrop-blur-xl dark:border-white/[0.06] dark:bg-dark-base/75">
+      <header className="sticky top-0 z-40 border-b border-black/[0.1] bg-surface-elevated/70 backdrop-blur-xl dark:border-white/[0.14] dark:bg-dark-base/75">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-8">
             <Link href="/" className="transition-opacity hover:opacity-80">
@@ -41,7 +41,7 @@ export default async function MarketingLayout({
       </header>
 
       <main className="flex-1">{children}</main>
-      <footer className="border-t border-black/[0.06] bg-white/40 dark:border-white/[0.06] dark:bg-dark-elevated/40">
+      <footer className="border-t border-black/[0.1] bg-white/40 dark:border-white/[0.14] dark:bg-dark-elevated/40">
         <div className="container mx-auto px-4 py-10">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div>
@@ -114,7 +114,7 @@ export default async function MarketingLayout({
               </ul>
             </div>
           </div>
-          <div className="mt-10 border-t border-black/[0.06] pt-8 text-center dark:border-white/[0.06]">
+          <div className="mt-10 border-t border-black/[0.1] pt-8 text-center dark:border-white/[0.14]">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               &copy; <Timestamp /> Serhii Starynets. All rights reserved.
             </p>

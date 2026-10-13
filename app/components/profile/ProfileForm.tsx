@@ -208,7 +208,7 @@ export default function ProfileForm({
                 'flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 transition-colors',
                 preferCustom
                   ? 'border-violet-300 bg-violet-50/70 dark:border-violet-700 dark:bg-violet-950/30'
-                  : 'border-black/[0.08] hover:bg-black/[0.02] dark:border-white/[0.1] dark:hover:bg-white/[0.03]',
+                  : 'border-black/[0.12] hover:bg-black/[0.02] dark:border-white/[0.14] dark:hover:bg-white/[0.03]',
               )}
             >
               <input
@@ -234,7 +234,7 @@ export default function ProfileForm({
                 'flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 transition-colors',
                 !preferCustom
                   ? 'border-violet-300 bg-violet-50/70 dark:border-violet-700 dark:bg-violet-950/30'
-                  : 'border-black/[0.08] hover:bg-black/[0.02] dark:border-white/[0.1] dark:hover:bg-white/[0.03]',
+                  : 'border-black/[0.12] hover:bg-black/[0.02] dark:border-white/[0.14] dark:hover:bg-white/[0.03]',
                 !hasGoogleAccount && 'opacity-70',
               )}
             >
@@ -260,7 +260,7 @@ export default function ProfileForm({
           </div>
         </FormGroup>
 
-        <div className="rounded-xl border border-black/[0.06] bg-black/[0.02] px-3 py-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
+        <div className="rounded-xl border border-black/[0.1] bg-black/[0.02] px-3 py-3 dark:border-white/[0.12] dark:bg-white/[0.03]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">
             Preview
           </p>

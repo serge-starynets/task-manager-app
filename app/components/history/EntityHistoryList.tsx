@@ -60,7 +60,7 @@ export default function EntityHistoryList({
           return (
             <li
               key={group.key}
-              className="rounded-xl border border-black/[0.05] bg-gray-50/80 px-3.5 py-2.5 text-sm leading-relaxed text-gray-700 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-gray-300"
+              className="rounded-xl border border-black/[0.09] bg-gray-50/80 px-3.5 py-2.5 text-sm leading-relaxed text-gray-700 dark:border-white/[0.14] dark:bg-white/[0.03] dark:text-gray-300"
             >
               {group.action === 'created' ? (
                 <p>

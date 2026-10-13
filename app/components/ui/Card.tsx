@@ -15,9 +15,9 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-black/[0.06] bg-white/90 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none',
+        'rounded-2xl border border-black/[0.1] bg-white shadow-soft dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none',
         hoverable &&
-          'transition-all duration-200 ease-smooth hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.1] dark:hover:border-white/[0.14] dark:hover:bg-dark-high',
+          'transition-all duration-200 ease-smooth hover:-translate-y-0.5 hover:shadow-lift hover:border-black/[0.16] dark:hover:border-white/[0.18] dark:hover:bg-dark-high',
         className
       )}
       {...props}
@@ -63,7 +63,7 @@ export function CardDescription({
 }: CardDescriptionProps) {
   return (
     <p
-      className={cn('text-sm text-gray-500 dark:text-gray-400', className)}
+      className={cn('text-sm text-gray-600 dark:text-gray-300', className)}
       {...props}
     >
       {children}

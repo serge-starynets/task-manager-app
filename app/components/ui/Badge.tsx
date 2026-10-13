@@ -27,28 +27,28 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const statusStyles: Record<StatusType, string> = {
   backlog:
-    'bg-gray-100 text-gray-600 dark:bg-white/[0.08] dark:text-gray-300 ring-1 ring-inset ring-black/[0.06] dark:ring-white/[0.1]',
-  todo: 'bg-zinc-200/80 text-zinc-700 dark:bg-zinc-700/50 dark:text-zinc-200 ring-1 ring-inset ring-zinc-300/60 dark:ring-zinc-600/40',
+    'bg-gray-200/90 text-gray-800 dark:bg-white/[0.12] dark:text-gray-100 ring-1 ring-inset ring-black/[0.1] dark:ring-white/[0.16]',
+  todo: 'bg-zinc-300/80 text-zinc-800 dark:bg-zinc-600/55 dark:text-zinc-100 ring-1 ring-inset ring-zinc-400/70 dark:ring-zinc-500/50',
   in_progress:
-    'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-800/50',
+    'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-200 ring-1 ring-inset ring-blue-300/80 dark:ring-blue-700/60',
   on_pause:
-    'bg-orange-50 text-orange-800 dark:bg-orange-950/50 dark:text-orange-300 ring-1 ring-inset ring-orange-200/70 dark:ring-orange-800/50',
-  qa: 'bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 ring-1 ring-inset ring-amber-200/70 dark:ring-amber-800/50',
-  done: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-800/50',
-  rejected: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 ring-1 ring-inset ring-red-200/70 dark:ring-red-800/50',
+    'bg-orange-100 text-orange-900 dark:bg-orange-950/70 dark:text-orange-200 ring-1 ring-inset ring-orange-300/80 dark:ring-orange-700/60',
+  qa: 'bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-200 ring-1 ring-inset ring-amber-300/80 dark:ring-amber-700/60',
+  done: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200 ring-1 ring-inset ring-emerald-300/80 dark:ring-emerald-700/60',
+  rejected: 'bg-red-100 text-red-800 dark:bg-red-950/70 dark:text-red-200 ring-1 ring-inset ring-red-300/80 dark:ring-red-700/60',
   closed:
-    'bg-gray-700 text-gray-100 dark:bg-gray-900/80 dark:text-gray-300 ring-1 ring-inset ring-gray-600/40',
+    'bg-gray-700 text-gray-50 dark:bg-gray-800 dark:text-gray-100 ring-1 ring-inset ring-gray-600/50 dark:ring-gray-500/40',
 };
 
 const statusDot: Record<StatusType, string> = {
-  backlog: 'bg-gray-400',
-  todo: 'bg-zinc-500',
-  in_progress: 'bg-blue-500',
-  on_pause: 'bg-orange-500',
-  qa: 'bg-amber-500',
-  done: 'bg-emerald-500',
-  rejected: 'bg-red-500',
-  closed: 'bg-gray-400',
+  backlog: 'bg-gray-500',
+  todo: 'bg-zinc-600',
+  in_progress: 'bg-blue-600',
+  on_pause: 'bg-orange-600',
+  qa: 'bg-amber-600',
+  done: 'bg-emerald-600',
+  rejected: 'bg-red-600',
+  closed: 'bg-gray-300',
 };
 
 export default function Badge({
@@ -80,16 +80,16 @@ export default function Badge({
 
   const variantStyles = {
     default:
-      'bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300 ring-1 ring-inset ring-violet-200/70 dark:ring-violet-800/50',
+      'bg-violet-100 text-violet-800 dark:bg-violet-950/70 dark:text-violet-200 ring-1 ring-inset ring-violet-300/80 dark:ring-violet-700/60',
     secondary:
-      'bg-gray-100 text-gray-700 dark:bg-white/[0.08] dark:text-gray-200 ring-1 ring-inset ring-black/[0.06] dark:ring-white/[0.1]',
+      'bg-gray-200/90 text-gray-800 dark:bg-white/[0.12] dark:text-gray-100 ring-1 ring-inset ring-black/[0.1] dark:ring-white/[0.16]',
     outline:
-      'border border-black/[0.08] text-gray-700 dark:border-white/[0.12] dark:text-gray-300',
+      'border border-black/[0.14] text-gray-800 dark:border-white/[0.18] dark:text-gray-200',
     success:
-      'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-800/50',
+      'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200 ring-1 ring-inset ring-emerald-300/80 dark:ring-emerald-700/60',
     warning:
-      'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 ring-1 ring-inset ring-amber-200/70 dark:ring-amber-800/50',
-    danger: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 ring-1 ring-inset ring-red-200/70 dark:ring-red-800/50',
+      'bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-200 ring-1 ring-inset ring-amber-300/80 dark:ring-amber-700/60',
+    danger: 'bg-red-100 text-red-800 dark:bg-red-950/70 dark:text-red-200 ring-1 ring-inset ring-red-300/80 dark:ring-red-700/60',
   };
 
   const colorClass = status

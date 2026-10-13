@@ -16,7 +16,7 @@ export function FeatureCard({
   icon?: LucideIcon;
 }) {
   return (
-    <div className="group rounded-2xl border border-black/[0.06] bg-white/80 p-6 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift dark:border-white/[0.08] dark:bg-dark-high/80 dark:shadow-none dark:hover:border-white/[0.14]">
+    <div className="group rounded-2xl border border-black/[0.1] bg-white p-6 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none dark:hover:border-white/[0.2]">
       {Icon ? (
         <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-300">
           <Icon size={18} />
@@ -25,7 +25,7 @@ export function FeatureCard({
       <h3 className="mb-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
         {title}
       </h3>
-      <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+      <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
         {description}
       </p>
     </div>
@@ -57,7 +57,7 @@ export function PlanCard({
         'rounded-2xl p-6',
         highlighted
           ? 'border-2 border-violet-400/60 bg-violet-50/80 shadow-glow dark:border-violet-700 dark:bg-violet-950/40'
-          : 'border border-black/[0.06] bg-white/80 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none',
+          : 'border border-black/[0.1] bg-white shadow-soft dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none',
       )}
     >
       <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
@@ -89,7 +89,7 @@ export function PlanCard({
           'inline-flex h-10 w-full items-center justify-center rounded-xl px-8 py-2 text-sm font-medium shadow transition-colors',
           highlighted
             ? 'bg-violet-600 text-white hover:bg-violet-700'
-            : 'border border-black/[0.08] bg-white text-gray-900 hover:bg-gray-50 dark:border-white/[0.1] dark:bg-dark-high dark:text-white dark:hover:bg-dark-elevated',
+            : 'border border-black/[0.12] bg-white text-gray-900 hover:bg-gray-50 dark:border-white/[0.14] dark:bg-dark-high dark:text-white dark:hover:bg-dark-elevated',
         )}
       >
         {buttonText}

@@ -179,10 +179,10 @@ export default function Select({
         onClick={() => (open ? close() : openList())}
         onKeyDown={handleTriggerKeyDown}
         className={cn(
-          'flex h-8 w-full items-center justify-between gap-2 rounded-xl border border-black/[0.1] bg-white px-3 py-1.5 text-left text-sm transition-shadow duration-200',
+          'flex h-8 w-full items-center justify-between gap-2 rounded-xl border border-black/[0.14] bg-white px-3 py-1.5 text-left text-sm transition-shadow duration-200',
           'focus:outline-none focus:ring-2 focus:ring-violet-500/25 focus:border-violet-400',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          'dark:border-white/[0.12] dark:bg-dark-elevated dark:text-gray-100 dark:focus:border-violet-500/60',
+          'dark:border-white/[0.16] dark:bg-dark-elevated dark:text-gray-100 dark:focus:border-violet-400',
           open &&
             'ring-2 ring-violet-500/25 border-violet-400 dark:border-violet-500/60',
           className,
@@ -213,7 +213,7 @@ export default function Select({
           role="listbox"
           aria-labelledby={triggerId}
           tabIndex={-1}
-          className="absolute z-20 mt-1.5 max-h-60 w-full overflow-auto rounded-xl border border-black/[0.06] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none scrollbar-thin"
+          className="absolute z-20 mt-1.5 max-h-60 w-full overflow-auto rounded-xl border border-black/[0.1] bg-white py-1 shadow-lift backdrop-blur-md dark:border-white/[0.14] dark:bg-dark-high dark:shadow-none scrollbar-thin"
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;

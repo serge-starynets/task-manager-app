@@ -64,7 +64,7 @@ export default function CreateTicketMenu({
         <div
           role="menu"
           className={cn(
-            'absolute z-20 mt-1.5 min-w-44 overflow-hidden rounded-xl border border-black/[0.06] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none',
+            'absolute z-20 mt-1.5 min-w-44 overflow-hidden rounded-xl border border-black/[0.1] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.12] dark:bg-dark-high/95 dark:shadow-none',
             menuAlign === 'end' ? 'right-0' : 'left-0',
           )}
 

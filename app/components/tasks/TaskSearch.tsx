@@ -94,7 +94,7 @@ export default function TaskSearch({ tasks, className }: TaskSearchProps) {
         <ul
           id="task-search-results"
           role="listbox"
-          className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-black/[0.06] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.08] dark:bg-dark-high/95 dark:shadow-none"
+          className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-black/[0.1] bg-white/95 py-1 shadow-lift backdrop-blur-md dark:border-white/[0.12] dark:bg-dark-high/95 dark:shadow-none"
         >
           {results.length === 0 ? (
             <li className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">

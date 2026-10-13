@@ -25,7 +25,7 @@ function BoardCardContent({
   return (
     <div
       className={cn(
-        'rounded-xl border border-black/[0.06] bg-white p-3 shadow-soft dark:border-white/[0.08] dark:bg-dark-high dark:shadow-none',
+        'rounded-xl border border-black/[0.1] bg-white p-3 shadow-soft dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none',
         className,
       )}
     >

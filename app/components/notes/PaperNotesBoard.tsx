@@ -678,7 +678,7 @@ export default function PaperNotesBoard({
 
       <aside className="flex w-[12.5rem] shrink-0 flex-col gap-3 overflow-y-auto scrollbar-thin md:w-[13.5rem]">
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
             Notes stack
           </p>
           <div

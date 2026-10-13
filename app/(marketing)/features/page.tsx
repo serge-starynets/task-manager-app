@@ -1,11 +1,11 @@
 import React from 'react';
 import {
+  BugIcon,
   FolderKanbanIcon,
   LayersIcon,
   Link2Icon,
-  ListTodoIcon,
-  PaperclipIcon,
-  SparklesIcon,
+  StickyNoteIcon,
+  TextCursorInputIcon,
 } from 'lucide-react';
 import { FeatureCard } from './Cards';
 
@@ -19,42 +19,42 @@ export default function FeaturesPage() {
         <h1 className="mb-4 text-4xl font-semibold tracking-tight text-gray-900 dark:text-white">
           Features
         </h1>
-        <p className="text-lg text-pretty text-gray-500 dark:text-gray-400">
-          Projenda gives you the essential tools to plan and track small
-          personal projects—without the complexity of team-focused software.
+        <p className="text-lg text-pretty text-gray-600 dark:text-gray-300">
+          Projenda is a lightweight issue tracker for personal projects—tasks,
+          bugs, boards, and notes without team software overhead.
         </p>
       </div>
 
       <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <FeatureCard
-          icon={ListTodoIcon}
-          title="Simple Task Tracking"
-          description="Create tasks, set priorities, and move work through clear statuses from backlog to completion."
+          icon={BugIcon}
+          title="Tasks and Bugs"
+          description="Track work as tasks or bugs with priorities, statuses, optional effort estimates, and severity on bugs. Each ticket gets a readable key like WEB-12."
         />
         <FeatureCard
           icon={FolderKanbanIcon}
-          title="Personal Projects"
-          description="Group tasks into focused projects, or keep standalone tasks for ideas and one-off work."
+          title="Projects That Fit the Work"
+          description="Group tickets into projects with a short abbreviation and a type—Software (bugs, QA, closed) or Other (no bugs, on-pause workflow). Standalone tickets work when you do not need a project."
         />
         <FeatureCard
           icon={LayersIcon}
-          title="List and Board Views"
-          description="Review your backlog in a compact list or use the visual board to move active tasks through your workflow."
+          title="Backlog and Board"
+          description="Scan and sort your backlog in a dense list, then drag active tickets across a kanban board—and reorder within a column—when status needs a visual shape."
         />
         <FeatureCard
-          icon={PaperclipIcon}
-          title="Rich Task Details"
-          description="Add formatted descriptions, images, and file attachments so the information you need stays with each task."
+          icon={TextCursorInputIcon}
+          title="Rich Ticket Details"
+          description="Write formatted descriptions with images and links, attach files, leave comments, and review field-level change history on every ticket."
         />
         <FeatureCard
           icon={Link2Icon}
-          title="Related Tasks"
-          description="Connect related tasks within a project to keep dependencies and supporting work easy to find."
+          title="Related and Blocked By"
+          description="Link tickets inside a project as related work or mark what is blocking you, including links between tasks and bugs."
         />
         <FeatureCard
-          icon={SparklesIcon}
-          title="Focused and Intuitive"
-          description="A clean, responsive interface with light and dark themes keeps planning simple and distractions minimal."
+          icon={StickyNoteIcon}
+          title="Paper Notes Board"
+          description="Keep short sticky notes on a personal whiteboard—stack them, drag them onto the board, and edit or remove them anytime. Light and dark themes keep the whole app calm."
         />
       </div>
     </div>

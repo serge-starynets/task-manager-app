@@ -11,8 +11,8 @@ function ProductPreview() {
   return (
     <div className="relative mx-auto mt-16 w-full max-w-5xl animate-fade-up">
       <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-b from-violet-500/15 via-violet-500/5 to-transparent blur-2xl" />
-      <div className="relative overflow-hidden rounded-3xl border border-black/[0.06] bg-white/80 shadow-lift backdrop-blur-sm dark:border-white/[0.1] dark:bg-[#1c1c22]/90">
-        <div className="flex items-center justify-between border-b border-black/[0.06] px-4 py-3 dark:border-white/[0.06]">
+      <div className="relative overflow-hidden rounded-3xl border border-black/[0.1] bg-white shadow-lift backdrop-blur-sm dark:border-white/[0.14] dark:bg-dark-high">
+        <div className="flex items-center justify-between border-b border-black/[0.1] px-4 py-3 dark:border-white/[0.14]">
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
             <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
@@ -48,7 +48,7 @@ function ProductPreview() {
           ].map((column) => (
             <div
               key={column.label}
-              className="rounded-2xl border border-black/[0.05] bg-gray-50/80 p-3 dark:border-white/[0.08] dark:bg-black/25"
+              className="rounded-2xl border border-black/[0.09] bg-gray-50/80 p-3 dark:border-white/[0.12] dark:bg-black/25"
             >
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -65,7 +65,7 @@ function ProductPreview() {
                 {column.cards.map((title) => (
                   <div
                     key={title}
-                    className="rounded-xl border border-black/[0.05] bg-white px-3 py-2.5 shadow-soft dark:border-white/[0.1] dark:bg-[#25252c] dark:shadow-none"
+                    className="rounded-xl border border-black/[0.09] bg-white px-3 py-2.5 shadow-soft dark:border-white/[0.14] dark:bg-[#25252c] dark:shadow-none"
                   >
                     <p className="font-mono text-[11px] text-gray-400">WEB-12</p>
                     <p className="mt-1 text-sm font-medium text-gray-800 dark:text-gray-100">
@@ -139,7 +139,7 @@ export default async function LandingPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl border border-black/[0.06] bg-white/70 p-5 text-left shadow-soft dark:border-white/[0.08] dark:bg-dark-high/70 dark:shadow-none"
+                className="rounded-2xl border border-black/[0.1] bg-white p-5 text-left shadow-soft dark:border-white/[0.12] dark:bg-dark-high dark:shadow-none"
               >
                 <item.icon
                   size={18}
@@ -148,7 +148,7 @@ export default async function LandingPage() {
                 <h2 className="font-semibold tracking-tight text-gray-900 dark:text-white">
                   {item.title}
                 </h2>
-                <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">
                   {item.copy}
                 </p>
               </div>
