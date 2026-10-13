@@ -5,6 +5,7 @@ import {
   getRelatedTasks,
   getTaskAttachments,
   getTaskComments,
+  getTaskHistory,
   isAdmin,
 } from '@/lib/dal';
 import { formatRelativeTime } from '@/lib/utils';
@@ -107,10 +108,11 @@ export default async function TaskPage({
     notFound();
   }
 
-  const [relatedTickets, attachments, comments] = await Promise.all([
+  const [relatedTickets, attachments, comments, history] = await Promise.all([
     getRelatedTasks(taskIdNum),
     getTaskAttachments(taskIdNum),
     getTaskComments(taskIdNum),
+    getTaskHistory(taskIdNum),
   ]);
 
   const {
@@ -287,6 +289,7 @@ export default async function TaskPage({
           currentUserId={currentUser.id}
           isAdmin={isAdmin(currentUser)}
           comments={comments}
+          history={history}
         />
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { hash } from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
-import { tasks, projects, users } from '../db/schema';
+import { entityHistory, tasks, projects, users } from '../db/schema';
 import { allocateTaskId } from '../lib/task-id';
 
 function assertSafeToSeed() {
@@ -36,6 +36,7 @@ async function main() {
   console.log('Starting database seeding...');
 
   // Clean up existing data (order matters for FKs)
+  await db.delete(entityHistory);
   await db.delete(tasks);
   await db.delete(projects);
   await db.delete(users);

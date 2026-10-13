@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import Button from '@/app/components/ui/Button';
 import RichText from '@/app/components/tasks/RichText';
 import RichTextEditor from '@/app/components/tasks/RichTextEditor';
+import EntityHistoryList from '@/app/components/history/EntityHistoryList';
 import {
   createTaskComment,
   deleteTaskComment,
@@ -20,7 +21,9 @@ import {
 } from '@/app/actions/comments';
 import { registerTaskAttachment } from '@/app/actions/attachments';
 import type { TaskCommentWithUser } from '@/lib/dal/comments';
+import type { EntityHistoryWithUser } from '@/lib/dal/history';
 import type { PendingAttachment } from '@/lib/attachments';
+import { countHistoryOperations } from '@/lib/entity-history';
 import { formatRelativeTime, cn } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 
@@ -49,6 +52,7 @@ type TaskActivityPanelProps = {
   currentUserId: string;
   isAdmin: boolean;
   comments: TaskCommentWithUser[];
+  history?: EntityHistoryWithUser[];
 };
 
 function canManageComment(
@@ -277,9 +281,11 @@ export default function TaskActivityPanel({
   currentUserId,
   isAdmin,
   comments,
+  history = [],
 }: TaskActivityPanelProps) {
   // Default to Comments so the feature is usable; History is first in the tab order.
   const [tab, setTab] = useState<Tab>('comments');
+  const historyCount = countHistoryOperations(history);
 
   return (
     <div className="surface-panel overflow-hidden p-6">
@@ -303,6 +309,18 @@ export default function TaskActivityPanel({
           >
             <HistoryIcon size={13} />
             History
+            {historyCount > 0 && (
+              <span
+                className={cn(
+                  'rounded-md px-1.5 py-0.5 text-[10px] tabular-nums',
+                  tab === 'history'
+                    ? 'bg-white/20'
+                    : 'bg-gray-100 text-gray-600 dark:bg-white/[0.08] dark:text-gray-300',
+                )}
+              >
+                {historyCount}
+              </span>
+            )}
           </button>
           <button
             type="button"
@@ -335,17 +353,8 @@ export default function TaskActivityPanel({
       </div>
 
       {tab === 'history' ? (
-        <div role="tabpanel" className="py-6 text-center">
-          <HistoryIcon
-            size={24}
-            className="mx-auto mb-3 text-gray-300 dark:text-gray-600"
-          />
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            History coming soon
-          </p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Ticket changes will appear here later.
-          </p>
+        <div role="tabpanel">
+          <EntityHistoryList entries={history} panel={false} />
         </div>
       ) : (
         <div className="space-y-5" role="tabpanel">

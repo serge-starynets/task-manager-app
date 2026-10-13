@@ -57,6 +57,20 @@
       "when": 1791841716352,
       "tag": "0007_quiet_chamber",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791885905932,
+      "tag": "0008_lazy_valeria_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791887431782,
+      "tag": "0009_broken_ozymandias",
+      "breakpoints": true
     }
   ]
 }

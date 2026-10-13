@@ -19,6 +19,13 @@ import {
 } from '@/lib/constants/tasks';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { allocateTaskId } from '@/lib/task-id';
+import {
+  deleteEntityHistory,
+  diffTaskFields,
+  recordAttachmentsAdded,
+  recordEntityCreated,
+  recordEntityFieldChanges,
+} from '@/lib/services/history-service';
 import { linkTicketRelations } from '@/lib/services/relation-service';
 import {
   MAX_ATTACHMENT_BYTES,
@@ -253,6 +260,22 @@ export async function createTaskForUser(
     }
   }
 
+  await recordEntityCreated({
+    entityType: 'task',
+    entityId: created.id,
+    entityName: created.title,
+    userId: user.id,
+  });
+
+  if (attachmentsToLink.length > 0) {
+    await recordAttachmentsAdded({
+      taskId: created.id,
+      entityName: created.title,
+      userId: user.id,
+      fileNames: attachmentsToLink.map((item) => item.fileName),
+    });
+  }
+
   return { ok: true, data: created };
 }
 
@@ -287,12 +310,13 @@ export async function updateTaskForUser(
 
   const validatedData = validationResult.data;
   const updateData: Record<string, unknown> = {};
-  const needsCurrent =
-    validatedData.severity !== undefined || validatedData.status !== undefined;
-  const current = needsCurrent ? await getTask(taskId) : null;
+  const current = await getTask(taskId);
+  if (!current) {
+    return { ok: false, status: 404, message: 'Task not found' };
+  }
 
   if (validatedData.status !== undefined) {
-    const projectType = await getProjectTypeForTask(current?.projectId);
+    const projectType = await getProjectTypeForTask(current.projectId);
     const typeRuleError = rejectForProjectTypeRules(projectType, {
       status: validatedData.status,
     });
@@ -305,7 +329,7 @@ export async function updateTaskForUser(
   }
   if (validatedData.status !== undefined) {
     updateData.status = validatedData.status;
-    if (current && current.status !== validatedData.status) {
+    if (current.status !== validatedData.status) {
       updateData.boardOrder = await nextTopBoardOrder(
         current.userId,
         current.projectId,
@@ -318,7 +342,7 @@ export async function updateTaskForUser(
   }
   if (validatedData.severity !== undefined) {
     updateData.severity =
-      current?.type === 'bug' ? validatedData.severity : null;
+      current.type === 'bug' ? validatedData.severity : null;
   }
   if (validatedData.estimation !== undefined) {
     updateData.estimation = validatedData.estimation;
@@ -338,10 +362,20 @@ export async function updateTaskForUser(
     return { ok: false, status: 404, message: 'Task not found' };
   }
 
+  const changes = diffTaskFields(current, updated);
+  await recordEntityFieldChanges({
+    entityType: 'task',
+    entityId: updated.id,
+    entityName: updated.title,
+    userId: user.id,
+    changes,
+  });
+
   return { ok: true, data: updated };
 }
 
 export async function updateTaskStatusForUser(
+  actorUserId: string,
   taskId: number,
   status: TaskData['status'],
 ): Promise<ServiceResult<Task>> {
@@ -399,6 +433,17 @@ export async function updateTaskStatusForUser(
     return { ok: false, status: 404, message: 'Task not found' };
   }
 
+  if (statusChanged) {
+    const changes = diffTaskFields(current, updated);
+    await recordEntityFieldChanges({
+      entityType: 'task',
+      entityId: updated.id,
+      entityName: updated.title,
+      userId: actorUserId,
+      changes,
+    });
+  }
+
   return { ok: true, data: updated };
 }
 
@@ -423,6 +468,7 @@ async function setColumnBoardOrders(orderedTaskIds: number[]): Promise<void> {
 }
 
 export async function moveTaskOnBoardForUser(
+  actorUserId: string,
   taskId: number,
   input: MoveTaskOnBoardInput,
 ): Promise<ServiceResult<Task>> {
@@ -504,6 +550,17 @@ export async function moveTaskOnBoardForUser(
     return { ok: false, status: 404, message: 'Task not found' };
   }
 
+  if (statusChanged) {
+    const changes = diffTaskFields(moved, updated);
+    await recordEntityFieldChanges({
+      entityType: 'task',
+      entityId: updated.id,
+      entityName: updated.title,
+      userId: actorUserId,
+      changes,
+    });
+  }
+
   return { ok: true, data: updated };
 }
 
@@ -525,6 +582,7 @@ export async function deleteTaskForUser(taskId: number): Promise<ServiceVoidResu
   }
 
   await deleteBlobsForTask(taskId);
+  await deleteEntityHistory('task', taskId);
   await db.delete(tasks).where(eq(tasks.id, taskId));
   return { ok: true };
 }

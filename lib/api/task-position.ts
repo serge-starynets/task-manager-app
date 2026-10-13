@@ -35,7 +35,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       );
     }
 
-    const result = await moveTaskOnBoardForUser(taskId, parsed.data);
+    const result = await moveTaskOnBoardForUser(
+      userOrResponse.id,
+      taskId,
+      parsed.data,
+    );
     if (!result.ok) {
       const failure = serviceFailureToBody(result);
       return jsonError(failure.error, failure.status, failure.errors);

@@ -6,7 +6,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Badge from '@/app/components/ui/Badge';
 import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
-import { TASK_PRIORITY } from '@/lib/constants/tasks';
+import {
+  TASK_PRIORITY,
+  formatEstimationHours,
+} from '@/lib/constants/tasks';
 import type { Priority, TaskWithUser } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +20,8 @@ function BoardCardContent({
   task: TaskWithUser;
   className?: string;
 }) {
+  const estimationLabel = formatEstimationHours(task.estimation);
+
   return (
     <div
       className={cn(
@@ -29,9 +34,16 @@ function BoardCardContent({
           <TicketTypeIcon type={task.type} size={12} />
           <span className="truncate">{task.taskId}</span>
         </span>
-        <Badge priority={task.priority as Priority} className="shrink-0">
-          {TASK_PRIORITY[task.priority as Priority].label}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {estimationLabel && (
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums tracking-wide text-gray-600 dark:bg-white/[0.08] dark:text-gray-300">
+              {estimationLabel}
+            </span>
+          )}
+          <Badge priority={task.priority as Priority}>
+            {TASK_PRIORITY[task.priority as Priority].label}
+          </Badge>
+        </div>
       </div>
       <Link
         href={`/tasks/${task.id}`}

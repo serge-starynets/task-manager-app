@@ -66,7 +66,7 @@ export async function deleteTaskAttachment(
       return { success: false, message: 'Unauthorized', error: 'Unauthorized' };
     }
 
-    const result = await deleteTaskAttachmentById(attachmentId);
+    const result = await deleteTaskAttachmentById(user.id, attachmentId);
     if (!result.ok) {
       return toActionResponse(result, attachmentErrorCode);
     }

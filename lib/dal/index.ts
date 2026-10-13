@@ -4,3 +4,4 @@ export * from './tasks';
 export * from './attachments';
 export * from './comments';
 export * from './relations';
+export * from './history';

@@ -60,8 +60,10 @@ export const EstimationSchema = z.preprocess(
     if (typeof value === 'string') {
       const trimmed = value.trim();
       if (trimmed === '') return null;
-      return Number(trimmed);
+      const parsed = Number(trimmed);
+      return Number.isFinite(parsed) ? parsed : value;
     }
+    if (typeof value === 'number' && !Number.isFinite(value)) return value;
     return value;
   },
   z

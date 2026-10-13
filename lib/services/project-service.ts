@@ -10,6 +10,11 @@ import {
   normalizeAbbreviation,
 } from '@/lib/project-abbreviation';
 import { sanitizeRichText } from '@/lib/rich-text';
+import {
+  diffProjectFields,
+  recordEntityCreated,
+  recordEntityFieldChanges,
+} from '@/lib/services/history-service';
 import type { ServiceResult } from '@/lib/services/types';
 import {
   MAX_PROJECTS_PER_USER,
@@ -82,6 +87,13 @@ export async function createProjectForUser(
       })
       .returning();
 
+    await recordEntityCreated({
+      entityType: 'project',
+      entityId: created.id,
+      entityName: created.title,
+      userId: user.id,
+    });
+
     return { ok: true, data: created };
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -138,6 +150,15 @@ export async function updateProjectForUser(
     .set(updateData)
     .where(eq(projects.id, projectId))
     .returning();
+
+  const changes = diffProjectFields(project, updated);
+  await recordEntityFieldChanges({
+    entityType: 'project',
+    entityId: updated.id,
+    entityName: updated.title,
+    userId: user.id,
+    changes,
+  });
 
   return { ok: true, data: updated };
 }

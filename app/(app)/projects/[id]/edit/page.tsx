@@ -1,5 +1,6 @@
-import { getAccessibleProject } from '@/lib/dal';
+import { getAccessibleProject, getProjectHistory } from '@/lib/dal';
 import ProjectForm from '@/app/components/projects/ProjectForm';
+import EntityHistoryList from '@/app/components/history/EntityHistoryList';
 import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -10,12 +11,15 @@ export default async function EditProjectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const projectId = parseInt(id);
 
-  const project = await getAccessibleProject(parseInt(id));
+  const project = await getAccessibleProject(projectId);
 
   if (!project) {
     notFound();
   }
+
+  const history = await getProjectHistory(projectId);
 
   return (
     <div className="mx-auto w-[91%]">
@@ -31,6 +35,10 @@ export default async function EditProjectPage({
 
       <div className="surface-panel p-6">
         <ProjectForm project={project} isEditing />
+      </div>
+
+      <div className="mt-8">
+        <EntityHistoryList entries={history} />
       </div>
     </div>
   );

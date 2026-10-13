@@ -8,6 +8,7 @@ import {
   timestamp,
   pgEnum,
   varchar,
+  index,
   uniqueIndex,
   primaryKey,
 } from 'drizzle-orm/pg-core';
@@ -50,6 +51,14 @@ export const projectStatusEnum = pgEnum('project_status', [
 /** Set once at creation; Software supports QA/Closed and Bugs, Other does not. */
 export const projectTypeEnum = pgEnum('project_type', ['software', 'other']);
 export const roleEnum = pgEnum('role', ['admin', 'user']);
+export const entityHistoryTypeEnum = pgEnum('entity_history_type', [
+  'task',
+  'project',
+]);
+export const entityHistoryActionEnum = pgEnum('entity_history_action', [
+  'created',
+  'updated',
+]);
 
 // Projects table
 export const projects = pgTable(
@@ -183,6 +192,40 @@ export const taskComments = pgTable('task_comments', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+/**
+ * Audit trail for task/bug and project creates & field updates.
+ * One row per creation or per changed field; rows from the same
+ * mutation share `operationId` so the UI can group them.
+ */
+export const entityHistory = pgTable(
+  'entity_history',
+  {
+    id: serial('id').primaryKey(),
+    /** Shared across all field rows written in one create/update. */
+    operationId: varchar('operation_id', { length: 36 }).notNull(),
+    entityType: entityHistoryTypeEnum('entity_type').notNull(),
+    entityId: integer('entity_id').notNull(),
+    /** Title snapshot at the time of the event. */
+    entityName: text('entity_name').notNull(),
+    action: entityHistoryActionEnum('action').notNull(),
+    fieldName: varchar('field_name', { length: 64 }),
+    oldValue: text('old_value'),
+    newValue: text('new_value'),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('entity_history_entity_created_idx').on(
+      table.entityType,
+      table.entityId,
+      table.createdAt,
+    ),
+    index('entity_history_operation_idx').on(table.operationId),
+  ],
+);
+
 /** OAuth provider accounts linked to users (Auth.js). */
 export const accounts = pgTable(
   'accounts',
@@ -230,6 +273,13 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   comments: many(taskComments),
 }));
 
+export const entityHistoryRelations = relations(entityHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [entityHistory.userId],
+    references: [users.id],
+  }),
+}));
+
 export const taskRelationsRelations = relations(taskRelations, ({ one }) => ({
   taskA: one(tasks, {
     fields: [taskRelations.taskIdA],
@@ -269,6 +319,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
   accounts: many(accounts),
   comments: many(taskComments),
+  historyEntries: many(entityHistory),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -285,6 +336,7 @@ export type User = InferSelectModel<typeof users>;
 export type TaskRelation = InferSelectModel<typeof taskRelations>;
 export type TaskAttachment = InferSelectModel<typeof taskAttachments>;
 export type TaskComment = InferSelectModel<typeof taskComments>;
+export type EntityHistory = InferSelectModel<typeof entityHistory>;
 export type RelatableTaskSummary = Pick<Task, 'id' | 'taskId' | 'title' | 'type'>;
 export type RelatedTaskSummary = RelatableTaskSummary & {
   kind: TaskRelation['kind'];

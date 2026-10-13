@@ -4,7 +4,7 @@ import { del, head } from '@vercel/blob';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { taskAttachments, type TaskAttachment } from '@/db/schema';
-import { canManageTask, getTaskAttachments } from '@/lib/dal';
+import { canManageTask, getTask, getTaskAttachments } from '@/lib/dal';
 import {
   MAX_ATTACHMENT_BYTES,
   isValidDraftPathname,
@@ -12,6 +12,10 @@ import {
   sumAttachmentBytes,
   validateTaskAttachmentBudget,
 } from '@/lib/attachments';
+import {
+  recordAttachmentRemoved,
+  recordAttachmentsAdded,
+} from '@/lib/services/history-service';
 import type { ServiceResult, ServiceVoidResult } from '@/lib/services/types';
 import {
   RegisterAttachmentSchema,
@@ -79,10 +83,19 @@ export async function registerTaskAttachmentForUser(
     })
     .returning();
 
+  const task = await getTask(data.taskId);
+  await recordAttachmentsAdded({
+    taskId: data.taskId,
+    entityName: task?.title ?? `Task #${data.taskId}`,
+    userId,
+    fileNames: [attachment.fileName],
+  });
+
   return { ok: true, data: attachment };
 }
 
 export async function deleteTaskAttachmentById(
+  actorUserId: string,
   attachmentId: number,
 ): Promise<ServiceResult<{ taskId: number }>> {
   const [attachment] = await db
@@ -106,7 +119,15 @@ export async function deleteTaskAttachmentById(
     console.error('Error deleting blob:', blobError);
   }
 
+  const task = await getTask(attachment.taskId);
   await db.delete(taskAttachments).where(eq(taskAttachments.id, attachmentId));
+
+  await recordAttachmentRemoved({
+    taskId: attachment.taskId,
+    entityName: task?.title ?? `Task #${attachment.taskId}`,
+    userId: actorUserId,
+    fileName: attachment.fileName,
+  });
 
   return { ok: true, data: { taskId: attachment.taskId } };
 }

@@ -33,7 +33,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       });
     }
 
-    const result = await updateTaskStatusForUser(taskId, parsed.data);
+    const result = await updateTaskStatusForUser(
+      userOrResponse.id,
+      taskId,
+      parsed.data,
+    );
     if (!result.ok) {
       const failure = serviceFailureToBody(result);
       return jsonError(failure.error, failure.status, failure.errors);

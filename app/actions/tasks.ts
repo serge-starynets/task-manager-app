@@ -115,7 +115,7 @@ export async function updateTaskStatus(
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const result = await updateTaskStatusForUser(id, status);
+    const result = await updateTaskStatusForUser(user.id, id, status);
     if (!result.ok) return toActionResponse(result);
 
     revalidateTaskList();
@@ -138,7 +138,10 @@ export async function moveTaskOnBoard(
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const result = await moveTaskOnBoardForUser(id, { status, orderedTaskIds });
+    const result = await moveTaskOnBoardForUser(user.id, id, {
+      status,
+      orderedTaskIds,
+    });
     if (!result.ok) return toActionResponse(result);
 
     updateTaskCache();
