@@ -74,8 +74,12 @@ export const projects = pgTable(
     status: projectStatusEnum('status').default('not_started').notNull(),
     type: projectTypeEnum('type').default('software').notNull(),
     userId: text('user_id').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex('projects_user_id_abbreviation_uidx').on(
@@ -106,8 +110,12 @@ export const tasks = pgTable(
      * Lower values render higher. New tickets get a value below the current min.
      */
     boardOrder: integer('board_order').default(0).notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
     userId: text('user_id').notNull(),
     projectId: integer('project_id').references(() => projects.id),
   },
@@ -131,7 +139,9 @@ export const taskRelations = pgTable(
       .notNull()
       .references(() => tasks.id, { onDelete: 'cascade' }),
     kind: relationKindEnum('kind').default('related').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex('task_relations_pair_kind_uidx').on(
@@ -154,7 +164,9 @@ export const taskAttachments = pgTable('task_attachments', {
   url: text('url').notNull(),
   pathname: text('pathname').notNull(),
   uploadedBy: text('uploaded_by').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 // Users table
@@ -166,7 +178,10 @@ export const users = pgTable(
     name: text('name'),
     /** Stored lowercase; always normalize before lookup/write (see lib/users.ts). */
     email: text('email').notNull().unique(),
-    emailVerified: timestamp('email_verified', { mode: 'date' }),
+    emailVerified: timestamp('email_verified', {
+      mode: 'date',
+      withTimezone: true,
+    }),
     /** OAuth / Google avatar URL (kept in sync by Auth.js). */
     image: text('image'),
     /** App username when preferCustomProfile is true. Max 20 chars. */
@@ -185,7 +200,9 @@ export const users = pgTable(
     /** Null for OAuth-only accounts. */
     password: text('password'),
     role: roleEnum('role').default('user').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     // Rejects case-variant duplicates even if a caller skips normalization.
@@ -206,8 +223,12 @@ export const notes = pgTable(
     posX: real('pos_x'),
     posY: real('pos_y'),
     userId: text('user_id').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [index('notes_user_id_idx').on(table.userId)],
 );
@@ -223,8 +244,12 @@ export const taskComments = pgTable('task_comments', {
     .references(() => users.id, { onDelete: 'cascade' }),
   /** Quill HTML (sanitized on write). */
   body: text('body').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 /**
@@ -249,7 +274,9 @@ export const entityHistory = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     index('entity_history_entity_created_idx').on(

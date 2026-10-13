@@ -8,13 +8,13 @@ import {
   getTaskHistory,
   isAdmin,
 } from '@/lib/dal';
-import { formatRelativeTime } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import Badge from '@/app/components/ui/Badge';
 import Button from '@/app/components/ui/Button';
+import LocalTime from '@/app/components/LocalTime';
 import RichText from '@/app/components/tasks/RichText';
 import TaskAttachmentsList from '@/app/components/tasks/TaskAttachmentsList';
 import TaskActivityPanel from '@/app/components/tasks/TaskActivityPanel';
@@ -218,14 +218,16 @@ export default async function TaskPage({
             </DetailField>
           )}
           <DetailField label="Created">
-            <span className="font-normal text-gray-500 dark:text-gray-400">
-              {formatRelativeTime(new Date(createdAt))}
-            </span>
+            <LocalTime
+              date={createdAt}
+              className="font-normal text-gray-500 dark:text-gray-400"
+            />
           </DetailField>
           <DetailField label="Updated">
-            <span className="font-normal text-gray-500 dark:text-gray-400">
-              {formatRelativeTime(new Date(updatedAt))}
-            </span>
+            <LocalTime
+              date={updatedAt}
+              className="font-normal text-gray-500 dark:text-gray-400"
+            />
           </DetailField>
         </dl>
       </div>

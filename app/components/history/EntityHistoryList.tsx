@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { HistoryIcon } from 'lucide-react';
 import type { EntityHistoryWithUser } from '@/lib/dal/history';
+import LocalTime from '@/app/components/LocalTime';
 import {
   HISTORY_ATTACHMENT_FIELD,
-  formatHistoryTimestamp,
   groupHistoryEntries,
   historyActorName,
   historyFieldLabel,
@@ -54,8 +54,10 @@ export default function EntityHistoryList({
     ) : (
       <ul className="space-y-2.5">
         {groups.map((group) => {
-          const at = formatHistoryTimestamp(group.createdAt);
           const actor = historyActorName(group.user);
+          const at = (
+            <LocalTime date={group.createdAt} variant="absolute" />
+          );
 
           return (
             <li

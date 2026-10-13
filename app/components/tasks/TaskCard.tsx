@@ -1,5 +1,5 @@
 import { Task } from '@/db/schema';
-import { formatRelativeTime } from '@/lib/utils';
+import LocalTime from '@/app/components/LocalTime';
 import { stripHtml } from '@/lib/rich-text';
 import { Priority, Status } from '@/lib/types';
 import Link from 'next/link';
@@ -58,7 +58,7 @@ export default function TaskCard({ task }: TaskCardProps) {
           </div>
         </CardContent>
         <CardFooter className="text-xs text-gray-400 dark:text-gray-500">
-          {formatRelativeTime(new Date(createdAt))}
+          <LocalTime date={createdAt} />
         </CardFooter>
       </Card>
     </Link>

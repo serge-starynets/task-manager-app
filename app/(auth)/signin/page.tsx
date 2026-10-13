@@ -83,12 +83,14 @@ export default function SignInPage() {
               <FormGroup>
                 <FormLabel htmlFor="email">Email</FormLabel>
                 <FormInput
+                  key={state?.fields?.email ?? 'email'}
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
                   disabled={isPending}
+                  defaultValue={state?.fields?.email ?? ''}
                   aria-describedby="email-error"
                   className={state?.errors?.email ? 'border-red-500' : ''}
                 />

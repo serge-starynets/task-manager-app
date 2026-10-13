@@ -7,9 +7,32 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Relative time for the last 5 minutes (e.g. "2 minutes ago"); otherwise dd.mm.yyyy:hh:mm
+/**
+ * Parse DB/API timestamps as absolute instants.
+ * Timezone-naive strings from Postgres `timestamp` are treated as UTC so they
+ * are not shifted again when formatted in the user's local timezone.
+ */
+export function parseAppDate(date: Date | string): Date {
+  if (date instanceof Date) return date;
+
+  const trimmed = date.trim();
+  if (!trimmed) return new Date(NaN);
+
+  // Already has an explicit offset / Z
+  if (/[zZ]$|[+-]\d{2}:?\d{2}$/.test(trimmed)) {
+    return new Date(trimmed);
+  }
+
+  // "2026-10-13 20:08:00" or "2026-10-13T20:08:00(.sss)"
+  const normalized = trimmed.includes('T')
+    ? trimmed
+    : trimmed.replace(' ', 'T');
+  return new Date(`${normalized}Z`);
+}
+
+// Relative time for the last 5 minutes (e.g. "2 minutes ago"); otherwise local dd.mm.yyyy:hh:mm
 export function formatRelativeTime(date: Date | string) {
-  const parsedDate = typeof date === 'string' ? new Date(date) : date;
+  const parsedDate = parseAppDate(date);
   const minutesAgo = differenceInMinutes(new Date(), parsedDate);
 
   // Only the recent past — future dates (negative minutesAgo) use the absolute format

@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import Badge from '@/app/components/ui/Badge';
 import TicketTypeIcon from '@/app/components/tasks/TicketTypeIcon';
-import { formatRelativeTime, cn } from '@/lib/utils';
+import LocalTime from '@/app/components/LocalTime';
+import { cn } from '@/lib/utils';
 import { Priority, Status } from '@/lib/types';
 import {
   TASK_STATUS,
@@ -152,10 +153,10 @@ export default function TaskTable({
                   </Badge>
                 </div>
                 <div className="text-xs tabular-nums text-gray-400 dark:text-gray-500">
-                  {formatRelativeTime(new Date(task.createdAt))}
+                  <LocalTime date={task.createdAt} />
                 </div>
                 <div className="text-xs tabular-nums text-gray-400 dark:text-gray-500">
-                  {formatRelativeTime(new Date(task.updatedAt))}
+                  <LocalTime date={task.updatedAt} />
                 </div>
               </div>
             </Link>

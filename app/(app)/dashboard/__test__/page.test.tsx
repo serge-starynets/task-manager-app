@@ -74,9 +74,19 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-vi.mock('@/lib/utils', () => ({
-  formatRelativeTime: vi.fn(() => '2 days ago'),
-  cn: vi.fn((...args) => args.join(' ')),
+vi.mock('@/lib/utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/utils')>();
+  return {
+    ...actual,
+    formatRelativeTime: vi.fn(() => '2 days ago'),
+    cn: vi.fn((...args) => args.join(' ')),
+  };
+});
+
+vi.mock('@/app/components/LocalTime', () => ({
+  default: ({ date }: { date: Date | string }) => (
+    <time dateTime={String(date)}>2 days ago</time>
+  ),
 }));
 
 vi.mock('next/navigation', () => ({

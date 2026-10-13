@@ -25,7 +25,8 @@ import type { EntityHistoryWithUser } from '@/lib/dal/history';
 import type { PendingAttachment } from '@/lib/attachments';
 import { countHistoryOperations } from '@/lib/entity-history';
 import { displayUserName } from '@/lib/user-display';
-import { formatRelativeTime, cn } from '@/lib/utils';
+import LocalTime from '@/app/components/LocalTime';
+import { cn } from '@/lib/utils';
 import { isEmptyHtml } from '@/lib/rich-text';
 
 async function registerCommentUpload(
@@ -128,7 +129,7 @@ function CommentItem({
           </p>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
             <ClockIcon size={12} />
-            {formatRelativeTime(new Date(comment.createdAt))}
+            <LocalTime date={comment.createdAt} />
             {edited && <span>· edited</span>}
           </p>
         </div>

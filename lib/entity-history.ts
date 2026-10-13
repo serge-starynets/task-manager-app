@@ -11,6 +11,7 @@ import {
 } from '@/lib/constants/tasks';
 import { stripHtml } from '@/lib/rich-text';
 import { displayUserName, type DisplayUser } from '@/lib/user-display';
+import { parseAppDate } from '@/lib/utils';
 
 export type HistoryEntityType = 'task' | 'project';
 
@@ -39,8 +40,7 @@ export function truncateHistoryValue(
 }
 
 export function formatHistoryTimestamp(date: Date | string): string {
-  const parsed = typeof date === 'string' ? new Date(date) : date;
-  return format(parsed, 'dd.MM.yyyy:HH:mm');
+  return format(parseAppDate(date), 'dd.MM.yyyy:HH:mm');
 }
 
 export function historyActorName(user: DisplayUser): string {
