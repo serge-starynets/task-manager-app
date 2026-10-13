@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Instrument_Serif, Plus_Jakarta_Sans } from 'next/font/google';
+import { Instrument_Serif, Kalam, Plus_Jakarta_Sans } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { auth } from '@/auth';
 import './globals.css';
@@ -21,6 +21,13 @@ const serif = Instrument_Serif({
   display: 'swap',
 });
 
+const note = Kalam({
+  subsets: ['latin'],
+  weight: ['300', '400', '700'],
+  variable: '--font-note',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'Projenda',
   description: 'A calm, modern workspace for personal projects and tasks.',
@@ -36,7 +43,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sans.variable} ${serif.variable} font-sans antialiased`}
+        className={`${sans.variable} ${serif.variable} ${note.variable} font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

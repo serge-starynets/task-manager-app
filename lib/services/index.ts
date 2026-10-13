@@ -4,3 +4,4 @@ export * from './project-service';
 export * from './relation-service';
 export * from './attachment-service';
 export * from './comment-service';
+export * from './note-service';

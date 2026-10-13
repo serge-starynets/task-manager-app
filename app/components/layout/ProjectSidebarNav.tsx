@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -10,6 +10,7 @@ import {
   FolderPlusIcon,
   LayoutGridIcon,
   ListIcon,
+  StickyNoteIcon,
 } from 'lucide-react';
 import type { Project } from '@/db/schema';
 import { cn } from '@/lib/utils';
@@ -22,10 +23,12 @@ interface ProjectSidebarNavProps {
 export default function ProjectSidebarNav({
   projects,
 }: ProjectSidebarNavProps) {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedProjectId = searchParams.get('project');
   const view = searchParams.get('view');
   const isBoardView = view === 'board';
+  const isNotesView = pathname === '/notes';
   const canCreateMore = projects.length < 10;
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() =>
@@ -68,6 +71,7 @@ export default function ProjectSidebarNav({
         const isExpanded = expandedIds.has(idStr);
         const backlogHref = `/dashboard?project=${project.id}`;
         const boardHref = `/dashboard?project=${project.id}&view=board`;
+        const notesHref = `/notes?project=${project.id}`;
 
         return (
           <div key={project.id} className="space-y-0.5">
@@ -127,7 +131,7 @@ export default function ProjectSidebarNav({
                   href={backlogHref}
                   className={cn(
                     'flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-lg transition-colors',
-                    isSelected && !isBoardView
+                    isSelected && !isBoardView && !isNotesView
                       ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200'
                       : 'text-gray-600 hover:bg-black/[0.04] dark:text-gray-400 dark:hover:bg-white/[0.05]',
                   )}
@@ -146,6 +150,18 @@ export default function ProjectSidebarNav({
                 >
                   <LayoutGridIcon size={15} className="shrink-0 opacity-70" />
                   <span className="hidden md:inline">Board</span>
+                </Link>
+                <Link
+                  href={notesHref}
+                  className={cn(
+                    'flex items-center gap-2 px-2.5 py-1.5 text-sm rounded-lg transition-colors',
+                    isSelected && isNotesView
+                      ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200'
+                      : 'text-gray-600 hover:bg-black/[0.04] dark:text-gray-400 dark:hover:bg-white/[0.05]',
+                  )}
+                >
+                  <StickyNoteIcon size={15} className="shrink-0 opacity-70" />
+                  <span className="hidden md:inline">Notes</span>
                 </Link>
               </div>
             )}

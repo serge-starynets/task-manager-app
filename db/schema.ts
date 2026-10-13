@@ -177,6 +177,25 @@ export const users = pgTable(
   ],
 );
 
+/**
+ * Personal sticky notes for a paper whiteboard.
+ * `posX`/`posY` null = sitting in the notes stack; set = placed on the board.
+ */
+export const notes = pgTable(
+  'notes',
+  {
+    id: serial('id').primaryKey(),
+    /** Plain text only; max 140 chars enforced in validation. */
+    content: varchar('content', { length: 140 }).notNull().default(''),
+    posX: real('pos_x'),
+    posY: real('pos_y'),
+    userId: text('user_id').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [index('notes_user_id_idx').on(table.userId)],
+);
+
 /** Rich-text comments on a task. */
 export const taskComments = pgTable('task_comments', {
   id: serial('id').primaryKey(),
@@ -337,6 +356,7 @@ export type TaskRelation = InferSelectModel<typeof taskRelations>;
 export type TaskAttachment = InferSelectModel<typeof taskAttachments>;
 export type TaskComment = InferSelectModel<typeof taskComments>;
 export type EntityHistory = InferSelectModel<typeof entityHistory>;
+export type Note = InferSelectModel<typeof notes>;
 export type RelatableTaskSummary = Pick<Task, 'id' | 'taskId' | 'title' | 'type'>;
 export type RelatedTaskSummary = RelatableTaskSummary & {
   kind: TaskRelation['kind'];
